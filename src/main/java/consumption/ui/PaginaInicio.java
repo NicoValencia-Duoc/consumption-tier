@@ -1,6 +1,7 @@
 package consumption.ui;
 
 import consumption.model.ItemConsumption;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;

@@ -1,6 +1,7 @@
 package consumption.ui;
 
 import consumption.model.ItemConsumption;
+
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;

@@ -2,6 +2,8 @@ package consumption;
 
 import consumption.model.*;
 import consumption.ui.PaginaInicio;
+import consumption.ui.VentanaPrincipal;
+
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
