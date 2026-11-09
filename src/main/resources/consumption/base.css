@@ -1,0 +1,32 @@
+.root { -fx-background-color: -c-bg; -fx-font-family: "Segoe UI"; }
+.label { -fx-text-fill: -c-tx; }
+
+/* Cabecera */
+.cabecera { -fx-border-color: transparent transparent -c-acento transparent; -fx-border-width: 0 0 2 0; -fx-padding: 0 0 12 0; }
+.logo { -fx-font-size: 22px; -fx-font-weight: bold; }
+.cancion { -fx-text-fill: -c-g; -fx-font-weight: bold; -fx-font-size: 12px; }
+.pestana, .filtro {
+    -fx-background-color: transparent; -fx-border-color: -c-ln;
+    -fx-text-fill: -c-mt; -fx-font-weight: bold; -fx-cursor: hand;
+}
+.pestana-activa { -fx-background-color: -c-y; -fx-text-fill: -c-yt; -fx-border-color: -c-y; }
+.filtro-activo { -fx-border-color: -c-r; -fx-text-fill: -c-r; }
+
+/* Buscador y subtítulo */
+.buscador { -fx-background-color: -c-pn; -fx-text-fill: -c-tx; -fx-prompt-text-fill: -c-mt; -fx-border-color: -c-ln; }
+.subtitulo { -fx-text-fill: -c-mt; -fx-font-size: 12px; }
+
+/* Galería */
+.scroll-pane, .scroll-pane > .viewport { -fx-background-color: transparent; }
+.scroll-pane { -fx-border-color: transparent; }
+.tarjeta { -fx-background-color: -c-pn; -fx-border-color: -c-ln; -fx-padding: 10; }
+.miniatura { -fx-background-color: -c-bg; -fx-border-color: -c-ln; -fx-border-style: dashed; -fx-pref-height: 104; -fx-min-height: 104; }
+.letra { -fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: -c-acento; }
+.tipo { -fx-text-fill: -c-mt; -fx-font-size: 10px; }
+.titulo-item { -fx-font-weight: bold; -fx-font-size: 16px; }
+.nota { -fx-text-fill: -c-g; -fx-font-weight: bold; -fx-font-size: 22px; }
+.estado { -fx-border-width: 1; -fx-padding: 2 8 2 8; -fx-font-size: 11px; -fx-font-weight: bold; }
+.estado-terminado { -fx-text-fill: -c-g; -fx-border-color: -c-g; }
+.estado-progreso { -fx-text-fill: -c-y; -fx-border-color: -c-y; }
+.estado-abandonado { -fx-text-fill: -c-r; -fx-border-color: -c-r; }
+.estado-pendiente { -fx-text-fill: -c-gr; -fx-border-color: -c-gr; }
