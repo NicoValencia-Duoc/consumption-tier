@@ -10,11 +10,11 @@ public class Juego extends ItemConsumption{
 
     public Juego(String titulo, double nota, Estado estado, String plataforma, String genero, String desarrollador, int anio, double horasJugadas){
         super(titulo, nota, estado);
-        this.plataforma = plataforma;
-        this.genero = genero;
-        this.desarrollador = desarrollador;
-        this.anio = anio;
-        this.horasJugadas = horasJugadas;
+        setPlataforma(plataforma);
+        setGenero(genero);
+        setDesarrollador(desarrollador);
+        setAnio(anio);
+        setHorasJugadas(horasJugadas);
     }
 
     @Override public String getTipo(){
@@ -24,6 +24,15 @@ public class Juego extends ItemConsumption{
         return "J";
     }
     @Override public double getPorcentajeMaximo(){return 999;}
+
+    public void setPlataforma(String v) { this.plataforma = texto(v, "La plataforma", 40); }
+    public void setGenero(String v) { this.genero = texto(v, "El género", 40); }
+    public void setDesarrollador(String v) { this.desarrollador = texto(v, "El desarrollador", 60); }
+    public void setAnio(int v) { this.anio = anio(v); }
+    public void setHorasJugadas(double v) {
+        if (v < 0) throw new IllegalArgumentException("Las horas no pueden ser negativas");
+        this.horasJugadas = v;
+    }
 
     public String getPlataforma(){
         return plataforma;

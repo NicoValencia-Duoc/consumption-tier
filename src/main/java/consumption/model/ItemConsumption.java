@@ -71,7 +71,7 @@ public abstract class ItemConsumption {
 
     public void setFechaInicio(LocalDate f) {
         if (f != null && fechaTermino != null && fechaTermino.isBefore(f)){
-            throw new IllegalArgumentException("La fecha de inicio no puede ser despues de la de termino.")
+            throw new IllegalArgumentException("La fecha de inicio no puede ser despues de la de termino.");
         }
         this.fechaInicio = f;
     }
@@ -94,7 +94,7 @@ public abstract class ItemConsumption {
         if(estado == Estado.TERMINADO && fechaTermino == null){
             throw new IllegalArgumentException("Un item terminado necesita fecha de termino.");
         }if (estado == Estado.PENDIENTE && (porcentaje > 0 || fechaInicio != null || fechaTermino != null)){
-            throw new IllegalArgumentException("Un item pendiente no puede tener avance ni fechas.")
+            throw new IllegalArgumentException("Un item pendiente no puede tener avance ni fechas.");
         }
     }
 
