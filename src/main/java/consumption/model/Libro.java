@@ -14,7 +14,7 @@ public class Libro extends ItemConsumption{
         this.paginas = paginas;
         this.anio = anio;
     }
-    
+
     @Override public String getTipo(){
         return "LIBROS";
     }
@@ -22,4 +22,16 @@ public class Libro extends ItemConsumption{
         return "L";
     }
 
+    public String getAutor() {
+        return autor;
+    }
+    public String getGenero() {
+        return genero;
+    }
+    public int getPaginas() {
+        return paginas;
+    }
+    public int getAnio() {
+        return anio;
+    }
 }
