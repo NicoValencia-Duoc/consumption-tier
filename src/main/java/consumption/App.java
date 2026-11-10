@@ -1,5 +1,6 @@
 package consumption;
 
+import consumption.data.RepositorioJson;
 import consumption.model.*;
 import consumption.ui.PaginaInicio;
 import consumption.ui.VentanaPrincipal;
@@ -14,12 +15,14 @@ public class App extends Application {
     private Scene scena;
     private boolean noche = true;
 
-    @Override public void start(Stage stage){
+    @Override public void start(Stage stage) {
+        RepositorioJson repositorio = new RepositorioJson();
+        List<ItemConsumption> items = repositorio.cargar();
 
-        scena = new Scene(new VentanaPrincipal(DatosEjemplo.crear(), this::cambiarTema),1100, 680);
+        scena = new Scene(new VentanaPrincipal(items, repositorio, this::cambiarTema), 1100, 680);
         aplicarTema();
 
-        stage.setTitle("Consumption tier // nombre");
+        stage.setTitle("Catálogo personal");
         stage.setScene(scena);
         stage.show();
     }

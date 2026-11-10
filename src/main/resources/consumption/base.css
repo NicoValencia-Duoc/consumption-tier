@@ -61,3 +61,21 @@
 .table-cell.estado-progreso { -fx-text-fill: -c-y; }
 .table-cell.estado-abandonado { -fx-text-fill: -c-r; }
 .table-cell.estado-pendiente { -fx-text-fill: -c-gr; }
+
+/* Botones de acción y formularios */
+.boton-accion { -fx-text-fill: -c-y; -fx-border-color: -c-y; }
+.boton-peligro { -fx-text-fill: -c-r; -fx-border-color: -c-r; }
+.button:disabled { -fx-opacity: 0.35; }
+.mensaje-error { -fx-text-fill: -c-r; -fx-font-weight: bold; }
+.text-field, .text-area {
+    -fx-background-color: -c-pn;
+    -fx-text-fill: -c-tx;
+    -fx-border-color: -c-ln;
+}
+.dialog-pane .content { -fx-background-color: -c-bg; }
+.dialog-pane .button {
+    -fx-background-color: transparent;
+    -fx-border-color: -c-ln;
+    -fx-text-fill: -c-tx;
+    -fx-font-weight: bold;
+}
