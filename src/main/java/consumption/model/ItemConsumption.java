@@ -107,7 +107,7 @@ public abstract class ItemConsumption {
 
     protected static int anio(int v){
         int tope = LocalDate.now().getYear() + 1;
-        if (v < 1800 || v > tope) throw new IllegalArgumentException("El año debe estar entre 1800 y \" + tope");
+        if (v < 1800 || v > tope) throw new IllegalArgumentException("El año debe estar entre 1800 y " + tope + ".");
         return v;
     }
 }
