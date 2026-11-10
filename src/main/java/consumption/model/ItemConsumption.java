@@ -1,6 +1,10 @@
 package consumption.model;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class ItemConsumption {
 
@@ -12,6 +16,7 @@ public abstract class ItemConsumption {
     private LocalDate fechaInicio;
     private LocalDate fechaTermino;
     private String comentario = "";
+    private Map<String, Double> criterios = new LinkedHashMap<>();
 
     public ItemConsumption(String titulo, double nota, Estado estado){
 
@@ -88,6 +93,35 @@ public abstract class ItemConsumption {
             throw new IllegalArgumentException("El comentario tiene un maximo de " + MAX_COMENTARIO + "caracteres.");
         }
         this.comentario = (c == null) ? "" : c;
+    }
+
+    public abstract List<String> getNombresCriterios();
+
+    public Map<String, Double> getCriterios() {
+        return Collections.unmodifiableMap(mapa());
+    }
+
+    public void setCriterio(String nombre, Double valor) {
+        if (!getNombresCriterios().contains(nombre)) {
+            throw new IllegalArgumentException("Criterio desconocido: " + nombre + ".");
+        }
+        if (valor == null) {
+            mapa().remove(nombre);
+        } else {
+            if (valor < 0 || valor > 10) {
+                throw new IllegalArgumentException(nombre + " debe estar entre 0 y 10.");
+            }
+            mapa().put(nombre, valor);
+        }
+        if (!mapa().isEmpty()) {
+            double promedio = mapa().values().stream().mapToDouble(Double::doubleValue).average().orElse(0);
+            this.nota = Math.round(promedio * 10) / 10.0;
+        }
+    }
+
+    private Map<String, Double> mapa() {
+        if (criterios == null) criterios = new LinkedHashMap<>();
+        return criterios;
     }
 
     public void validarCoherencia(){

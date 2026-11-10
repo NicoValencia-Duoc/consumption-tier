@@ -1,6 +1,13 @@
 package consumption.model;
 
+import java.util.List;
+
 public class Juego extends ItemConsumption{
+
+    public static final List<String> CRITERIOS =
+            List.of("JUGABILIDAD", "HISTORIA", "GRAFICOS", "MUSICA Y SONIDO", "REJUGABILIDAD");
+
+    @Override public List<String> getNombresCriterios() { return CRITERIOS; }
 
     private String plataforma;
     private String genero;

@@ -1,6 +1,13 @@
 package consumption.model;
 
+import java.util.List;
+
 public class Libro extends ItemConsumption{
+
+    public static final List<String> CRITERIOS =
+            List.of("TRAMA", "PERSONAJES", "ESCRITURA", "FLUIDEZ", "IMPACTO PERSONAL");
+
+    @Override public List<String> getNombresCriterios() { return CRITERIOS; }
 
     private String autor;
     private String genero;

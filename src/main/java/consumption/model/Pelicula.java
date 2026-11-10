@@ -1,6 +1,13 @@
 package consumption.model;
 
+import java.util.List;
+
 public class Pelicula extends ItemConsumption{
+
+    public static final List<String> CRITERIOS =
+            List.of("GUION", "ACTUACION", "DIRECCION", "CINEMATOGRAFIA", "BANDA SONORA");
+
+    @Override public List<String> getNombresCriterios() { return CRITERIOS; }
 
     private String director;
     private String genero;
