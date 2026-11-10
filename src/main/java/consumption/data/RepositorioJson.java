@@ -14,7 +14,7 @@ import java.util.List;
 
 public class RepositorioJson {
     private static final Path ARCHIVO =
-            Path.of(System.getProperty("user.home"), "catalogo-personal", "datos.json");
+            Path.of(System.getProperty("user.home"), "consumption-personal", "datos.json");
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDate.class, new AdaptadorFecha().nullSafe())
             .setPrettyPrinting()
