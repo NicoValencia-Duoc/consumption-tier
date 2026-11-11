@@ -17,6 +17,7 @@ public abstract class ItemConsumption {
     private LocalDate fechaTermino;
     private String comentario = "";
     private Map<String, Double> criterios = new LinkedHashMap<>();
+    private boolean favorito;
 
     public ItemConsumption(String titulo, double nota, Estado estado){
 
@@ -27,6 +28,7 @@ public abstract class ItemConsumption {
 
     public abstract String getTipo();
     public abstract String getLetra();
+    public abstract String getGenero();
 
     public String getTitulo(){
         return titulo;
@@ -52,6 +54,8 @@ public abstract class ItemConsumption {
     public String getComentario() {
         return comentario;
     }
+
+    public boolean isFavorito() { return favorito; }
 
     public void setTitulo(String t){
         this.titulo = texto(t, "El titulo", 80);
@@ -86,6 +90,10 @@ public abstract class ItemConsumption {
             throw new IllegalArgumentException("La fecha de termino no puede ser anterior a la de inicio.");
         }
         this.fechaTermino = f;
+    }
+
+    public void setFavorito(boolean f) {
+        this.favorito = f;
     }
 
     public void setComentario(String c){

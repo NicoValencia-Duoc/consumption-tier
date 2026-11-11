@@ -90,3 +90,13 @@
 .valor-criterio { -fx-text-fill: -c-g; -fx-font-weight: bold; }
 .text-area { -fx-control-inner-background: -c-pn; }
 .text-area .content { -fx-background-color: -c-pn; }
+
+/* Filtros, orden y favoritos */
+.combo-box { -fx-background-color: -c-pn; -fx-border-color: -c-ln; }
+.combo-box .list-cell { -fx-text-fill: -c-tx; -fx-background-color: transparent; }
+.combo-box .arrow { -fx-background-color: -c-mt; }
+.combo-box-popup .list-view { -fx-background-color: -c-pn; -fx-border-color: -c-ln; }
+.combo-box-popup .list-cell { -fx-background-color: -c-pn; -fx-text-fill: -c-tx; }
+.combo-box-popup .list-cell:hover { -fx-background-color: -c-ln; }
+.check-box { -fx-text-fill: -c-tx; }
+.estrella { -fx-text-fill: -c-acento; -fx-font-size: 18px; }

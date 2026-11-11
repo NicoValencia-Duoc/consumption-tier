@@ -36,6 +36,14 @@ public class TarjetaItem extends VBox {
         HBox.setHgrow(espacio, Priority.ALWAYS);
         HBox fila = new HBox(nota, espacio, estado);
         fila.setAlignment(Pos.CENTER_LEFT);
+
+        if (item.isFavorito()) {
+            Label estrella = new Label("★");
+            estrella.getStyleClass().add("estrella");
+            StackPane.setAlignment(estrella, Pos.TOP_RIGHT);
+            miniatura.getChildren().add(estrella);
+        }
+
         getChildren().addAll(miniatura, titulo, fila);
     }
 }
