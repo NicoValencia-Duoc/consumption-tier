@@ -1,17 +1,22 @@
 package consumption.ui;
 
+import consumption.data.GestorImagenes;
 import consumption.model.Estado;
 import consumption.model.ItemConsumption;
+
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
-
+import javafx.scene.layout.HBox;
+import javafx.stage.FileChooser;
+import java.io.File;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public abstract class FormularioItem<T extends ItemConsumption> {
@@ -27,6 +32,10 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     private final DatePicker inicio = new DatePicker();
     private final DatePicker termino = new DatePicker();
     private final Map<String, TextField> campoCriterio = new LinkedHashMap<>();
+
+    private File archivoNuevo;
+    private boolean quitarImagen;
+    private final Label nombreImagen = new Label("SIN IMAGEN");
 
     protected abstract String nombreTipo();
     protected abstract List<String> nombresCriterios();
@@ -46,6 +55,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         agregarFila("INICIO", inicio);
         agregarFila("TERMINO", termino);
         agregarCamposPropios();
+        agregarFilaImagen();
 
         Label seccion = new Label("CRITERIOS DE NOTA - 0 A 10 - VACIO = N/A");
         seccion.getStyleClass().add("subtitulo");
@@ -93,6 +103,33 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         return respuesta.filter(b -> b == guardar).map(b -> resultado);
     }
 
+    private void agregarFilaImagen() {
+        Button elegir = new Button("ELEGIR...");
+        elegir.getStyleClass().add("pestana");
+        Button quitar = new Button("QUITAR");
+        quitar.getStyleClass().add("pestana");
+
+        elegir.setOnAction(e -> {
+            FileChooser selector = new FileChooser();
+            selector.setTitle("Elige una imagen");
+            selector.getExtensionFilters().add(new FileChooser.ExtensionFilter(
+                    "Imagenes", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp"));
+            File archivo = selector.showOpenDialog(grilla.getScene().getWindow());
+            if (archivo != null) {
+                archivoNuevo = archivo;
+                quitarImagen = false;
+                nombreImagen.setText(archivo.getName());
+            }
+        });
+        quitar.setOnAction(e -> {
+            archivoNuevo = null;
+            quitarImagen = true;
+            nombreImagen.setText("SIN IMAGEN");
+        });
+
+        agregarFila("IMAGEN", new HBox(8, elegir, quitar, nombreImagen));
+    }
+
     private T construir(T existente) {
         String t = titulo.getText().trim();
         Estado e = estado.getValue();
@@ -109,11 +146,24 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         T prueba = crear(t, 0, e);
         aplicarComunes(prueba, t, e, p, ini, fin, notas);
         prueba.validarCoherencia();
-        if (existente == null) return prueba;
 
-        aplicarComunes(existente, t, e, p, ini, fin, notas);
-        aplicarPropios(existente);
-        return existente;
+        String rutaAnterior = (existente == null) ? null : existente.getRutaImagen();
+        String ruta = rutaAnterior;
+        if (archivoNuevo != null) {
+            ruta = GestorImagenes.copiar(archivoNuevo);
+        } else if (quitarImagen) {
+            ruta = null;
+        }
+
+        T item = prueba;
+        if (existente != null) {
+            aplicarComunes(existente, t, e, p, ini, fin, notas);
+            aplicarPropios(existente);
+            item = existente;
+        }
+        item.setRutaImagen(ruta);
+        if (!Objects.equals(ruta, rutaAnterior)) GestorImagenes.eliminar(rutaAnterior);
+        return item;
     }
 
     private void aplicarComunes(T item, String t, Estado e, double p,
@@ -133,6 +183,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         porcentaje.setText(String.valueOf(item.getPorcentaje()));
         inicio.setValue(item.getFechaInicio());
         termino.setValue(item.getFechaTermino());
+        if (item.getRutaImagen() != null) nombreImagen.setText("IMAGEN ACTUAL");
         item.getCriterios().forEach((nombre, valor) -> {
             TextField campo = campoCriterio.get(nombre);
             if (campo != null) campo.setText(String.valueOf(valor));

@@ -1,9 +1,12 @@
 package consumption.ui;
 
+import consumption.data.GestorImagenes;
 import consumption.model.ItemConsumption;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 
 public class TarjetaItem extends VBox {
@@ -13,15 +16,22 @@ public class TarjetaItem extends VBox {
         setSpacing(8);
         setPrefWidth(235);
 
-        Label letra = new Label(item.getLetra());
-        letra.getStyleClass().add("letra");
+        StackPane miniatura = new StackPane();
+        miniatura.getStyleClass().add("miniatura");
+
+        Image imagen = GestorImagenes.imagenDe(item, 215, 104);
+        if (imagen != null) {
+            miniatura.getChildren().add(new ImageView(imagen));
+        } else {
+            Label letra = new Label(item.getLetra());
+            letra.getStyleClass().add("letra");
+            miniatura.getChildren().add(letra);
+        }
+
         Label tipo = new Label(item.getTipo());
         tipo.getStyleClass().add("tipo");
-
-        StackPane miniatura = new StackPane(letra, tipo);
         StackPane.setAlignment(tipo, Pos.BOTTOM_LEFT);
-
-        miniatura.getStyleClass().add("miniatura");
+        miniatura.getChildren().add(tipo);
 
         Label titulo = new Label(item.getTitulo());
         titulo.getStyleClass().add("titulo-item");
@@ -36,7 +46,6 @@ public class TarjetaItem extends VBox {
         HBox.setHgrow(espacio, Priority.ALWAYS);
         HBox fila = new HBox(nota, espacio, estado);
         fila.setAlignment(Pos.CENTER_LEFT);
-
         if (item.isFavorito()) {
             Label estrella = new Label("★");
             estrella.getStyleClass().add("estrella");

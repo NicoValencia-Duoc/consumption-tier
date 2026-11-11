@@ -6,6 +6,9 @@ import consumption.model.ItemConsumption;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import consumption.data.GestorImagenes;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class PaginaDetalle extends VBox{
 
@@ -66,6 +69,12 @@ public class PaginaDetalle extends VBox{
         HBox botones = new HBox(10, volver, guardar, contador, aviso);
         botones.setAlignment(Pos.CENTER_LEFT);
 
-        getChildren().addAll(titulo, resumen, nota, criterios, tituloComentario, comentario,  botones);
+        ImageView portada = new ImageView();
+        Image imagen = GestorImagenes.imagenDe(item, 220, 300);
+        if (imagen != null) portada.setImage(imagen);
+
+        VBox datos = new VBox(8, titulo, resumen, nota, criterios);
+        HBox cabeza = new HBox(24, portada, datos);
+        getChildren().addAll(cabeza, tituloComentario, comentario, botones);
     }
 }

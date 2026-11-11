@@ -100,3 +100,6 @@
 .combo-box-popup .list-cell:hover { -fx-background-color: -c-ln; }
 .check-box { -fx-text-fill: -c-tx; }
 .estrella { -fx-text-fill: -c-acento; -fx-font-size: 18px; }
+
+/* Texto del tipo sobre la miniatura */
+.tipo { -fx-background-color: -c-pn; -fx-padding: 0 4 0 4; }

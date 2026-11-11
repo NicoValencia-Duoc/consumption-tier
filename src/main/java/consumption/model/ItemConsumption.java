@@ -18,6 +18,7 @@ public abstract class ItemConsumption {
     private String comentario = "";
     private Map<String, Double> criterios = new LinkedHashMap<>();
     private boolean favorito;
+    private String rutaImagen;
 
     public ItemConsumption(String titulo, double nota, Estado estado){
 
@@ -54,6 +55,7 @@ public abstract class ItemConsumption {
     public String getComentario() {
         return comentario;
     }
+    public String getRutaImagen() { return rutaImagen; }
 
     public boolean isFavorito() { return favorito; }
 
@@ -101,6 +103,10 @@ public abstract class ItemConsumption {
             throw new IllegalArgumentException("El comentario tiene un maximo de " + MAX_COMENTARIO + "caracteres.");
         }
         this.comentario = (c == null) ? "" : c;
+    }
+
+    public void setRutaImagen(String r) {
+        this.rutaImagen = r;
     }
 
     public abstract List<String> getNombresCriterios();

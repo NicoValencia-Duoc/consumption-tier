@@ -2,6 +2,7 @@ package consumption.ui;
 
 import consumption.data.RepositorioJson;
 import consumption.model.*;
+import consumption.data.GestorImagenes;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -97,6 +98,7 @@ public class VentanaPrincipal extends VBox {
         pagina.setAlEliminar(seleccionado -> {
             if (confirmarEliminar(seleccionado)) {
                 items.remove(seleccionado);
+                GestorImagenes.eliminar(seleccionado.getRutaImagen());
                 guardarYRefrescar();
             }
         });
