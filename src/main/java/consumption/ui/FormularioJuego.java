@@ -4,6 +4,7 @@ import consumption.model.Estado;
 import consumption.model.Juego;
 
 import javafx.scene.control.TextField;
+import java.util.List;
 
 public class FormularioJuego extends FormularioItem<Juego> {
 
@@ -12,6 +13,8 @@ public class FormularioJuego extends FormularioItem<Juego> {
     private final TextField desarrollador = new TextField();
     private final TextField anio = new TextField();
     private final TextField horas = new TextField();
+
+    @Override protected List<String> nombresCriterios() { return Juego.CRITERIOS; }
 
     @Override protected String nombreTipo() { return "JUEGO"; }
 

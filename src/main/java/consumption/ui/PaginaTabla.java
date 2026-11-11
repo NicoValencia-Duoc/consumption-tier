@@ -23,6 +23,7 @@ public class PaginaTabla <T extends ItemConsumption> extends VBox{
     private Runnable alAgregar = () -> {};
     private Consumer<T> alEditar = t -> {};
     private Consumer<T> alEliminar = t -> {};
+    private Consumer<T> alVerDetalle = t -> {};
 
     public PaginaTabla(String nombreTipo, List<T> items) {
         setSpacing(14);
@@ -37,6 +38,11 @@ public class PaginaTabla <T extends ItemConsumption> extends VBox{
         Button eliminar = new Button("ELIMINAR");
         eliminar.getStyleClass().addAll("pestana", "boton-peligro");
 
+        Button detalle = new Button("DETALLE");
+        detalle.getStyleClass().add("pestana");
+        detalle.disableProperty().bind(tabla.getSelectionModel().selectedItemProperty().isNull());
+        detalle.setOnAction(e -> alVerDetalle.accept(tabla.getSelectionModel().getSelectedItem()));
+
         editar.disableProperty().bind(tabla.getSelectionModel().selectedItemProperty().isNull());
 
         eliminar.disableProperty().bind(tabla.getSelectionModel().selectedItemProperty().isNull());
@@ -46,7 +52,7 @@ public class PaginaTabla <T extends ItemConsumption> extends VBox{
 
         Region espacio = new Region();
         HBox.setHgrow(espacio, Priority.ALWAYS);
-        HBox acciones = new HBox(8, titulo, espacio, agregar, editar, eliminar);
+        HBox acciones = new HBox(8, titulo, espacio, agregar, editar, eliminar, detalle);
         acciones.setAlignment(Pos.CENTER_LEFT);
 
         tabla.setItems(FXCollections.observableArrayList(items));
@@ -81,6 +87,11 @@ public class PaginaTabla <T extends ItemConsumption> extends VBox{
         tabla.getColumns().add(columna("TÉRMINO", i -> fecha(i.getFechaTermino(), "EN CURSO")));
 
         tabla.getSortOrder().add(nota);
+        tabla.setOnMouseClicked(ev -> {
+            if (ev.getClickCount() == 2 && tabla.getSelectionModel().getSelectedItem() != null) {
+                alVerDetalle.accept(tabla.getSelectionModel().getSelectedItem());
+            }
+        });
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         getChildren().addAll(acciones, tabla);
     }
@@ -88,6 +99,7 @@ public class PaginaTabla <T extends ItemConsumption> extends VBox{
     public void setAlAgregar(Runnable accion) { this.alAgregar = accion; }
     public void setAlEditar(Consumer<T> accion) { this.alEditar = accion; }
     public void setAlEliminar(Consumer<T> accion) { this.alEliminar = accion; }
+    public void setAlVerDetalle(Consumer<T> accion) { this.alVerDetalle = accion; }
 
     public void agregarColumna(String titulo, Function<T, Object> extractor) {
         tabla.getColumns().add(tabla.getColumns().size() - COMUNES, columna(titulo, extractor));

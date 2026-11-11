@@ -20,6 +20,7 @@ public class VentanaPrincipal extends VBox {
     private String pestanaActual = "INICIO";
 
     public VentanaPrincipal(List<ItemConsumption> items, RepositorioJson repositorio, Runnable alCambiarTema) {
+
         this.items = items;
         this.repositorio = repositorio;
         setSpacing(14);
@@ -33,6 +34,7 @@ public class VentanaPrincipal extends VBox {
     }
 
     private void mostrar(String pestana) {
+
         pestanaActual = pestana;
         Node pagina = switch (pestana) {
             case "JUEGOS" -> paginaJuegos();
@@ -44,6 +46,7 @@ public class VentanaPrincipal extends VBox {
     }
 
     private Node paginaJuegos() {
+
         List<Juego> juegos = items.stream().filter(Juego.class::isInstance).map(Juego.class::cast).toList();
         PaginaTabla<Juego> p = new PaginaTabla<>("JUEGOS", juegos);
         p.agregarColumna("PLATAFORMA", Juego::getPlataforma);
@@ -56,6 +59,7 @@ public class VentanaPrincipal extends VBox {
     }
 
     private Node paginaLibros() {
+
         List<Libro> libros = items.stream().filter(Libro.class::isInstance).map(Libro.class::cast).toList();
         PaginaTabla<Libro> p = new PaginaTabla<>("LIBROS", libros);
         p.agregarColumna("AUTOR", Libro::getAutor);
@@ -67,6 +71,7 @@ public class VentanaPrincipal extends VBox {
     }
 
     private Node paginaPeliculas() {
+
         List<Pelicula> pelis = items.stream().filter(Pelicula.class::isInstance).map(Pelicula.class::cast).toList();
         PaginaTabla<Pelicula> p = new PaginaTabla<>("PELÍCULAS", pelis);
         p.agregarColumna("DIRECTOR", Pelicula::getDirector);
@@ -78,6 +83,8 @@ public class VentanaPrincipal extends VBox {
     }
 
     private <T extends ItemConsumption> void conectar(PaginaTabla<T> pagina, Supplier<FormularioItem<T>> formulario) {
+
+        pagina.setAlVerDetalle(this::verDetalle);
         pagina.setAlAgregar(() -> formulario.get().mostrar(null, hojas()).ifPresent(nuevo -> {
             items.add(nuevo);
             guardarYRefrescar();
@@ -92,6 +99,16 @@ public class VentanaPrincipal extends VBox {
                 guardarYRefrescar();
             }
         });
+    }
+
+    private void verDetalle(ItemConsumption item) {
+        cabecera.marcarActiva("DETALLE");
+        contenido.getChildren().setAll(new PaginaDetalle(item,
+                () -> repositorio.guardar(items),
+                () -> {
+                    cabecera.marcarActiva(pestanaActual);
+                    mostrar(pestanaActual);
+                }));
     }
 
     private void guardarYRefrescar() {

@@ -8,16 +8,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class Cabecera extends HBox{
+public class Cabecera extends HBox {
 
     private final List<Button> pestanas = new ArrayList<>();
+    private final Button pestanaDetalle = new Button("DETALLE");
 
-    public Cabecera(Consumer <String> alElegirPestana, Runnable alCambiarTema){
+    public Cabecera(Consumer<String> alElegirPestana, Runnable alCambiarTema) {
 
         Label logo = new Label("Consumption Tier // Nombre");
         logo.getStyleClass().add("logo");
         HBox contenedorPestanas = new HBox(6);
-        for (String nombre : new String[] {"INICIO", "JUEGOS", "LIBROS", "PELICULAS"}){
+        for (String nombre : new String[] {"INICIO", "JUEGOS", "LIBROS", "PELICULAS"}) {
             Button b = new Button(nombre);
             b.getStyleClass().add("pestana");
             b.setOnAction(e -> {
@@ -27,6 +28,8 @@ public class Cabecera extends HBox{
             pestanas.add(b);
             contenedorPestanas.getChildren().add(b);
         }
+        pestanaDetalle.getStyleClass().add("pestana");
+        contenedorPestanas.getChildren().add(pestanaDetalle);
 
         Label cancion = new Label("PISTA 03 - NOMBRE DE CANCION");
         cancion.getStyleClass().add("cancion");
@@ -46,11 +49,17 @@ public class Cabecera extends HBox{
         getStyleClass().add("cabecera");
         marcarActiva("INICIO");
     }
-    public void marcarActiva(String nombre){
-        for (Button b : pestanas){
+
+    public void marcarActiva(String nombre) {
+        for (Button b : pestanas) {
             b.getStyleClass().remove("pestana-activa");
-            if(b.getText().equals(nombre))
+            if (b.getText().equals(nombre))
                 b.getStyleClass().add("pestana-activa");
         }
+        boolean detalle = nombre.equals("DETALLE");
+        pestanaDetalle.setVisible(detalle);
+        pestanaDetalle.setManaged(detalle);
+        pestanaDetalle.getStyleClass().remove("pestana-activa");
+        if (detalle) pestanaDetalle.getStyleClass().add("pestana-activa");
     }
 }

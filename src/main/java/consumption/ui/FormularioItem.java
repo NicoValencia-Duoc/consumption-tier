@@ -2,17 +2,19 @@ package consumption.ui;
 
 import consumption.model.Estado;
 import consumption.model.ItemConsumption;
-
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-public abstract class FormularioItem <T extends ItemConsumption>{
+public abstract class FormularioItem<T extends ItemConsumption> {
 
     private final GridPane grilla = new GridPane();
     private final Label mensaje = new Label();
@@ -20,32 +22,46 @@ public abstract class FormularioItem <T extends ItemConsumption>{
     private T resultado;
 
     private final TextField titulo = new TextField();
-    private final TextField nota = new TextField();
     private final ComboBox<Estado> estado = new ComboBox<>();
     private final TextField porcentaje = new TextField();
     private final DatePicker inicio = new DatePicker();
     private final DatePicker termino = new DatePicker();
+    private final Map<String, TextField> campoCriterio = new LinkedHashMap<>();
 
     protected abstract String nombreTipo();
+    protected abstract List<String> nombresCriterios();
     protected abstract void agregarCamposPropios();
     protected abstract void cargarPropios(T item);
     protected abstract T crear(String titulo, double nota, Estado estado);
     protected abstract void aplicarPropios(T item);
 
-    public Optional <T> mostrar(T existente, List<String> hojas){
-
+    public Optional<T> mostrar(T existente, List<String> hojas) {
         estado.getItems().setAll(Estado.values());
-        nota.setText("0");
         porcentaje.setText("0");
         estado.setValue(Estado.PENDIENTE);
 
         agregarFila("TITULO", titulo);
-        agregarFila("NOTA (0-10)", nota);
         agregarFila("ESTADO", estado);
         agregarFila("AVANCE (%)", porcentaje);
         agregarFila("INICIO", inicio);
         agregarFila("TERMINO", termino);
         agregarCamposPropios();
+
+        Label seccion = new Label("CRITERIOS DE NOTA - 0 A 10 - VACIO = N/A");
+        seccion.getStyleClass().add("subtitulo");
+        grilla.add(seccion, 0, fila++, 2, 1);
+        for (String criterio : nombresCriterios()) {
+            TextField campo = new TextField();
+            campo.setPromptText("N/A");
+            campoCriterio.put(criterio, campo);
+            agregarFila(criterio, campo);
+        }
+        Label aviso = new Label("La nota final se calcula sola con el promedio de los criterios que completes.");
+        aviso.getStyleClass().add("subtitulo");
+        aviso.setWrapText(true);
+        aviso.setMaxWidth(320);
+        grilla.add(aviso, 0, fila++, 2, 1);
+
         if (existente != null) cargar(existente);
 
         mensaje.getStyleClass().add("mensaje-error");
@@ -79,37 +95,48 @@ public abstract class FormularioItem <T extends ItemConsumption>{
 
     private T construir(T existente) {
         String t = titulo.getText().trim();
-        double n = decimal(nota, "La nota");
         Estado e = estado.getValue();
         double p = decimal(porcentaje, "El avance");
         LocalDate ini = inicio.getValue();
         LocalDate fin = termino.getValue();
-        T prueba = crear(t, n, e);
-        aplicarComunes(prueba, t, n, e, p, ini, fin);
+
+        Map<String, Double> notas = new LinkedHashMap<>();
+        for (Map.Entry<String, TextField> c : campoCriterio.entrySet()) {
+            String valor = c.getValue().getText().trim();
+            notas.put(c.getKey(), valor.isEmpty() ? null : decimal(c.getValue(), c.getKey()));
+        }
+
+        T prueba = crear(t, 0, e);
+        aplicarComunes(prueba, t, e, p, ini, fin, notas);
         prueba.validarCoherencia();
         if (existente == null) return prueba;
-        aplicarComunes(existente, t, n, e, p, ini, fin);
+
+        aplicarComunes(existente, t, e, p, ini, fin, notas);
         aplicarPropios(existente);
         return existente;
     }
 
-    private void aplicarComunes(T item, String t, double n, Estado e, double p, LocalDate ini, LocalDate fin) {
+    private void aplicarComunes(T item, String t, Estado e, double p,
+                                LocalDate ini, LocalDate fin, Map<String, Double> notas) {
         item.setTitulo(t);
-        item.setNota(n);
         item.setEstado(e);
         item.setPorcentaje(p);
         item.setFechaTermino(null);
         item.setFechaInicio(ini);
         item.setFechaTermino(fin);
+        notas.forEach(item::setCriterio);
     }
 
     private void cargar(T item) {
         titulo.setText(item.getTitulo());
-        nota.setText(String.valueOf(item.getNota()));
         estado.setValue(item.getEstado());
         porcentaje.setText(String.valueOf(item.getPorcentaje()));
         inicio.setValue(item.getFechaInicio());
         termino.setValue(item.getFechaTermino());
+        item.getCriterios().forEach((nombre, valor) -> {
+            TextField campo = campoCriterio.get(nombre);
+            if (campo != null) campo.setText(String.valueOf(valor));
+        });
         cargarPropios(item);
     }
 
@@ -119,13 +146,15 @@ public abstract class FormularioItem <T extends ItemConsumption>{
         fila++;
     }
 
-    protected String texto(TextField f) { return f.getText().trim(); }
+    protected String texto(TextField f) {
+        return f.getText().trim();
+    }
 
     protected int entero(TextField f, String campo) {
         try {
             return Integer.parseInt(f.getText().trim());
         } catch (NumberFormatException ex) {
-            throw new IllegalArgumentException(campo + " debe ser un número entero");
+            throw new IllegalArgumentException(campo + " debe ser un numero entero.");
         }
     }
 
@@ -133,8 +162,7 @@ public abstract class FormularioItem <T extends ItemConsumption>{
         try {
             return Double.parseDouble(f.getText().trim().replace(',', '.'));
         } catch (NumberFormatException ex) {
-            throw new IllegalArgumentException(campo + " debe ser un número");
+            throw new IllegalArgumentException(campo + " debe ser un numero.");
         }
     }
 }
-

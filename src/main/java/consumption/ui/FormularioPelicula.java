@@ -4,6 +4,7 @@ import consumption.model.Estado;
 import consumption.model.Pelicula;
 
 import javafx.scene.control.TextField;
+import java.util.List;
 
 public class FormularioPelicula extends FormularioItem<Pelicula> {
 
@@ -11,6 +12,8 @@ public class FormularioPelicula extends FormularioItem<Pelicula> {
     private final TextField genero = new TextField();
     private final TextField duracion = new TextField();
     private final TextField anio = new TextField();
+
+    @Override protected List<String> nombresCriterios() { return Pelicula.CRITERIOS; }
 
     @Override protected String nombreTipo() { return "PELICULA"; }
 
