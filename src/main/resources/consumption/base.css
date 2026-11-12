@@ -141,3 +141,60 @@
 .list-cell { -fx-background-color: -c-pn; -fx-text-fill: -c-tx; }
 .list-cell:filled:selected { -fx-background-color: -c-ln; }
 .list-cell:filled:hover { -fx-background-color: -c-ln; }
+
+/* Identidad: nombre de usuario, globo de bienvenida y aviso */
+.nombre-usuario {
+    -fx-font-size: 16px;
+    -fx-text-fill: -c-acento;
+    -fx-border-color: transparent transparent -c-acento transparent;
+    -fx-border-style: dotted;
+    -fx-border-width: 0 0 1 0;
+    -fx-cursor: text;
+}
+.nombre-usuario:hover {
+    -fx-text-fill: -c-r;
+    -fx-border-color: transparent transparent -c-r transparent;
+}
+.campo-nombre {
+    -fx-background-color: -c-pn;
+    -fx-text-fill: -c-acento;
+    -fx-border-color: -c-acento;
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 6 0 6;
+}
+.globo {
+    -fx-background-color: -c-pn;
+    -fx-border-color: -c-acento;
+    -fx-text-fill: -c-acento;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 8 4 8;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(252,238,10,0.45), 10, 0.2, 0, 0);
+}
+.aviso-maw {
+    -fx-background-color: -c-pn;
+    -fx-border-color: -c-g;
+    -fx-border-width: 1 1 1 4;
+    -fx-text-fill: -c-g;
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 14 8 14;
+    -fx-effect: dropshadow(gaussian, rgba(57,255,136,0.45), 12, 0.2, 0, 0);
+}
+
+/* Encabezado de los diálogos ("THE MAW TIENE HAMBRE") */
+.dialog-pane > .header-panel {
+    -fx-background-color: -c-pn;
+    -fx-border-color: transparent transparent -c-acento transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.dialog-pane > .header-panel .label {
+    -fx-text-fill: -c-acento;
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}

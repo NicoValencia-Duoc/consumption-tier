@@ -31,10 +31,10 @@ public class App extends Application {
         reproductor = new ReproductorMusica();
         reproductor.volumenProperty().set(preferencias.getVolumen());
 
-        scena = new Scene(new VentanaPrincipal(items, repositorio, this::cambiarTema, reproductor), 1295, 720);
+        scena = new Scene(new VentanaPrincipal(items, repositorio, this::cambiarTema, reproductor, preferencias), 1295, 720);
         aplicarTema();
 
-        stage.setTitle("Consumption Tier");
+        stage.setTitle("THE MAW");
         stage.setScene(scena);
         stage.show();
         reproductor.iniciar();

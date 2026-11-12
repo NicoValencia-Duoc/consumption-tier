@@ -23,21 +23,52 @@ public class PaginaInicio extends VBox {
     private final ComboBox<String> orden = new ComboBox<>();
     private final Label subtitulo = new Label();
     private final List<Button> botonesFiltro = new ArrayList<>();
+    private final Consumer<String> alAgregarTipo;
+    private final ScrollPane scroll;
+    private final VBox bienvenida;
+    private final Label sinResultados = new Label("NADA QUE MOSTRAR CON ESTE FILTRO");
     private String filtroActual = "TODO";
 
-    public PaginaInicio(List<ItemConsumption> items, Consumer<ItemConsumption> alAbrir) {
+    public PaginaInicio(List<ItemConsumption> items, Consumer<ItemConsumption> alAbrir,
+                        Consumer<String> alAgregarTipo) {
         this.items = items;
         this.alAbrir = alAbrir;
+        this.alAgregarTipo = alAgregarTipo;
         setSpacing(14);
 
         galeria.setPrefColumns(4);
-        ScrollPane scroll = new ScrollPane(galeria);
+        scroll = new ScrollPane(galeria);
         scroll.setFitToWidth(true);
-        VBox.setVgrow(scroll, Priority.ALWAYS);
+
+        bienvenida = crearBienvenida();
+        sinResultados.getStyleClass().add("subtitulo");
+
+        StackPane zona = new StackPane(scroll, bienvenida, sinResultados);
+        VBox.setVgrow(zona, Priority.ALWAYS);
 
         subtitulo.getStyleClass().add("subtitulo");
-        getChildren().addAll(crearBarraHerramientas(), crearFilaOrden(), scroll);
+        getChildren().addAll(crearBarraHerramientas(), crearFilaOrden(), zona);
         actualizar();
+    }
+
+    private VBox crearBienvenida() {
+        Label titulo = new Label("THE MAW TIENE HAMBRE");
+        titulo.getStyleClass().add("titulo-detalle");
+        Label texto = new Label("AUN NO HAS DEVORADO NADA. SACIALA CON TU PRIMER REGISTRO.");
+        texto.getStyleClass().add("subtitulo");
+
+        HBox botones = new HBox(8);
+        botones.setAlignment(Pos.CENTER);
+        for (String tipo : new String[] {"JUEGO", "LIBRO", "PELICULA", "SERIE"}) {
+            Button b = new Button("+ " + tipo);
+            b.getStyleClass().addAll("pestana", "boton-accion");
+            b.setOnAction(e -> alAgregarTipo.accept(tipo));
+            botones.getChildren().add(b);
+        }
+
+        VBox caja = new VBox(14, titulo, texto, botones);
+        caja.setAlignment(Pos.CENTER);
+        return caja;
     }
 
     private HBox crearBarraHerramientas() {
@@ -100,6 +131,11 @@ public class PaginaInicio extends VBox {
             galeria.getChildren().add(tarjeta);
         }
         subtitulo.setText(visibles.size() + " ITEMS · ORDENADOS POR " + orden.getValue());
+
+        boolean sinNada = items.isEmpty();
+        bienvenida.setVisible(sinNada);
+        scroll.setVisible(!sinNada);
+        sinResultados.setVisible(!sinNada && visibles.isEmpty());
     }
 
     private boolean coincideConFiltro(ItemConsumption i) {
