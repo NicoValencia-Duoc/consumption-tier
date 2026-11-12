@@ -4,6 +4,7 @@ import consumption.data.RepositorioJson;
 import consumption.model.*;
 import consumption.data.GestorImagenes;
 import consumption.data.RespaldoZip;
+import consumption.data.Preferencias;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -24,17 +25,22 @@ public class VentanaPrincipal extends VBox {
     private final Cabecera cabecera;
     private final StackPane contenido = new StackPane();
     private String pestanaActual = "INICIO";
+    private final Aviso aviso = new Aviso();
 
     public VentanaPrincipal(List<ItemConsumption> items, RepositorioJson repositorio,
-                            Runnable alCambiarTema, ReproductorMusica reproductor) {
+                            Runnable alCambiarTema, ReproductorMusica reproductor,
+                            Preferencias preferencias) {
         this.items = items;
         this.repositorio = repositorio;
         setSpacing(14);
         setPadding(new Insets(20, 28, 20, 28));
 
-        cabecera = new Cabecera(this::mostrar, alCambiarTema);
-        VBox.setVgrow(contenido, Priority.ALWAYS);
-        getChildren().addAll(cabecera, contenido, new BarraMusica(reproductor));
+        cabecera = new Cabecera(this::mostrar, alCambiarTema, preferencias);
+        cabecera.setViewOrder(-1);
+
+        StackPane zona = new StackPane(contenido, aviso);
+        VBox.setVgrow(zona, Priority.ALWAYS);
+        getChildren().addAll(cabecera, zona, new BarraMusica(reproductor));
 
         mostrar("INICIO");
     }
@@ -48,7 +54,7 @@ public class VentanaPrincipal extends VBox {
             case "SERIES" -> paginaSeries();
             case "PENDIENTES" -> paginaPendientes();
             case "ESTADISTICAS" -> new PaginaEstadisticas(items, this::crearRespaldo, this::restaurarRespaldo);
-            default -> new PaginaInicio(items, this::verDetalle);
+            default -> new PaginaInicio(items, this::verDetalle, this::agregarDeTipo);
         };
         contenido.getChildren().setAll(pagina);
     }
@@ -126,32 +132,52 @@ public class VentanaPrincipal extends VBox {
 
     private <T extends ItemConsumption> void conectar(PaginaTabla<T> pagina, Supplier<FormularioItem<T>> formulario) {
         conectarComunes(pagina);
-        pagina.setAlAgregar(() -> formulario.get().mostrar(null, hojas()).ifPresent(nuevo -> {
-            items.add(nuevo);
-            guardarYRefrescar();
-        }));
+        pagina.setAlAgregar(() -> agregarCon(formulario.get()));
         pagina.setAlEditar(seleccionado ->
-                formulario.get().mostrar(seleccionado, hojas()).ifPresent(editado -> guardarYRefrescar()));
+                formulario.get().mostrar(seleccionado, hojas()).ifPresent(editado -> {
+                    guardarYRefrescar();
+                    aviso.mostrar("REGISTRO ACTUALIZADO");
+                }));
     }
 
     private void agregarPendiente() {
-        ChoiceDialog<String> eleccion = new ChoiceDialog<>("JUEGO", "JUEGO", "LIBRO", "PELICULA","SERIE");
+        ChoiceDialog<String> eleccion = new ChoiceDialog<>("JUEGO", "JUEGO", "LIBRO", "PELICULA", "SERIE");
         eleccion.setTitle("AGREGAR PENDIENTE");
         eleccion.setHeaderText(null);
         eleccion.setContentText("¿Que quieres agregar?");
         eleccion.getDialogPane().getStylesheets().setAll(hojas());
 
-        eleccion.showAndWait().ifPresent(tipo -> {
-            FormularioItem<? extends ItemConsumption> formulario = switch (tipo) {
-                case "JUEGO" -> new FormularioJuego();
-                case "LIBRO" -> new FormularioLibro();
-                case "SERIE" -> new FormularioSerie();
-                default -> new FormularioPelicula();
-            };
-            formulario.mostrar(null, hojas()).ifPresent(nuevo -> {
-                items.add(nuevo);
-                guardarYRefrescar();
-            });
+        eleccion.showAndWait().ifPresent(this::agregarDeTipo);
+    }
+
+    private void agregarDeTipo(String tipo) {
+        FormularioItem<? extends ItemConsumption> formulario = switch (tipo) {
+            case "JUEGO" -> new FormularioJuego();
+            case "LIBRO" -> new FormularioLibro();
+            case "SERIE" -> new FormularioSerie();
+            default -> new FormularioPelicula();
+        };
+        agregarCon(formulario);
+    }
+
+    private <T extends ItemConsumption> void agregarCon(FormularioItem<T> formulario) {
+        formulario.mostrar(null, hojas()).ifPresent(nuevo -> {
+            items.add(nuevo);
+            guardarYRefrescar();
+            avisarGuardado(nuevo);
+        });
+    }
+
+    private void avisarGuardado(ItemConsumption item) {
+        if (item.getEstado() == Estado.PENDIENTE) {
+            aviso.mostrar("PENDIENTE GUARDADO");
+            return;
+        }
+        aviso.mostrar(switch (item.getTipo()) {
+            case "JUEGOS" -> "JUEGO DEVORADO";
+            case "LIBROS" -> "LIBRO DEVORADO";
+            case "SERIES" -> "SERIE DEVORADA";
+            default -> "PELICULA DEVORADA";
         });
     }
 
@@ -168,7 +194,10 @@ public class VentanaPrincipal extends VBox {
 
     @SuppressWarnings("unchecked")
     private <T extends ItemConsumption> void editarCon(FormularioItem<T> formulario, ItemConsumption item) {
-        formulario.mostrar((T) item, hojas()).ifPresent(editado -> guardarYRefrescar());
+        formulario.mostrar((T) item, hojas()).ifPresent(editado -> {
+            guardarYRefrescar();
+            aviso.mostrar("REGISTRO ACTUALIZADO");
+        });
     }
 
     private void verDetalle(ItemConsumption item) {

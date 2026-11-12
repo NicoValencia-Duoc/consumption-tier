@@ -84,6 +84,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
 
         Dialog<ButtonType> dialogo = new Dialog<>();
         dialogo.setTitle((existente == null ? "AGREGAR " : "EDITAR ") + nombreTipo());
+        dialogo.setHeaderText(existente == null ? "THE MAW TIENE HAMBRE" : null);
         dialogo.getDialogPane().getStylesheets().setAll(hojas);
         dialogo.getDialogPane().setContent(grilla);
         ButtonType guardar = new ButtonType("GUARDAR", ButtonBar.ButtonData.OK_DONE);

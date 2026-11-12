@@ -45,7 +45,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         SortedList<T> ordenada = new SortedList<>(filtrada);
         ordenada.comparatorProperty().bind(tabla.comparatorProperty());
         tabla.setItems(ordenada);
-        tabla.setPlaceholder(new Label("SIN REGISTROS PARA MOSTRAR"));
+        tabla.setPlaceholder(new Label("SIN REGISTROS · THE MAW TIENE HAMBRE"));
         VBox.setVgrow(tabla, Priority.ALWAYS);
 
         Label titulo = new Label();

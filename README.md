@@ -1,6 +1,5 @@
-# Consumption Tier
-
-Biblioteca personal que reúne en un solo lugar tus juegos, libros, películas y series, hecha con **JavaFX + Maven** (Java 21). Estética cyberpunk con tema día/noche y música de fondo.
+# THE MAW
+THE MAW (el proyecto se llama consumption-tier) es una biblioteca personal que reúne en un solo lugar tus juegos, libros, películas y series, hecha con **JavaFX + Maven** (Java 21). Estética cyberpunk con tema día/noche y música de fondo.
 
 ## Qué hace
 
@@ -31,11 +30,11 @@ En la carpeta `consumption-personal` dentro de tu usuario (por ejemplo `C:\Users
 
 | Archivo | Contenido |
 |---|---|
-| `datos.json` | Tus juegos, libros y películas |
+| `datos.json` | Tus juegos, libros, películas y series |
 | `imagenes/` | Las portadas que agregas |
-| `preferencias.json` | Volumen y tema |
+| `preferencias.json` | Volumen, tema y tu nombre |
 
-Si no existe `datos.json`, la app parte con datos de ejemplo.
+Si no existe datos.json, la app parte vacía.
 
 ## Música
 

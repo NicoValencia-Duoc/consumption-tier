@@ -1,6 +1,5 @@
 package consumption.data;
 
-import consumption.DatosEjemplo;
 import consumption.model.*;
 
 import com.google.gson.*;
@@ -28,7 +27,7 @@ public class RepositorioJson {
 
     public List<ItemConsumption> cargar() {
         if (!Files.exists(ARCHIVO)) {
-            return new ArrayList<>(DatosEjemplo.crear());
+            return new ArrayList<>();
         }
         try (Reader lector = Files.newBufferedReader(ARCHIVO)) {
             Datos d = gson.fromJson(lector, Datos.class);
@@ -43,7 +42,7 @@ public class RepositorioJson {
         } catch (IOException | JsonParseException e) {
             System.err.println("No se pudo leer el archivo: " + e.getMessage());
             respaldarDanado();
-            return new ArrayList<>(DatosEjemplo.crear());
+            return new ArrayList<>();
         }
     }
 
