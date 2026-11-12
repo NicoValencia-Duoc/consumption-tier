@@ -2,6 +2,8 @@ package consumption.ui;
 
 import consumption.model.Estado;
 import consumption.model.ItemConsumption;
+import consumption.data.ExportadorCsv;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -10,7 +12,9 @@ import javafx.collections.transformation.SortedList;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-
+import javafx.stage.FileChooser;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -58,6 +62,9 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         eliminar.getStyleClass().addAll("pestana", "boton-peligro");
         Button detalle = new Button("DETALLE");
         detalle.getStyleClass().add("pestana");
+        Button exportar = new Button("EXPORTAR CSV");
+        exportar.getStyleClass().add("pestana");
+        exportar.setOnAction(e -> exportarCsv(nombreTipo));
 
         for (Button b : List.of(favorito, editar, eliminar, detalle)) {
             b.disableProperty().bind(tabla.getSelectionModel().selectedItemProperty().isNull());
@@ -74,7 +81,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
 
         Region espacio = new Region();
         HBox.setHgrow(espacio, Priority.ALWAYS);
-        HBox acciones = new HBox(8, titulo, espacio, favorito, agregar, editar, eliminar, detalle);
+        HBox acciones = new HBox(8, titulo, espacio, favorito, agregar, editar, eliminar, detalle, exportar);
         acciones.setAlignment(Pos.CENTER_LEFT);
 
         buscador.setPromptText("BUSCAR POR TITULO...");
@@ -146,6 +153,27 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
                         && (estado == null || estado.equals("TODOS") || i.getEstado().getEtiqueta().equals(estado))
                         && (genero == null || genero.equals("TODOS") || i.getGenero().equals(genero))
                         && (!soloFavoritos.isSelected() || i.isFavorito()));
+    }
+
+    private void exportarCsv(String nombreTipo) {
+        FileChooser selector = new FileChooser();
+        selector.setTitle("Exportar a CSV");
+        selector.setInitialFileName(nombreTipo.toLowerCase() + ".csv");
+        selector.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
+        File archivo = selector.showSaveDialog(getScene().getWindow());
+        if (archivo == null) return;
+
+        Alert alerta;
+        try {
+            ExportadorCsv.exportar(tabla, archivo.toPath());
+            alerta = new Alert(Alert.AlertType.INFORMATION,
+                    "Se exportaron " + tabla.getItems().size() + " filas a " + archivo.getName());
+        } catch (IOException ex) {
+            alerta = new Alert(Alert.AlertType.ERROR, "No se pudo guardar el archivo: " + ex.getMessage());
+        }
+        alerta.setHeaderText(null);
+        alerta.getDialogPane().getStylesheets().setAll(getScene().getStylesheets());
+        alerta.showAndWait();
     }
 
     private T seleccionado() {

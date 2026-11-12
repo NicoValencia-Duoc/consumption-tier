@@ -3,15 +3,19 @@ package consumption.ui;
 import consumption.data.RepositorioJson;
 import consumption.model.*;
 import consumption.data.GestorImagenes;
+import consumption.data.RespaldoZip;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.layout.*;
-
 import java.util.List;
 import java.util.function.Supplier;
+import javafx.stage.FileChooser;
+import java.io.File;
+import java.io.IOException;
+import java.time.LocalDate;
 
 public class VentanaPrincipal extends VBox {
 
@@ -41,6 +45,7 @@ public class VentanaPrincipal extends VBox {
             case "LIBROS" -> paginaLibros();
             case "PELICULAS" -> paginaPeliculas();
             case "PENDIENTES" -> paginaPendientes();
+            case "ESTADISTICAS" -> new PaginaEstadisticas(items, this::crearRespaldo, this::restaurarRespaldo);
             default -> new PaginaInicio(items, this::verDetalle);
         };
         contenido.getChildren().setAll(pagina);
@@ -162,6 +167,56 @@ public class VentanaPrincipal extends VBox {
     private void alternarFavorito(ItemConsumption item) {
         item.setFavorito(!item.isFavorito());
         repositorio.guardar(items);
+    }
+    private void crearRespaldo() {
+        FileChooser selector = new FileChooser();
+        selector.setTitle("Guardar respaldo");
+        selector.setInitialFileName("respaldo-" + LocalDate.now() + ".zip");
+        selector.getExtensionFilters().add(new FileChooser.ExtensionFilter("Respaldo (.zip)", "*.zip"));
+        File archivo = selector.showSaveDialog(getScene().getWindow());
+        if (archivo == null) return;
+
+        try {
+            repositorio.guardar(items);
+            RespaldoZip.crear(archivo.toPath());
+            avisar(Alert.AlertType.INFORMATION, "Respaldo guardado en " + archivo.getName());
+        } catch (IOException ex) {
+            avisar(Alert.AlertType.ERROR, "No se pudo crear el respaldo: " + ex.getMessage());
+        }
+    }
+
+    private void restaurarRespaldo() {
+        Alert aviso = new Alert(Alert.AlertType.CONFIRMATION,
+                "Restaurar reemplaza TODOS tus datos e imagenes actuales por los del respaldo. ¿Continuar?",
+                ButtonType.OK, ButtonType.CANCEL);
+        aviso.setHeaderText(null);
+        aviso.setTitle("RESTAURAR RESPALDO");
+        aviso.getDialogPane().getStylesheets().setAll(hojas());
+        if (aviso.showAndWait().filter(b -> b == ButtonType.OK).isEmpty()) return;
+
+        FileChooser selector = new FileChooser();
+        selector.setTitle("Elige un respaldo");
+        selector.getExtensionFilters().add(new FileChooser.ExtensionFilter("Respaldo (.zip)", "*.zip"));
+        File archivo = selector.showOpenDialog(getScene().getWindow());
+        if (archivo == null) return;
+
+        try {
+            RespaldoZip.restaurar(archivo.toPath());
+            GestorImagenes.limpiarCache();
+            items.clear();
+            items.addAll(repositorio.cargar());
+            mostrar(pestanaActual);
+            avisar(Alert.AlertType.INFORMATION, "Respaldo restaurado: " + items.size() + " items.");
+        } catch (IOException ex) {
+            avisar(Alert.AlertType.ERROR, "No se pudo restaurar: " + ex.getMessage());
+        }
+    }
+
+    private void avisar(Alert.AlertType tipo, String texto) {
+        Alert alerta = new Alert(tipo, texto, ButtonType.OK);
+        alerta.setHeaderText(null);
+        alerta.getDialogPane().getStylesheets().setAll(hojas());
+        alerta.showAndWait();
     }
 
     private void guardarYRefrescar() {

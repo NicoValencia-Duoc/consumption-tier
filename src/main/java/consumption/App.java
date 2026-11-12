@@ -19,7 +19,7 @@ public class App extends Application {
         RepositorioJson repositorio = new RepositorioJson();
         List<ItemConsumption> items = repositorio.cargar();
 
-        scena = new Scene(new VentanaPrincipal(items, repositorio, this::cambiarTema), 1100, 680);
+        scena = new Scene(new VentanaPrincipal(items, repositorio, this::cambiarTema), 1295, 720);
         aplicarTema();
 
         stage.setTitle("Catálogo personal");

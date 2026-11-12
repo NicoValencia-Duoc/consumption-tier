@@ -14,7 +14,7 @@ import java.util.UUID;
 public class GestorImagenes {
 
     private static final Path CARPETA =
-            Path.of(System.getProperty("user.home"), "consumption-personal", "imagenes");
+            Rutas.IMAGENES;
     private static final long MAX_BYTES = 5L * 1024 * 1024;
     private static final Map<String, Image> CACHE = new HashMap<>();
 
@@ -67,5 +67,9 @@ public class GestorImagenes {
             case "LIBROS" -> "libro.png";
             default -> "pelicula.png";
         };
+    }
+
+    public static void limpiarCache() {
+        CACHE.clear();
     }
 }
