@@ -7,6 +7,7 @@ public class Rutas {
     public static final Path BASE = Path.of(System.getProperty("user.home"), "consumption-personal");
     public static final Path DATOS = BASE.resolve("datos.json");
     public static final Path IMAGENES = BASE.resolve("imagenes");
+    public static final Path PREFERENCIAS = BASE.resolve("preferencias.json");
 
     private Rutas() {}
 }
