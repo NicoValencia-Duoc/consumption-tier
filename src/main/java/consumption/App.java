@@ -34,7 +34,7 @@ public class App extends Application {
         scena = new Scene(new VentanaPrincipal(items, repositorio, this::cambiarTema, reproductor), 1295, 720);
         aplicarTema();
 
-        stage.setTitle("Catálogo personal");
+        stage.setTitle("Consumption Tier");
         stage.setScene(scena);
         stage.show();
         reproductor.iniciar();
