@@ -1,10 +1,10 @@
 # Consumption Tier
 
-Biblioteca personal que reúne en un solo lugar tus juegos, libros y películas, hecha con **JavaFX + Maven** (Java 21). Estética cyberpunk con tema día/noche y música de fondo.
+Biblioteca personal que reúne en un solo lugar tus juegos, libros, películas y series, hecha con **JavaFX + Maven** (Java 21). Estética cyberpunk con tema día/noche y música de fondo.
 
 ## Qué hace
 
-- Tablas por tipo (juegos, libros, películas) con nota por criterios, comentarios e imagen de portada.
+- Tablas por tipo (juegos, libros, películas y series) con nota por criterios, comentarios e imagen de portada.
 - Búsqueda, filtros, orden, favoritos y lista de pendientes.
 - Pestaña de estadísticas por tipo.
 - Exportar cualquier tabla a CSV (listo para Excel).
@@ -72,7 +72,7 @@ Varias licencias son **no comerciales** (NC) o **sin obra derivada** (ND): este 
 ```
 src/main/java/consumption/
 ├── App.java, Launcher.java
-├── model/   Juego, Libro, Pelicula, Estado, Estadisticas
+├── model/   Juego, Libro, Pelicula, Serie, Estado, Estadisticas
 ├── data/    RepositorioJson, GestorImagenes, ExportadorCsv, RespaldoZip, Preferencias, Rutas
 └── ui/      ventana principal, tablas, formularios, detalle, estadísticas, reproductor
 src/main/resources/consumption/
