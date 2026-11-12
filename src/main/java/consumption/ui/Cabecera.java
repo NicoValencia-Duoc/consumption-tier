@@ -18,7 +18,7 @@ public class Cabecera extends HBox {
         Label logo = new Label("Consumption Tier // Nombre");
         logo.getStyleClass().add("logo");
         HBox contenedorPestanas = new HBox(6);
-        for (String nombre : new String[] {"INICIO", "JUEGOS", "LIBROS", "PELICULAS", "PENDIENTES", "ESTADISTICAS"}) {
+        for (String nombre : new String[] {"INICIO", "JUEGOS", "LIBROS", "PELICULAS","SERIES", "PENDIENTES", "ESTADISTICAS"}) {
             Button b = new Button(nombre);
             b.getStyleClass().add("pestana");
             b.setOnAction(e -> {

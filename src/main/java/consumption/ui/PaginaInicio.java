@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 
 public class PaginaInicio extends VBox {
 
-    private static final String[] FILTROS = {"TODO", "JUEGOS", "LIBROS", "PELICULAS", "FAVORITOS"};
+    private static final String[] FILTROS = {"TODO", "JUEGOS", "LIBROS", "PELICULAS", "FAVORITOS", "SERIES"};
 
     private final List<ItemConsumption> items;
     private final Consumer<ItemConsumption> alAbrir;
@@ -104,7 +104,7 @@ public class PaginaInicio extends VBox {
 
     private boolean coincideConFiltro(ItemConsumption i) {
         return switch (filtroActual) {
-            case "JUEGOS", "LIBROS", "PELICULAS" -> i.getTipo().equals(filtroActual);
+            case "JUEGOS", "LIBROS", "PELICULAS", "SERIES" -> i.getTipo().equals(filtroActual);
             case "FAVORITOS" -> i.isFavorito();
             default -> true;
         };

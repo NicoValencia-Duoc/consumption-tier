@@ -1,9 +1,11 @@
 package consumption.ui;
 
 import consumption.model.*;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
 
 import java.util.List;
@@ -16,6 +18,7 @@ public class PaginaEstadisticas extends VBox {
         List<Juego> juegos = items.stream().filter(Juego.class::isInstance).map(Juego.class::cast).toList();
         List<Libro> libros = items.stream().filter(Libro.class::isInstance).map(Libro.class::cast).toList();
         List<Pelicula> peliculas = items.stream().filter(Pelicula.class::isInstance).map(Pelicula.class::cast).toList();
+        List<Serie> series = items.stream().filter(Serie.class::isInstance).map(Serie.class::cast).toList();
 
         long favoritos = items.stream().filter(ItemConsumption::isFavorito).count();
         Label general = new Label(items.size() + " ITEMS EN TOTAL · " + favoritos + " FAVORITOS");
@@ -26,11 +29,19 @@ public class PaginaEstadisticas extends VBox {
                 .mapToInt(Libro::getPaginas).sum();
         double horasPeliculas = peliculas.stream().filter(p -> p.getEstado() == Estado.TERMINADO)
                 .mapToInt(Pelicula::getDuracionMin).sum() / 60.0;
+        int episodios = series.stream().filter(s -> s.getEstado() == Estado.TERMINADO)
+                .mapToInt(Serie::getEpisodios).sum();
 
-        HBox paneles = new HBox(14,
-                panel(Estadisticas.resumir("JUEGOS", juegos), "HORAS JUGADAS", String.format("%.1f", horasJuego)),
-                panel(Estadisticas.resumir("LIBROS", libros), "PAGINAS (TERMINADOS)", String.valueOf(paginas)),
-                panel(Estadisticas.resumir("PELICULAS", peliculas), "HORAS (TERMINADAS)", String.format("%.1f", horasPeliculas)));
+        GridPane paneles = new GridPane();
+        paneles.setHgap(14);
+        paneles.setVgap(14);
+        ColumnConstraints mitad = new ColumnConstraints();
+        mitad.setPercentWidth(50);
+        paneles.getColumnConstraints().addAll(mitad, mitad);
+        paneles.add(panel(Estadisticas.resumir("JUEGOS", juegos), "HORAS JUGADAS", String.format("%.1f", horasJuego)), 0, 0);
+        paneles.add(panel(Estadisticas.resumir("LIBROS", libros), "PAGINAS (TERMINADOS)", String.valueOf(paginas)), 1, 0);
+        paneles.add(panel(Estadisticas.resumir("PELICULAS", peliculas), "HORAS (TERMINADAS)", String.format("%.1f", horasPeliculas)), 0, 1);
+        paneles.add(panel(Estadisticas.resumir("SERIES", series), "EPISODIOS (TERMINADAS)", String.valueOf(episodios)), 1, 1);
 
         Label herramientas = new Label("RESPALDO DE TUS DATOS (INCLUYE LAS IMAGENES)");
         herramientas.getStyleClass().add("subtitulo");
@@ -46,7 +57,13 @@ public class PaginaEstadisticas extends VBox {
         HBox botones = new HBox(8, respaldar, restaurar);
         botones.setAlignment(Pos.CENTER_LEFT);
 
-        getChildren().addAll(general, paneles, herramientas, botones);
+        VBox cuerpo = new VBox(18, general, paneles, herramientas, botones);
+        cuerpo.setPadding(new Insets(0, 8, 0, 0));
+
+        ScrollPane scroll = new ScrollPane(cuerpo);
+        scroll.setFitToWidth(true);
+        VBox.setVgrow(scroll, Priority.ALWAYS);
+        getChildren().add(scroll);
     }
 
     private VBox panel(Estadisticas.Resumen r, String etiquetaExtra, String valorExtra) {
@@ -78,7 +95,7 @@ public class PaginaEstadisticas extends VBox {
 
         VBox caja = new VBox(12, nombre, datos);
         caja.getStyleClass().add("tarjeta");
-        caja.setPrefWidth(330);
+        caja.setMaxWidth(Double.MAX_VALUE);
         return caja;
     }
 }

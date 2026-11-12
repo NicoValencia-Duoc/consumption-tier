@@ -65,6 +65,7 @@ public class GestorImagenes {
         return switch (tipo) {
             case "JUEGOS" -> "juego.png";
             case "LIBROS" -> "libro.png";
+            case "SERIES" -> "serie.png";
             default -> "pelicula.png";
         };
     }

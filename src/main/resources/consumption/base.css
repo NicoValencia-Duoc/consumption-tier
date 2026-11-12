@@ -25,9 +25,9 @@
 .scroll-pane, .scroll-pane > .viewport { -fx-background-color: transparent; }
 .scroll-pane { -fx-border-color: transparent; }
 .tarjeta { -fx-background-color: -c-pn; -fx-border-color: -c-ln; -fx-padding: 10; }
-.miniatura { -fx-background-color: -c-bg; -fx-border-color: -c-ln; -fx-border-style: dashed; -fx-pref-height: 104; -fx-min-height: 104; }
-.letra { -fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: -c-acento; }
-.tipo { -fx-text-fill: -c-mt; -fx-font-size: 10px; }
+.miniatura { -fx-background-color: #08080a; -fx-border-color: #2a2a33; -fx-border-style: dashed; -fx-pref-height: 104; -fx-min-height: 104; }
+.letra { -fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: #fcee0a; }
+.tipo { -fx-text-fill: #9a9aa6; -fx-font-size: 10px; }
 .titulo-item { -fx-font-weight: bold; -fx-font-size: 16px; }
 .nota { -fx-text-fill: -c-g; -fx-font-weight: bold; -fx-font-size: 22px; }
 .estado { -fx-border-width: 1; -fx-padding: 2 8 2 8; -fx-font-size: 11px; -fx-font-weight: bold; }
@@ -103,10 +103,10 @@
 .combo-box-popup .list-cell { -fx-background-color: -c-pn; -fx-text-fill: -c-tx; }
 .combo-box-popup .list-cell:hover { -fx-background-color: -c-ln; }
 .check-box { -fx-text-fill: -c-tx; }
-.estrella { -fx-text-fill: -c-acento; -fx-font-size: 18px; }
+.estrella { -fx-text-fill: #fcee0a; -fx-font-size: 18px; }
 
 /* Texto del tipo sobre la miniatura */
-.tipo { -fx-background-color: -c-pn; -fx-padding: 0 4 0 4; }
+.tipo { -fx-background-color: #14141a; -fx-padding: 0 4 0 4; }
 
 /* Reproductor */
 .reproductor {

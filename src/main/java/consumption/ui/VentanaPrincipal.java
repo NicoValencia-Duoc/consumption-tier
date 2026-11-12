@@ -45,6 +45,7 @@ public class VentanaPrincipal extends VBox {
             case "JUEGOS" -> paginaJuegos();
             case "LIBROS" -> paginaLibros();
             case "PELICULAS" -> paginaPeliculas();
+            case "SERIES" -> paginaSeries();
             case "PENDIENTES" -> paginaPendientes();
             case "ESTADISTICAS" -> new PaginaEstadisticas(items, this::crearRespaldo, this::restaurarRespaldo);
             default -> new PaginaInicio(items, this::verDetalle);
@@ -86,6 +87,19 @@ public class VentanaPrincipal extends VBox {
         return p;
     }
 
+    private Node paginaSeries() {
+        List<Serie> series = items.stream().filter(Serie.class::isInstance).map(Serie.class::cast).toList();
+        PaginaTabla<Serie> p = new PaginaTabla<>("SERIES", series);
+        p.agregarColumna("CREADOR", Serie::getCreador);
+        p.agregarColumna("GENERO", Serie::getGenero);
+        p.agregarColumna("TEMPORADAS", Serie::getTemporadas);
+        p.agregarColumna("EPISODIOS", Serie::getEpisodios);
+        p.agregarColumna("AÑO", Serie::getAnio);
+        p.agregarColumna("ORIGEN", s -> s.getOrigen().isEmpty() ? "-" : s.getOrigen());
+        conectar(p, FormularioSerie::new);
+        return p;
+    }
+
     private Node paginaPendientes() {
         List<ItemConsumption> pendientes = items.stream()
                 .filter(i -> i.getEstado() == Estado.PENDIENTE).toList();
@@ -121,7 +135,7 @@ public class VentanaPrincipal extends VBox {
     }
 
     private void agregarPendiente() {
-        ChoiceDialog<String> eleccion = new ChoiceDialog<>("JUEGO", "JUEGO", "LIBRO", "PELICULA");
+        ChoiceDialog<String> eleccion = new ChoiceDialog<>("JUEGO", "JUEGO", "LIBRO", "PELICULA","SERIE");
         eleccion.setTitle("AGREGAR PENDIENTE");
         eleccion.setHeaderText(null);
         eleccion.setContentText("¿Que quieres agregar?");
@@ -131,6 +145,7 @@ public class VentanaPrincipal extends VBox {
             FormularioItem<? extends ItemConsumption> formulario = switch (tipo) {
                 case "JUEGO" -> new FormularioJuego();
                 case "LIBRO" -> new FormularioLibro();
+                case "SERIE" -> new FormularioSerie();
                 default -> new FormularioPelicula();
             };
             formulario.mostrar(null, hojas()).ifPresent(nuevo -> {
@@ -147,6 +162,7 @@ public class VentanaPrincipal extends VBox {
     private FormularioItem<? extends ItemConsumption> formularioPara(ItemConsumption item) {
         if (item instanceof Juego) return new FormularioJuego();
         if (item instanceof Libro) return new FormularioLibro();
+        if (item instanceof Serie) return new FormularioSerie();
         return new FormularioPelicula();
     }
 

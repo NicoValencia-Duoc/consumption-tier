@@ -23,6 +23,7 @@ public class RepositorioJson {
         List<Juego> juegos = new ArrayList<>();
         List<Libro> libros = new ArrayList<>();
         List<Pelicula> peliculas = new ArrayList<>();
+        List<Serie> series = new ArrayList<>();
     }
 
     public List<ItemConsumption> cargar() {
@@ -36,6 +37,7 @@ public class RepositorioJson {
                 todos.addAll(d.juegos);
                 todos.addAll(d.libros);
                 todos.addAll(d.peliculas);
+                if (d.series != null) todos.addAll(d.series);
             }
             return todos;
         } catch (IOException | JsonParseException e) {
@@ -51,6 +53,7 @@ public class RepositorioJson {
             if (i instanceof Juego j) d.juegos.add(j);
             else if (i instanceof Libro l) d.libros.add(l);
             else if (i instanceof Pelicula p) d.peliculas.add(p);
+            else if (i instanceof Serie s) d.series.add(s);
         }
         try {
             Files.createDirectories(ARCHIVO.getParent());
