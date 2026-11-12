@@ -23,6 +23,10 @@ public class BarraMusica extends HBox {
         siguiente.getStyleClass().add("boton-musica");
         siguiente.setOnAction(e -> reproductor.siguiente());
 
+        Button lista = new Button("☰");
+        lista.getStyleClass().add("boton-musica");
+        lista.setOnAction(e -> PistasDialog.mostrar(reproductor, getScene().getStylesheets()));
+
         Slider volumen = new Slider(0, 1, reproductor.volumenProperty().get());
         volumen.setPrefWidth(110);
         reproductor.volumenProperty().bind(volumen.valueProperty());
@@ -32,12 +36,13 @@ public class BarraMusica extends HBox {
         titulo.setMaxWidth(420);
         titulo.textProperty().bind(Bindings.concat("♪ ", reproductor.tituloProperty()));
 
-        getChildren().addAll(titulo, pausa, siguiente, volumen);
+        getChildren().addAll(titulo, lista, pausa, siguiente, volumen);
 
         if (!reproductor.hayMusica()) {
             pausa.setDisable(true);
             siguiente.setDisable(true);
             volumen.setDisable(true);
+            lista.setDisable(true);
         }
     }
 }

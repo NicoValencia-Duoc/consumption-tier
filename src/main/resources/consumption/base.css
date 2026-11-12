@@ -1,4 +1,8 @@
-.root { -fx-background-color: -c-bg; -fx-font-family: "Segoe UI"; }
+.root {
+    -fx-background-color: -c-bg;
+    -fx-font-family: "Rajdhani", "Segoe UI";
+    -fx-font-size: 15px;
+}
 .label { -fx-text-fill: -c-tx; }
 
 /* Cabecera */
@@ -119,3 +123,21 @@
 }
 .slider .track { -fx-background-color: -c-ln; }
 .slider .thumb { -fx-background-color: -c-y; }
+
+/* Tipografía de títulos y números */
+.logo, .letra, .nota, .titulo-detalle, .titulo-item {
+    -fx-font-family: "Orbitron", "Segoe UI";
+}
+.logo { -fx-font-size: 20px; }
+.titulo-item { -fx-font-size: 14px; }
+.nota { -fx-font-size: 20px; }
+
+/* Lista de pistas */
+.list-view {
+    -fx-background-color: -c-pn;
+    -fx-control-inner-background: -c-pn;
+    -fx-border-color: -c-ln;
+}
+.list-cell { -fx-background-color: -c-pn; -fx-text-fill: -c-tx; }
+.list-cell:filled:selected { -fx-background-color: -c-ln; }
+.list-cell:filled:hover { -fx-background-color: -c-ln; }

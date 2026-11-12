@@ -18,18 +18,18 @@ public class ReproductorMusica {
 
     private static final String CARPETA = "/consumption/musica/";
 
-    private final List<String> archivos = new ArrayList<>();
-    private final List<String> cola = new ArrayList<>();
+    private final List<Pista> pistas = new ArrayList<>();
+    private final List<Pista> cola = new ArrayList<>();
     private int indice = -1;
     private int fallosSeguidos = 0;
     private MediaPlayer jugador;
 
-    private final StringProperty titulo = new SimpleStringProperty("SIN MUSICA");
+    private final StringProperty titulo = new SimpleStringProperty("SIN MÚSICA");
     private final BooleanProperty sonando = new SimpleBooleanProperty(false);
     private final DoubleProperty volumen = new SimpleDoubleProperty(0.5);
 
     public ReproductorMusica() {
-        archivos.addAll(leerLista());
+        pistas.addAll(leerLista());
         volumen.addListener((obs, antes, ahora) -> {
             if (jugador != null) jugador.setVolume(ahora.doubleValue());
         });
@@ -38,12 +38,26 @@ public class ReproductorMusica {
     public StringProperty tituloProperty() { return titulo; }
     public BooleanProperty sonandoProperty() { return sonando; }
     public DoubleProperty volumenProperty() { return volumen; }
-    public boolean hayMusica() { return !archivos.isEmpty(); }
+    public boolean hayMusica() { return !pistas.isEmpty(); }
+    public List<Pista> getPistas() { return List.copyOf(pistas); }
+
+    public Pista getActual() {
+        boolean valida = jugador != null && indice >= 0 && indice < cola.size();
+        return valida ? cola.get(indice) : null;
+    }
 
     public void iniciar() {
-        if (archivos.isEmpty()) return;
+        if (pistas.isEmpty()) return;
         barajar();
         indice = 0;
+        reproducirActual();
+    }
+
+    public void reproducir(Pista pista) {
+        if (cola.isEmpty()) barajar();
+        int posicion = cola.indexOf(pista);
+        if (posicion < 0) return;
+        indice = posicion;
         reproducirActual();
     }
 
@@ -62,7 +76,7 @@ public class ReproductorMusica {
     }
 
     public void siguiente() {
-        if (archivos.isEmpty()) return;
+        if (pistas.isEmpty()) return;
         indice++;
         if (indice >= cola.size()) {
             barajar();
@@ -78,10 +92,10 @@ public class ReproductorMusica {
 
     private void reproducirActual() {
         detenerJugador();
-        String archivo = cola.get(indice);
+        Pista pista = cola.get(indice);
         try {
-            URL url = ReproductorMusica.class.getResource(CARPETA + archivo);
-            if (url == null) throw new IOException("No se encontro " + archivo);
+            URL url = ReproductorMusica.class.getResource(CARPETA + pista.archivo());
+            if (url == null) throw new IOException("No se encontró " + pista.archivo());
 
             jugador = new MediaPlayer(new Media(url.toExternalForm()));
             jugador.setVolume(volumen.get());
@@ -90,7 +104,7 @@ public class ReproductorMusica {
             jugador.setOnError(() -> alFallar());
             jugador.play();
 
-            titulo.set(nombreLegible(archivo));
+            titulo.set(pista.textoCompleto().toUpperCase());
             sonando.set(true);
         } catch (Exception e) {
             alFallar();
@@ -102,7 +116,7 @@ public class ReproductorMusica {
         if (fallosSeguidos >= cola.size()) {
             detenerJugador();
             sonando.set(false);
-            titulo.set("NO SE PUDO REPRODUCIR LA MUSICA");
+            titulo.set("NO SE PUDO REPRODUCIR LA MÚSICA");
             return;
         }
         siguiente();
@@ -119,31 +133,28 @@ public class ReproductorMusica {
     }
 
     private void barajar() {
-        String ultima = cola.isEmpty() ? null : cola.get(cola.size() - 1);
+        Pista ultima = cola.isEmpty() ? null : cola.get(cola.size() - 1);
         cola.clear();
-        cola.addAll(archivos);
+        cola.addAll(pistas);
         Collections.shuffle(cola);
+
         if (cola.size() > 1 && cola.get(0).equals(ultima)) Collections.swap(cola, 0, 1);
     }
 
-    private static String nombreLegible(String archivo) {
-        int punto = archivo.lastIndexOf('.');
-        String sinExtension = (punto > 0) ? archivo.substring(0, punto) : archivo;
-        return sinExtension.replace('_', ' ').toUpperCase();
-    }
-
-    private static List<String> leerLista() {
-        List<String> lista = new ArrayList<>();
+    private static List<Pista> leerLista() {
+        List<Pista> lista = new ArrayList<>();
         try (InputStream in = ReproductorMusica.class.getResourceAsStream(CARPETA + "lista.txt")) {
             if (in == null) return lista;
             BufferedReader lector = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
             String linea;
             while ((linea = lector.readLine()) != null) {
                 linea = linea.replace("\uFEFF", "").trim();
-                if (!linea.isEmpty() && !linea.startsWith("#")) lista.add(linea);
+                if (linea.isEmpty() || linea.startsWith("#")) continue;
+                Pista pista = Pista.desdeLinea(linea);
+                if (!pista.archivo().isEmpty()) lista.add(pista);
             }
         } catch (IOException e) {
-            System.err.println("No se pudo leer la lista de musica: " + e.getMessage());
+            System.err.println("No se pudo leer la lista de música: " + e.getMessage());
         }
         return lista;
     }
