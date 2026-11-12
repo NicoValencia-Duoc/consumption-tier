@@ -31,9 +31,6 @@ public class Cabecera extends HBox {
         pestanaDetalle.getStyleClass().add("pestana");
         contenedorPestanas.getChildren().add(pestanaDetalle);
 
-        Label cancion = new Label("PISTA 03 - NOMBRE DE CANCION");
-        cancion.getStyleClass().add("cancion");
-
         Button tema = new Button("DIA / NOCHE");
         tema.getStyleClass().add("pestana");
         tema.setOnAction(event -> alCambiarTema.run());
@@ -43,7 +40,7 @@ public class Cabecera extends HBox {
         HBox.setHgrow(izq, Priority.ALWAYS);
         HBox.setHgrow(der, Priority.ALWAYS);
 
-        getChildren().addAll(logo, izq, contenedorPestanas, der, cancion, tema);
+        getChildren().addAll(logo, izq, contenedorPestanas, der, tema);
         setSpacing(20);
         setAlignment(Pos.CENTER_LEFT);
         getStyleClass().add("cabecera");

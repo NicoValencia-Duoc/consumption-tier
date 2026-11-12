@@ -4,6 +4,7 @@ import consumption.data.RepositorioJson;
 import consumption.model.*;
 import consumption.ui.PaginaInicio;
 import consumption.ui.VentanaPrincipal;
+import consumption.ui.ReproductorMusica;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -14,17 +15,26 @@ public class App extends Application {
 
     private Scene scena;
     private boolean noche = true;
+    private ReproductorMusica reproductor;
 
-    @Override public void start(Stage stage) {
+    @Override
+    public void start(Stage stage) {
         RepositorioJson repositorio = new RepositorioJson();
         List<ItemConsumption> items = repositorio.cargar();
+        reproductor = new ReproductorMusica();
 
-        scena = new Scene(new VentanaPrincipal(items, repositorio, this::cambiarTema), 1295, 720);
+        scena = new Scene(new VentanaPrincipal(items, repositorio, this::cambiarTema, reproductor), 1300, 720);
         aplicarTema();
 
-        stage.setTitle("Catálogo personal");
+        stage.setTitle("ConsumptionTier");
         stage.setScene(scena);
         stage.show();
+        reproductor.iniciar();
+    }
+
+    @Override
+    public void stop() {
+        if (reproductor != null) reproductor.detener();
     }
 
     private void cambiarTema(){

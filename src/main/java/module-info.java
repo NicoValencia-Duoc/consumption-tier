@@ -1,5 +1,6 @@
 module consumption {
     requires javafx.controls;
+    requires javafx.media;
     requires com.google.gson;
     exports consumption;
     exports consumption.model;

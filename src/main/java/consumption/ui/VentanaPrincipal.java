@@ -25,7 +25,8 @@ public class VentanaPrincipal extends VBox {
     private final StackPane contenido = new StackPane();
     private String pestanaActual = "INICIO";
 
-    public VentanaPrincipal(List<ItemConsumption> items, RepositorioJson repositorio, Runnable alCambiarTema) {
+    public VentanaPrincipal(List<ItemConsumption> items, RepositorioJson repositorio,
+                            Runnable alCambiarTema, ReproductorMusica reproductor) {
         this.items = items;
         this.repositorio = repositorio;
         setSpacing(14);
@@ -33,7 +34,7 @@ public class VentanaPrincipal extends VBox {
 
         cabecera = new Cabecera(this::mostrar, alCambiarTema);
         VBox.setVgrow(contenido, Priority.ALWAYS);
-        getChildren().addAll(cabecera, contenido);
+        getChildren().addAll(cabecera, contenido, new BarraMusica(reproductor));
 
         mostrar("INICIO");
     }
