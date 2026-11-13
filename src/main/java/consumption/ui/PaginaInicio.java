@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 
 public class PaginaInicio extends VBox {
 
-    private static final String[] FILTROS = {"TODO", "JUEGOS", "LIBROS", "PELICULAS", "FAVORITOS", "SERIES"};
+    private static final String[] FILTROS = {"TODO", "JUEGOS", "LIBROS", "PELICULAS", "SERIES", "FAVORITOS"};
 
     private final List<ItemConsumption> items;
     private final Consumer<ItemConsumption> alAbrir;
