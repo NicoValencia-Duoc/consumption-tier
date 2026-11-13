@@ -18,7 +18,7 @@ public class GestorImagenes {
     private static final long MAX_BYTES = 5L * 1024 * 1024;
     private static final Map<String, Image> CACHE = new HashMap<>();
 
-    public static String copiar(File origen) {
+    public static void validar(File origen) {
         String nombre = origen.getName().toLowerCase();
         if (!nombre.matches(".*\\.(png|jpg|jpeg|gif|bmp)")) {
             throw new IllegalArgumentException("La imagen debe ser PNG, JPG, GIF o BMP.");
@@ -27,6 +27,15 @@ public class GestorImagenes {
             if (Files.size(origen.toPath()) > MAX_BYTES) {
                 throw new IllegalArgumentException("La imagen pesa mas de 5 MB.");
             }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("No se pudo leer la imagen.");
+        }
+    }
+
+    public static String copiar(File origen) {
+        validar(origen);
+        String nombre = origen.getName().toLowerCase();
+        try {
             Files.createDirectories(CARPETA);
             String destino = UUID.randomUUID() + nombre.substring(nombre.lastIndexOf('.'));
             Files.copy(origen.toPath(), CARPETA.resolve(destino));
@@ -57,6 +66,15 @@ public class GestorImagenes {
             if (recurso == null) return null;
             uri = recurso.toExternalForm();
         }
+        return CACHE.computeIfAbsent(clave + "@" + ancho + "x" + alto,
+                k -> new Image(uri, ancho, alto, true, true));
+    }
+
+    public static Image iconoDeTipo(String tipo, double ancho, double alto) {
+        String clave = nombreIcono(tipo);
+        var recurso = GestorImagenes.class.getResource("/consumption/iconos/" + clave);
+        if (recurso == null) return null;
+        String uri = recurso.toExternalForm();
         return CACHE.computeIfAbsent(clave + "@" + ancho + "x" + alto,
                 k -> new Image(uri, ancho, alto, true, true));
     }

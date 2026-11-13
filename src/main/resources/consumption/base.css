@@ -228,3 +228,119 @@
     -fx-min-width: 38;  -fx-pref-width: 38;
     -fx-min-height: 38; -fx-pref-height: 38;
 }
+
+/* ===== Formulario de agregar / editar ===== */
+.cuerpo-form { -fx-background-color: -c-bg; }
+
+/* Cabeceras de seccion: texto con un destello rojo desplazado (detalle "glitcheado") */
+.seccion-form {
+    -fx-text-fill: -c-acento;
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(255,42,61,0.75), 0, 0, 2, 0);
+}
+.seccion-linea {
+    -fx-background-color: -c-ln;
+    -fx-min-height: 1; -fx-pref-height: 1; -fx-max-height: 1;
+}
+.etiqueta-form { -fx-text-fill: -c-mt; -fx-font-weight: bold; -fx-font-size: 13px; }
+.error-campo { -fx-text-fill: -c-r; -fx-font-size: 12px; -fx-font-weight: bold; }
+
+/* Estado como etiquetas */
+.chip {
+    -fx-background-color: transparent;
+    -fx-border-color: -c-ln;
+    -fx-text-fill: -c-mt;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-padding: 4 10 4 10;
+    -fx-cursor: hand;
+}
+.chip:hover { -fx-border-color: -c-acento; }
+.chip:selected { -fx-background-color: -c-pn; }
+.chip-terminado:selected { -fx-text-fill: -c-g; -fx-border-color: -c-g; -fx-effect: dropshadow(gaussian, rgba(57,255,136,0.5), 8, 0.2, 0, 0); }
+.chip-progreso:selected { -fx-text-fill: -c-y; -fx-border-color: -c-y; -fx-effect: dropshadow(gaussian, rgba(252,238,10,0.5), 8, 0.2, 0, 0); }
+.chip-abandonado:selected { -fx-text-fill: -c-r; -fx-border-color: -c-r; -fx-effect: dropshadow(gaussian, rgba(255,42,61,0.5), 8, 0.2, 0, 0); }
+.chip-pendiente:selected { -fx-text-fill: -c-gr; -fx-border-color: -c-gr; -fx-effect: dropshadow(gaussian, rgba(154,154,166,0.4), 8, 0.2, 0, 0); }
+
+/* Vista previa de la portada (colores fijos, como la miniatura) */
+.vista-previa {
+    -fx-background-color: #08080a;
+    -fx-border-color: #2a2a33;
+    -fx-border-style: dashed;
+}
+
+/* Botones del dialogo: mismo tamano y forma; solo GUARDAR lleva el color de accion */
+.dialog-pane .button.boton-dialogo {
+    -fx-background-color: transparent;
+    -fx-border-color: -c-ln;
+    -fx-text-fill: -c-tx;
+    -fx-font-weight: bold;
+    -fx-padding: 6 18 6 18;
+    -fx-min-width: 110;
+    -fx-cursor: hand;
+}
+.dialog-pane .button.boton-dialogo:hover { -fx-border-color: -c-acento; }
+.dialog-pane .button.boton-dialogo.boton-accion { -fx-text-fill: -c-y; -fx-border-color: -c-y; }
+
+/* Titulo del dialogo con el mismo destello de las secciones */
+.dialog-pane > .header-panel .label {
+    -fx-effect: dropshadow(gaussian, rgba(255,42,61,0.75), 0, 0, 2, 0);
+}
+
+/* ===== Barra de avance ===== */
+.barra-avance .progress-bar > .track {
+    -fx-background-color: -c-ln;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+}
+.barra-avance .progress-bar > .bar {
+    -fx-background-color: -c-g;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-padding: 5;
+}
+
+/* Sobre 100%: llena, magenta y con brillo */
+.barra-avance.exceso .progress-bar > .bar {
+    -fx-background-color: #ff2fa0;
+    -fx-effect: dropshadow(gaussian, rgba(255,47,160,0.85), 8, 0.4, 0, 0);
+}
+.barra-avance.exceso .valor-criterio { -fx-text-fill: #ff2fa0; }
+
+/* ===== Calendario ===== */
+.cal-panel {
+    -fx-background-color: -c-pn;
+    -fx-border-color: -c-acento;
+    -fx-effect: dropshadow(gaussian, rgba(252,238,10,0.30), 14, 0.2, 0, 0);
+}
+.cal-titulo {
+    -fx-text-fill: -c-acento;
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+.cal-nav {
+    -fx-background-color: transparent;
+    -fx-border-color: -c-ln;
+    -fx-text-fill: -c-tx;
+    -fx-font-weight: bold;
+    -fx-min-width: 30;
+    -fx-cursor: hand;
+}
+.cal-nav:hover { -fx-border-color: -c-acento; -fx-text-fill: -c-acento; }
+.cal-dia-nombre { -fx-text-fill: -c-mt; -fx-font-weight: bold; -fx-font-size: 11px; }
+.cal-dia {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -c-tx;
+    -fx-min-width: 32; -fx-pref-width: 32;
+    -fx-min-height: 28; -fx-pref-height: 28;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+.cal-dia:hover { -fx-border-color: -c-acento; }
+.cal-hoy { -fx-border-color: -c-r; }
+.cal-sel { -fx-background-color: -c-y; -fx-text-fill: -c-yt; -fx-border-color: -c-y; -fx-font-weight: bold; }
+.cal-dia:disabled { -fx-opacity: 0.25; }

@@ -2,6 +2,7 @@ package consumption.ui;
 
 
 import consumption.model.ItemConsumption;
+import consumption.model.Estado;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -17,7 +18,7 @@ public class PaginaDetalle extends VBox{
         setSpacing(12);
         Label titulo = new Label(item.getTitulo());
         titulo.getStyleClass().add("titulo-detalle");
-        Label resumen = new Label(item.getTipo() + " · " + item.getEstado().getEtiqueta() + " · AVANCE" + String.format("%.0f%%", item.getPorcentaje()));
+        Label resumen = new Label(item.getTipo() + " · " + item.getEstado().getEtiqueta());
         resumen.getStyleClass().add("subtitulo");
         Label nota = new Label(String.format("NOTA FINAL %.1f", item.getNota()));
         nota.getStyleClass().add("nota");
@@ -77,7 +78,13 @@ public class PaginaDetalle extends VBox{
         Image imagen = GestorImagenes.imagenDe(item, 220, 300);
         if (imagen != null) portada.setImage(imagen);
 
-        VBox datos = new VBox(8, titulo, resumen, filaNota, criterios); datos = new VBox(8, titulo, resumen, nota, criterios);
+        VBox datos = new VBox(8, titulo, resumen);
+        if (item.getEstado() != Estado.PENDIENTE) {
+            Label etiquetaAvance = new Label("AVANCE");
+            etiquetaAvance.getStyleClass().add("subtitulo");
+            datos.getChildren().add(new HBox(10, etiquetaAvance, new BarraAvance(item.getPorcentaje())));
+        }
+        datos.getChildren().addAll(filaNota, criterios);
         HBox cabeza = new HBox(24, portada, datos);
         getChildren().addAll(cabeza, tituloComentario, comentario, botones);
     }
