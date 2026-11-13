@@ -44,9 +44,12 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
 
         filtrada = new FilteredList<>(FXCollections.observableArrayList(items));
         SortedList<T> ordenada = new SortedList<>(filtrada);
-        ordenada.comparatorProperty().bind(tabla.comparatorProperty());        ordenada.comparatorProperty().bind(
+        ordenada.comparatorProperty().bind(
                 Bindings.createObjectBinding(this::comparadorConDesempate, tabla.comparatorProperty()));
         tabla.setItems(ordenada);
+        tabla.setSortPolicy(t -> t.getItems() instanceof SortedList
+                ? Boolean.TRUE
+                : TableView.DEFAULT_SORT_POLICY.call(t));
         tabla.setPlaceholder(new Label("SIN REGISTROS · THE MAW TIENE HAMBRE"));
         VBox.setVgrow(tabla, Priority.ALWAYS);
 
