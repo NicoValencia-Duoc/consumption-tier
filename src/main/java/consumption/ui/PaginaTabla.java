@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.Comparator;
 
 public class PaginaTabla<T extends ItemConsumption> extends VBox {
 
@@ -43,7 +44,8 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
 
         filtrada = new FilteredList<>(FXCollections.observableArrayList(items));
         SortedList<T> ordenada = new SortedList<>(filtrada);
-        ordenada.comparatorProperty().bind(tabla.comparatorProperty());
+        ordenada.comparatorProperty().bind(tabla.comparatorProperty());        ordenada.comparatorProperty().bind(
+                Bindings.createObjectBinding(this::comparadorConDesempate, tabla.comparatorProperty()));
         tabla.setItems(ordenada);
         tabla.setPlaceholder(new Label("SIN REGISTROS · THE MAW TIENE HAMBRE"));
         VBox.setVgrow(tabla, Priority.ALWAYS);
@@ -111,6 +113,24 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
 
         TableColumn<T, Object> nota = columna("NOTA", ItemConsumption::getNota);
         nota.setSortType(TableColumn.SortType.DESCENDING);
+        nota.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Object valor, boolean vacio) {
+                super.updateItem(valor, vacio);
+                int fila = getIndex();
+                if (vacio || valor == null || getTableView() == null
+                        || fila < 0 || fila >= getTableView().getItems().size()) {
+                    setText(null);
+                    setGraphic(null);
+                    return;
+                }
+                T item = getTableView().getItems().get(fila);
+                setText(String.format("%.1f", item.getNota()));
+                setGraphic(EtiquetaTier.de(item, "tier-chico"));
+                setContentDisplay(ContentDisplay.RIGHT);
+                setGraphicTextGap(8);
+            }
+        });
 
         TableColumn<T, Object> estado = columna("ESTADO", ItemConsumption::getEstado);
         estado.setCellFactory(col -> new TableCell<>() {
@@ -178,6 +198,12 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
 
     private T seleccionado() {
         return tabla.getSelectionModel().getSelectedItem();
+    }
+
+    private Comparator<T> comparadorConDesempate() {
+        Comparator<T> alfabetico = Comparator.comparing(ItemConsumption::getTitulo, String.CASE_INSENSITIVE_ORDER);
+        Comparator<T> base = tabla.getComparator();
+        return (base == null) ? alfabetico : base.thenComparing(alfabetico);
     }
 
     public void setAlAgregar(Runnable accion) { this.alAgregar = accion; }

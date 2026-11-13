@@ -37,6 +37,10 @@ public abstract class ItemConsumption {
     public double getNota(){
         return nota;
     }
+    public Tier getTier() {
+        boolean sinNota = nota <= 0 && getCriterios().isEmpty();
+        return sinNota ? null : Tier.de(nota);
+    }
     public Estado getEstado(){
         return estado;
     }

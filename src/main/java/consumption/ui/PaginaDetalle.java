@@ -21,6 +21,10 @@ public class PaginaDetalle extends VBox{
         resumen.getStyleClass().add("subtitulo");
         Label nota = new Label(String.format("NOTA FINAL %.1f", item.getNota()));
         nota.getStyleClass().add("nota");
+        EtiquetaTier tier = EtiquetaTier.de(item, "tier-grande");
+        HBox filaNota = new HBox(12, nota);
+        filaNota.setAlignment(Pos.CENTER_LEFT);
+        if (tier != null) filaNota.getChildren().add(tier);
 
         GridPane criterios = new GridPane();
         criterios.setHgap(24);
@@ -73,7 +77,7 @@ public class PaginaDetalle extends VBox{
         Image imagen = GestorImagenes.imagenDe(item, 220, 300);
         if (imagen != null) portada.setImage(imagen);
 
-        VBox datos = new VBox(8, titulo, resumen, nota, criterios);
+        VBox datos = new VBox(8, titulo, resumen, filaNota, criterios); datos = new VBox(8, titulo, resumen, nota, criterios);
         HBox cabeza = new HBox(24, portada, datos);
         getChildren().addAll(cabeza, tituloComentario, comentario, botones);
     }

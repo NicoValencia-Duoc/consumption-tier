@@ -198,3 +198,33 @@
     -fx-font-size: 14px;
     -fx-font-weight: bold;
 }
+
+/* Tier: colores fijos (no dependen del tema) */
+.tier {
+    -fx-text-fill: #08080a;
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-alignment: center;
+    -fx-min-width: 24;  -fx-pref-width: 24;
+    -fx-min-height: 24; -fx-pref-height: 24;
+}
+.tier-s { -fx-background-color: #ff2fa0; -fx-effect: dropshadow(gaussian, rgba(255,47,160,0.55), 8, 0.3, 0, 0); }
+.tier-a { -fx-background-color: #ff8a1f; -fx-effect: dropshadow(gaussian, rgba(255,138,31,0.55), 8, 0.3, 0, 0); }
+.tier-b { -fx-background-color: #fcee0a; -fx-effect: dropshadow(gaussian, rgba(252,238,10,0.55), 8, 0.3, 0, 0); }
+.tier-c { -fx-background-color: #39ff88; -fx-effect: dropshadow(gaussian, rgba(57,255,136,0.55), 8, 0.3, 0, 0); }
+.tier-d { -fx-background-color: #2fd8ff; -fx-effect: dropshadow(gaussian, rgba(47,216,255,0.55), 8, 0.3, 0, 0); }
+.tier-f { -fx-background-color: #9b6bff; -fx-effect: dropshadow(gaussian, rgba(155,107,255,0.55), 8, 0.3, 0, 0); }
+
+/* Variantes de tamano (van despues de los colores para pisar el brillo) */
+.tier-chico {
+    -fx-font-size: 12px;
+    -fx-min-width: 20;  -fx-pref-width: 20;
+    -fx-min-height: 20; -fx-pref-height: 20;
+    -fx-effect: null;
+}
+.tier-grande {
+    -fx-font-size: 22px;
+    -fx-min-width: 38;  -fx-pref-width: 38;
+    -fx-min-height: 38; -fx-pref-height: 38;
+}

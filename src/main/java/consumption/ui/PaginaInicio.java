@@ -147,10 +147,13 @@ public class PaginaInicio extends VBox {
     }
 
     private Comparator<ItemConsumption> comparador() {
-        Comparator<ItemConsumption> porNotaDesc = Comparator.comparingDouble(ItemConsumption::getNota).reversed();
+        Comparator<ItemConsumption> alfabetico =
+                Comparator.comparing(ItemConsumption::getTitulo, String.CASE_INSENSITIVE_ORDER);
+        Comparator<ItemConsumption> porNotaDesc =
+                Comparator.comparingDouble(ItemConsumption::getNota).reversed().thenComparing(alfabetico);
         return switch (orden.getValue()) {
-            case "NOTA ▲" -> Comparator.comparingDouble(ItemConsumption::getNota);
-            case "TITULO A-Z" -> Comparator.comparing(ItemConsumption::getTitulo, String.CASE_INSENSITIVE_ORDER);
+            case "NOTA ▲" -> Comparator.comparingDouble(ItemConsumption::getNota).thenComparing(alfabetico);
+            case "TITULO A-Z" -> alfabetico;
             case "TERMINADOS PRIMERO" -> Comparator.<ItemConsumption, Boolean>comparing(
                     i -> i.getEstado() != Estado.TERMINADO).thenComparing(porNotaDesc);
             default -> porNotaDesc;

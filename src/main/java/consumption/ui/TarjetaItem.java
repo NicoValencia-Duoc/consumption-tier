@@ -3,6 +3,7 @@ package consumption.ui;
 import consumption.data.GestorImagenes;
 import consumption.model.ItemConsumption;
 
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -33,6 +34,21 @@ public class TarjetaItem extends VBox {
         StackPane.setAlignment(tipo, Pos.BOTTOM_LEFT);
         miniatura.getChildren().add(tipo);
 
+        if (item.isFavorito()) {
+            Label estrella = new Label("★");
+            estrella.getStyleClass().add("estrella");
+            StackPane.setAlignment(estrella, Pos.TOP_LEFT);
+            StackPane.setMargin(estrella, new Insets(2, 0, 0, 6));
+            miniatura.getChildren().add(estrella);
+        }
+
+        EtiquetaTier tier = EtiquetaTier.de(item);
+        if (tier != null) {
+            StackPane.setAlignment(tier, Pos.TOP_RIGHT);
+            StackPane.setMargin(tier, new Insets(5, 5, 0, 0));
+            miniatura.getChildren().add(tier);
+        }
+
         Label titulo = new Label(item.getTitulo());
         titulo.getStyleClass().add("titulo-item");
 
@@ -46,12 +62,6 @@ public class TarjetaItem extends VBox {
         HBox.setHgrow(espacio, Priority.ALWAYS);
         HBox fila = new HBox(nota, espacio, estado);
         fila.setAlignment(Pos.CENTER_LEFT);
-        if (item.isFavorito()) {
-            Label estrella = new Label("★");
-            estrella.getStyleClass().add("estrella");
-            StackPane.setAlignment(estrella, Pos.TOP_RIGHT);
-            miniatura.getChildren().add(estrella);
-        }
 
         getChildren().addAll(miniatura, titulo, fila);
     }
