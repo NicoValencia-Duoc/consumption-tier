@@ -17,6 +17,7 @@ import javafx.stage.FileChooser;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class VentanaPrincipal extends VBox {
 
@@ -134,7 +135,7 @@ public class VentanaPrincipal extends VBox {
         conectarComunes(pagina);
         pagina.setAlAgregar(() -> agregarCon(formulario.get()));
         pagina.setAlEditar(seleccionado ->
-                formulario.get().mostrar(seleccionado, hojas()).ifPresent(editado -> {
+                abrir(formulario.get(), seleccionado).ifPresent(editado -> {
                     guardarYRefrescar();
                     aviso.mostrar("REGISTRO ACTUALIZADO");
                 }));
@@ -161,7 +162,7 @@ public class VentanaPrincipal extends VBox {
     }
 
     private <T extends ItemConsumption> void agregarCon(FormularioItem<T> formulario) {
-        formulario.mostrar(null, hojas()).ifPresent(nuevo -> {
+        abrir(formulario, null).ifPresent(nuevo -> {
             items.add(nuevo);
             guardarYRefrescar();
             avisarGuardado(nuevo);
@@ -194,7 +195,7 @@ public class VentanaPrincipal extends VBox {
 
     @SuppressWarnings("unchecked")
     private <T extends ItemConsumption> void editarCon(FormularioItem<T> formulario, ItemConsumption item) {
-        formulario.mostrar((T) item, hojas()).ifPresent(editado -> {
+        abrir(formulario, (T) item).ifPresent(editado -> {
             guardarYRefrescar();
             aviso.mostrar("REGISTRO ACTUALIZADO");
         });
@@ -282,5 +283,17 @@ public class VentanaPrincipal extends VBox {
 
     private List<String> hojas() {
         return getScene().getStylesheets();
+    }
+
+    private boolean existeDuplicado(String tipo, String titulo, ItemConsumption propio) {
+        String buscado = titulo.trim();
+        return items.stream().anyMatch(i -> i != propio
+                && i.getTipo().equals(tipo)
+                && i.getTitulo().equalsIgnoreCase(buscado));
+    }
+
+    private <T extends ItemConsumption> Optional<T> abrir(FormularioItem<T> formulario, T existente) {
+        formulario.setComprobadorDuplicado(this::existeDuplicado);
+        return formulario.mostrar(existente, hojas());
     }
 }

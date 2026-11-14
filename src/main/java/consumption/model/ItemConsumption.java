@@ -9,6 +9,7 @@ import java.util.Map;
 public abstract class ItemConsumption {
 
     public static final int MAX_COMENTARIO = 500;
+    public static final int MAX_REPETICIONES = 999;
     private String titulo;
     private double nota;
     private Estado estado;
@@ -19,6 +20,7 @@ public abstract class ItemConsumption {
     private Map<String, Double> criterios = new LinkedHashMap<>();
     private boolean favorito;
     private String rutaImagen;
+    private int vecesRepetido;
 
     public ItemConsumption(String titulo, double nota, Estado estado){
 
@@ -57,8 +59,9 @@ public abstract class ItemConsumption {
         return fechaTermino;
     }
     public String getComentario() {
-        return comentario;
+        return comentario == null ? "" : comentario;
     }
+    public int getVecesRepetido() { return vecesRepetido; }
     public String getRutaImagen() { return rutaImagen; }
 
     public boolean isFavorito() { return favorito; }
@@ -104,13 +107,20 @@ public abstract class ItemConsumption {
 
     public void setComentario(String c){
         if (c != null && c.length() > MAX_COMENTARIO){
-            throw new IllegalArgumentException("El comentario tiene un maximo de " + MAX_COMENTARIO + "caracteres.");
+            throw new IllegalArgumentException("El comentario tiene un maximo de " + MAX_COMENTARIO + " caracteres.");
         }
         this.comentario = (c == null) ? "" : c;
     }
 
     public void setRutaImagen(String r) {
         this.rutaImagen = r;
+    }
+
+    public void setVecesRepetido(int v) {
+        if (v < 0 || v > MAX_REPETICIONES) {
+            throw new IllegalArgumentException("Las veces repetido deben estar entre 0 y " + MAX_REPETICIONES + ".");
+        }
+        this.vecesRepetido = v;
     }
 
     public abstract List<String> getNombresCriterios();

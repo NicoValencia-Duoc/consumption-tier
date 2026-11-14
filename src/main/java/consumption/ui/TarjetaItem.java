@@ -9,6 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.control.Tooltip;
 
 public class TarjetaItem extends VBox {
     public TarjetaItem(ItemConsumption item){
@@ -64,5 +65,7 @@ public class TarjetaItem extends VBox {
         fila.setAlignment(Pos.CENTER_LEFT);
 
         getChildren().addAll(miniatura, titulo, fila);
+        Tooltip globo = TooltipoComentario.de(item.getComentario());
+        if (globo != null) Tooltip.install(this, globo);
     }
 }

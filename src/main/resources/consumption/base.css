@@ -129,6 +129,7 @@
     -fx-padding: 2 4 2 4;
     -fx-text-overrun: clip;
 }
+.icono-musica { -fx-fill: -c-y; }
 .slider .track { -fx-background-color: -c-ln; }
 .slider .thumb { -fx-background-color: -c-y; }
 
@@ -352,3 +353,15 @@
 .cal-hoy { -fx-border-color: -c-r; }
 .cal-sel { -fx-background-color: -c-y; -fx-text-fill: -c-yt; -fx-border-color: -c-y; -fx-font-weight: bold; }
 .cal-dia:disabled { -fx-opacity: 0.25; }
+
+/* Globo del comentario (siempre oscuro: la ventana del globo no hereda las variables de tema) */
+.tooltip {
+    -fx-background-color: #14141a;
+    -fx-text-fill: #f2f2f2;
+    -fx-border-color: #fcee0a;
+    -fx-border-width: 1;
+    -fx-background-radius: 0;
+    -fx-font-family: "Rajdhani", "Segoe UI";
+    -fx-font-size: 14px;
+    -fx-padding: 10 12 10 12;
+}

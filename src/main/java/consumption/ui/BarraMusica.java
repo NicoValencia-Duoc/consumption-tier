@@ -7,6 +7,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.Node;
+import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.Group;
 
 public class BarraMusica extends VBox {
 
@@ -20,8 +24,10 @@ public class BarraMusica extends VBox {
 
         Button pausa = new Button();
         pausa.getStyleClass().add("boton-musica");
-        pausa.textProperty().bind(Bindings.when(reproductor.sonandoProperty()).then("❚❚").otherwise("▶"));
-        pausa.styleProperty().bind(Bindings.when(reproductor.sonandoProperty()).then("").otherwise("-fx-font-size: 17px;"));
+        Node iconoPlay = crearIconoPlay();
+        Node iconoPausa = crearIconoPausa();
+        pausa.setGraphic(reproductor.sonandoProperty().get() ? iconoPausa : iconoPlay);
+        reproductor.sonandoProperty().addListener((obs, antes, ahora) -> pausa.setGraphic(ahora ? iconoPausa : iconoPlay));
         pausa.setOnAction(e -> reproductor.alternarPausa());
         fijarAncho(pausa);
 
@@ -62,6 +68,20 @@ public class BarraMusica extends VBox {
             volumen.setDisable(true);
             lista.setDisable(true);
         }
+    }
+
+    private static Node crearIconoPlay() {
+        Polygon triangulo = new Polygon(0, 0, 12, 7, 0, 14);
+        triangulo.getStyleClass().add("icono-musica");
+        return triangulo;
+    }
+
+    private static Node crearIconoPausa() {
+        Rectangle izquierda = new Rectangle(0, 0, 4, 14);
+        Rectangle derecha = new Rectangle(8, 0, 4, 14);
+        izquierda.getStyleClass().add("icono-musica");
+        derecha.getStyleClass().add("icono-musica");
+        return new Group(izquierda, derecha);
     }
 
     private static void fijarAncho(Button boton) {

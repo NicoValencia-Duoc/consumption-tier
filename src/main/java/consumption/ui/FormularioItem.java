@@ -19,6 +19,8 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.scene.layout.Priority;
+import javafx.stage.WindowEvent;
 
 import java.io.File;
 import java.time.LocalDate;
@@ -45,6 +47,11 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         public Node getCampo() {
             return campo;
         }
+    }
+
+    @FunctionalInterface
+    public interface ComprobadorDuplicado {
+        boolean existe(String tipo, String titulo, ItemConsumption propio);
     }
 
     private static final Set<Estado> CON_AVANCE = EnumSet.of(Estado.EN_PROGRESO, Estado.TERMINADO, Estado.ABANDONADO);
@@ -74,6 +81,14 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     private final CampoFecha termino = new CampoFecha("El termino");
     private final Map<String, FilaCriterio> criterios = new LinkedHashMap<>();
     private final HBox notaViva = new HBox(10);
+    private final TextField repeticiones = new TextField("0");
+    private final TextArea comentario = new TextArea();
+
+    private boolean modificado;
+    private boolean descarteConfirmado;
+    private ComprobadorDuplicado comprobador;
+    private Dialog<ButtonType> dialogo;
+    private List<String> hojas;
 
     private File archivoNuevo;
     private boolean quitarImagen;
@@ -87,9 +102,13 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     protected abstract void cargarPropios(T item);
     protected abstract T crear(String titulo, double nota, Estado estado);
     protected abstract void aplicarPropios(T item);
+    public void setComprobadorDuplicado(ComprobadorDuplicado c) {
+        this.comprobador = c;
+    }
 
     public Optional<T> mostrar(T existente, List<String> hojas) {
         this.original = existente;
+        this.hojas = hojas;
 
         nuevaSeccion("IDENTIDAD");
         agregarFila("TITULO", titulo);
@@ -99,9 +118,11 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         agregarFilaCondicional("AVANCE (%)", crearAvance(), CON_AVANCE);
         agregarFilaCondicional("INICIO", inicio, CON_AVANCE);
         agregarFilaCondicional("TERMINO", termino, CON_TERMINO);
+        repeticiones.setPrefColumnCount(5);
+        agregarFilaCondicional("VECES REPETIDO", repeticiones, CON_AVANCE);
         termino.setMinimo(() -> inicio.valorProperty().get());
-        inicio.valorProperty().addListener((obs, antes, ahora) -> revisarFechas());
-        termino.valorProperty().addListener((obs, antes, ahora) -> revisarFechas());
+        inicio.valorProperty().addListener((obs, antes, ahora) -> { modificado = true; revisarFechas(); });
+        termino.valorProperty().addListener((obs, antes, ahora) -> { modificado = true; revisarFechas(); });
 
         nuevaSeccion("DATOS DE " + nombreTipo());
         agregarCamposPropios();
@@ -113,15 +134,27 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         nuevaSeccion("CRITERIOS · 0 A 10 · N/A SI NO APLICA");
         for (String criterio : nombresCriterios()) {
             FilaCriterio fila = new FilaCriterio();
-            fila.valorProperty().addListener((obs, antes, ahora) -> actualizarNota());
+            fila.valorProperty().addListener((obs, antes, ahora) -> {
+                modificado = true;
+                actualizarNota();
+            });
             criterios.put(criterio, fila);
             agregarFila(criterio, fila);
         }
         agregarFila("NOTA FINAL", notaViva);
+        nuevaSeccion("COMENTARIO");
+        comentario.setWrapText(true);
+        comentario.setPrefRowCount(4);
+        comentario.setPromptText("Opcional · hasta " + ItemConsumption.MAX_COMENTARIO + " caracteres");
+        comentario.setTextFormatter(new TextFormatter<String>(cambio ->
+                cambio.getControlNewText().length() <= ItemConsumption.MAX_COMENTARIO ? cambio : null));
+        HBox.setHgrow(comentario, Priority.ALWAYS);
+        agregarFila("COMENTARIO", comentario);
 
         if (existente != null) cargar(existente);
         aplicarVisibilidad();
         actualizarNota();
+        modificado = false;
 
         cuerpo.setPadding(new Insets(14));
         cuerpo.getStyleClass().add("cuerpo-form");
@@ -135,7 +168,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         mensaje.setMaxWidth(540);
         VBox raiz = new VBox(8, scroll, mensaje);
 
-        Dialog<ButtonType> dialogo = new Dialog<>();
+        dialogo = new Dialog<>();
         dialogo.setTitle((existente == null ? "AGREGAR " : "EDITAR ") + nombreTipo());
         dialogo.setHeaderText(existente == null ? TITULO_NUEVO : TITULO_EDICION);
         dialogo.getDialogPane().getStylesheets().setAll(hojas);
@@ -152,7 +185,12 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         botonGuardar.addEventFilter(ActionEvent.ACTION, ev -> {
             limpiarErrores();
             try {
-                resultado = construir(existente);
+                T construido = construir(existente);
+                if (construido == null) {
+                    ev.consume();
+                } else {
+                    resultado = construido;
+                }
             } catch (ErrorCampo ex) {
                 mostrarError(ex.getCampo(), ex.getMessage());
                 ev.consume();
@@ -161,6 +199,15 @@ public abstract class FormularioItem<T extends ItemConsumption> {
                 ev.consume();
             }
         });
+
+        botonCancelar.addEventFilter(ActionEvent.ACTION, ev -> {
+            if (!puedeDescartar()) ev.consume();
+        });
+
+        dialogo.setOnShown(ev -> dialogo.getDialogPane().getScene().getWindow()
+                .addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, cierre -> {
+                    if (!puedeDescartar()) cierre.consume();
+                }));
 
         Platform.runLater(titulo::requestFocus);
         Optional<ButtonType> respuesta = dialogo.showAndWait();
@@ -188,6 +235,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         registrarFila(etiqueta, campo, visibleEn);
     }
 
+
     private void registrarFila(String etiqueta, Node campo, Set<Estado> visibleEn) {
         Label et = new Label(etiqueta);
         et.getStyleClass().add("etiqueta-form");
@@ -210,7 +258,10 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         Fila fila = new Fila(etiqueta, campo, caja, error, visibleEn);
         filas.add(fila);
         if (campo instanceof TextInputControl texto) {
-            texto.textProperty().addListener((obs, antes, ahora) -> limpiar(fila));
+            texto.textProperty().addListener((obs, antes, ahora) -> {
+                modificado = true;
+                limpiar(fila);
+            });
         }
     }
 
@@ -228,6 +279,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
             if (ahora == null && antes != null) {
                 antes.setSelected(true);
             } else {
+                modificado = true;
                 aplicarVisibilidad();
             }
         });
@@ -238,6 +290,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     private Node crearAvance() {
         porcentaje.setPrefColumnCount(5);
         porcentaje.textProperty().addListener((obs, antes, ahora) -> {
+            modificado = true;
             barraAvance.setPorcentaje(leerNumero(ahora));
             limpiarDe(porcentaje);
         });
@@ -280,12 +333,14 @@ public abstract class FormularioItem<T extends ItemConsumption> {
             quitarImagen = false;
             nombreImagen.setText(archivo.getName());
             refrescarVistaPrevia();
+            modificado = true;
         });
         quitar.setOnAction(e -> {
             archivoNuevo = null;
             quitarImagen = true;
             nombreImagen.setText("SIN IMAGEN");
             refrescarVistaPrevia();
+            modificado = true;
         });
 
         VBox lado = new VBox(8, new HBox(8, elegir, quitar), nombreImagen);
@@ -409,6 +464,38 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         if (recorrido > 0) scroll.setVvalue(Math.max(0, Math.min(1, y / recorrido)));
     }
 
+    private boolean preguntar(String texto, String si, String no) {
+        ButtonType botonSi = new ButtonType(si, ButtonBar.ButtonData.OK_DONE);
+        ButtonType botonNo = new ButtonType(no, ButtonBar.ButtonData.CANCEL_CLOSE);
+        Alert alerta = new Alert(Alert.AlertType.CONFIRMATION, texto, botonSi, botonNo);
+        alerta.setTitle("CONFIRMAR");
+        alerta.setHeaderText(null);
+        alerta.initOwner(dialogo.getDialogPane().getScene().getWindow());
+        alerta.getDialogPane().getStylesheets().setAll(hojas);
+
+        Button b1 = (Button) alerta.getDialogPane().lookupButton(botonSi);
+        Button b2 = (Button) alerta.getDialogPane().lookupButton(botonNo);
+        b1.getStyleClass().add("boton-dialogo");
+        b2.getStyleClass().addAll("boton-dialogo", "boton-accion");
+        b1.setDefaultButton(false);
+        b2.setDefaultButton(true);
+
+        return alerta.showAndWait().filter(b -> b == botonSi).isPresent();
+    }
+
+    private boolean puedeDescartar() {
+        if (!modificado || descarteConfirmado) return true;
+        if (preguntar("Hay cambios sin guardar. ¿Descartarlos?", "DESCARTAR", "SEGUIR EDITANDO")) {
+            descarteConfirmado = true;
+            return true;
+        }
+        return false;
+    }
+
+    private boolean tituloIgual(String a, String b) {
+        return a != null && b != null && a.trim().equalsIgnoreCase(b.trim());
+    }
+
     private T construir(T existente) {
         String t = titulo.getText().trim();
         Estado e = estadoActual();
@@ -422,12 +509,20 @@ public abstract class FormularioItem<T extends ItemConsumption> {
             throw new ErrorCampo(termino, "El termino no puede ser anterior al inicio.");
         }
 
+        int veces = conAvance ? entero(repeticiones, "Las veces repetido") : 0;
+        String textoComentario = comentario.getText();
+
         Map<String, Double> notas = new LinkedHashMap<>();
         criterios.forEach((nombre, fila) -> notas.put(nombre, fila.getValor()));
 
         T prueba = crear(t, 0, e);
-        aplicarComunes(prueba, t, e, p, ini, fin, notas);
+        aplicarComunes(prueba, t, e, p, ini, fin, notas, veces,textoComentario);
         prueba.validarCoherencia();
+        boolean tituloCambio = existente == null || !tituloIgual(existente.getTitulo(), t);
+        if (comprobador != null && tituloCambio && comprobador.existe(prueba.getTipo(), t, existente)) {
+            String texto = "Ya tienes «" + t + "» en " + prueba.getTipo() + ". ¿Guardar de todas formas?";
+            if (!preguntar(texto, "GUARDAR IGUAL", "REVISAR")) return null;
+        }
 
         String rutaAnterior = (existente == null) ? null : existente.getRutaImagen();
         String ruta = rutaAnterior;
@@ -439,7 +534,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
 
         T item = prueba;
         if (existente != null) {
-            aplicarComunes(existente, t, e, p, ini, fin, notas);
+            aplicarComunes(existente, t, e, p, ini, fin, notas, veces, textoComentario);
             aplicarPropios(existente);
             item = existente;
         }
@@ -449,13 +544,16 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     }
 
     private void aplicarComunes(T item, String t, Estado e, double p,
-                                LocalDate ini, LocalDate fin, Map<String, Double> notas) {
+                                LocalDate ini, LocalDate fin, Map<String, Double> notas,
+                                int veces, String textoComentario) {
         item.setTitulo(t);
         item.setEstado(e);
         item.setPorcentaje(p);
         item.setFechaTermino(null);
         item.setFechaInicio(ini);
         item.setFechaTermino(fin);
+        item.setVecesRepetido(veces);
+        item.setComentario(textoComentario);
         notas.forEach(item::setCriterio);
     }
 
@@ -465,6 +563,8 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         porcentaje.setText(ReglasForm.numero(item.getPorcentaje()));
         inicio.setValor(item.getFechaInicio());
         termino.setValor(item.getFechaTermino());
+        repeticiones.setText(String.valueOf(item.getVecesRepetido()));
+        comentario.setText(item.getComentario());
         item.getCriterios().forEach((nombre, valor) -> {
             FilaCriterio fila = criterios.get(nombre);
             if (fila != null) fila.setValor(valor);

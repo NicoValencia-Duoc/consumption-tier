@@ -159,6 +159,13 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
 
         tabla.getSortOrder().add(nota);
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        tabla.setRowFactory(t -> new TableRow<T>() {
+            @Override
+            protected void updateItem(T item, boolean vacio) {
+                super.updateItem(item, vacio);
+                setTooltip((vacio || item == null) ? null : TooltipoComentario.de(item.getComentario()));
+            }
+        });
         tabla.setOnMouseClicked(ev -> {
             if (ev.getClickCount() == 2 && seleccionado() != null) alVerDetalle.accept(seleccionado());
         });

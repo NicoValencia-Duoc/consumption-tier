@@ -79,6 +79,12 @@ public class PaginaDetalle extends VBox{
         if (imagen != null) portada.setImage(imagen);
 
         VBox datos = new VBox(8, titulo, resumen);
+        if (item.getVecesRepetido() > 0) {
+            int n = item.getVecesRepetido();
+            Label repetido = new Label("REPETIDO " + n + (n == 1 ? " VEZ" : " VECES"));
+            repetido.getStyleClass().add("subtitulo");
+            datos.getChildren().add(repetido);
+        }
         if (item.getEstado() != Estado.PENDIENTE) {
             Label etiquetaAvance = new Label("AVANCE");
             etiquetaAvance.getStyleClass().add("subtitulo");
