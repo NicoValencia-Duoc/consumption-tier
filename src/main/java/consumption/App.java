@@ -47,7 +47,6 @@ public class App extends Application {
         GeometriaVentana.aplicar(stage, preferencias);
         stage.show();
         GeometriaVentana.registrar(stage, preferencias);
-        reproductor.iniciar();
     }
 
     @Override

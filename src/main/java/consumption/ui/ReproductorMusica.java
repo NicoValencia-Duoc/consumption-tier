@@ -4,6 +4,8 @@ import javafx.beans.property.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
+import javafx.util.Duration;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,9 +26,11 @@ public class ReproductorMusica {
     private int fallosSeguidos = 0;
     private MediaPlayer jugador;
 
-    private final StringProperty titulo = new SimpleStringProperty("SIN MUSICA");
+    private final StringProperty titulo = new SimpleStringProperty("THE MAW EN SILENCIO");
     private final BooleanProperty sonando = new SimpleBooleanProperty(false);
     private final DoubleProperty volumen = new SimpleDoubleProperty(0.5);
+    private final DoubleProperty progreso = new SimpleDoubleProperty(0);
+    private final StringProperty tiempo = new SimpleStringProperty("");
 
     public ReproductorMusica() {
         pistas.addAll(leerLista());
@@ -38,6 +42,8 @@ public class ReproductorMusica {
     public StringProperty tituloProperty() { return titulo; }
     public BooleanProperty sonandoProperty() { return sonando; }
     public DoubleProperty volumenProperty() { return volumen; }
+    public ReadOnlyDoubleProperty progresoProperty() { return progreso; }
+    public ReadOnlyStringProperty tiempoProperty() { return tiempo; }
     public boolean hayMusica() { return !pistas.isEmpty(); }
     public List<Pista> getPistas() { return List.copyOf(pistas); }
 
@@ -85,6 +91,14 @@ public class ReproductorMusica {
         reproducirActual();
     }
 
+    public boolean buscar(double fraccion) {
+        if (jugador == null) return false;
+        Duration total = jugador.getTotalDuration();
+        if (!duracionConocida(total)) return false;
+        jugador.seek(total.multiply(Math.max(0, Math.min(1, fraccion))));
+        return true;
+    }
+
     public void detener() {
         detenerJugador();
         sonando.set(false);
@@ -95,14 +109,17 @@ public class ReproductorMusica {
         Pista pista = cola.get(indice);
         try {
             URL url = ReproductorMusica.class.getResource(CARPETA + pista.archivo());
-            if (url == null) throw new IOException("No se encontro " + pista.archivo());
+            if (url == null) throw new IOException("No se encontró " + pista.archivo());
 
-            jugador = new MediaPlayer(new Media(url.toExternalForm()));
-            jugador.setVolume(volumen.get());
-            jugador.setOnPlaying(() -> fallosSeguidos = 0);
-            jugador.setOnEndOfMedia(this::siguiente);
-            jugador.setOnError(() -> alFallar());
-            jugador.play();
+            MediaPlayer nuevo = new MediaPlayer(new Media(url.toExternalForm()));
+            jugador = nuevo;
+            nuevo.setVolume(volumen.get());
+            nuevo.setOnPlaying(() -> fallosSeguidos = 0);
+            nuevo.setOnEndOfMedia(this::siguiente);
+            nuevo.setOnError(() -> alFallar());
+            nuevo.setOnReady(() -> actualizarProgreso(nuevo));
+            nuevo.currentTimeProperty().addListener((obs, antes, ahora) -> actualizarProgreso(nuevo));
+            nuevo.play();
 
             titulo.set(pista.textoCompleto().toUpperCase());
             sonando.set(true);
@@ -122,11 +139,36 @@ public class ReproductorMusica {
         siguiente();
     }
 
+    private void actualizarProgreso(MediaPlayer reproduciendo) {
+        if (reproduciendo != jugador) return;
+        Duration actual = reproduciendo.getCurrentTime();
+        Duration total = reproduciendo.getTotalDuration();
+        if (duracionConocida(total)) {
+            progreso.set(Math.min(1, actual.toMillis() / total.toMillis()));
+            tiempo.set(formatear(actual) + " / " + formatear(total));
+        } else {
+            progreso.set(0);
+            tiempo.set(formatear(actual));
+        }
+    }
+
+    private static boolean duracionConocida(Duration d) {
+        return d != null && !d.isUnknown() && !d.isIndefinite() && d.toMillis() > 0;
+    }
+
+    static String formatear(Duration d) {
+        long segundos = (long) d.toSeconds();
+        return (segundos / 60) + ":" + String.format("%02d", segundos % 60);
+    }
+
     private void detenerJugador() {
+        progreso.set(0);
+        tiempo.set("");
         if (jugador == null) return;
         jugador.setOnEndOfMedia(null);
         jugador.setOnError(null);
         jugador.setOnPlaying(null);
+        jugador.setOnReady(null);
         jugador.stop();
         jugador.dispose();
         jugador = null;
@@ -154,7 +196,7 @@ public class ReproductorMusica {
                 if (!pista.archivo().isEmpty()) lista.add(pista);
             }
         } catch (IOException e) {
-            System.err.println("No se pudo leer la lista de musica: " + e.getMessage());
+            System.err.println("No se pudo leer la lista de música: " + e.getMessage());
         }
         return lista;
     }

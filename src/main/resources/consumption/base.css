@@ -112,14 +112,22 @@
 .reproductor {
     -fx-background-color: -c-pn;
     -fx-border-color: -c-ln;
+}
+.reproductor-fila {
     -fx-padding: 6 12 6 12;
 }
+.linea-progreso { -fx-cursor: hand; }
+.linea-progreso-pista { -fx-background-color: -c-ln; }
+.linea-progreso-relleno { -fx-background-color: -c-y; }
+.tiempo { -fx-text-fill: -c-mt; -fx-font-size: 12px; }
 .boton-musica {
     -fx-background-color: transparent;
     -fx-border-color: -c-ln;
     -fx-text-fill: -c-y;
     -fx-font-weight: bold;
     -fx-cursor: hand;
+    -fx-padding: 2 4 2 4;
+    -fx-text-overrun: clip;
 }
 .slider .track { -fx-background-color: -c-ln; }
 .slider .thumb { -fx-background-color: -c-y; }
