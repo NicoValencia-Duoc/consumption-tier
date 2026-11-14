@@ -299,23 +299,15 @@
 }
 
 /* ===== Barra de avance ===== */
-.barra-avance .progress-bar > .track {
-    -fx-background-color: -c-ln;
-    -fx-background-insets: 0;
-    -fx-background-radius: 0;
-}
-.barra-avance .progress-bar > .bar {
-    -fx-background-color: -c-g;
-    -fx-background-insets: 0;
-    -fx-background-radius: 0;
-    -fx-padding: 5;
-}
+.avance-pista  { -fx-background-color: -c-ln; }
+.avance-normal { -fx-background-color: -c-g; }
 
-/* Sobre 100%: llena, magenta y con brillo */
-.barra-avance.exceso .progress-bar > .bar {
+/* Sobre 100%: tramo extra magenta con brillo y marca en el 100% */
+.avance-exceso {
     -fx-background-color: #ff2fa0;
     -fx-effect: dropshadow(gaussian, rgba(255,47,160,0.85), 8, 0.4, 0, 0);
 }
+.avance-marca { -fx-background-color: -c-tx; }
 .barra-avance.exceso .valor-criterio { -fx-text-fill: #ff2fa0; }
 
 /* ===== Calendario ===== */
@@ -365,3 +357,15 @@
     -fx-font-size: 14px;
     -fx-padding: 10 12 10 12;
 }
+
+/* ===== Deslizador de avance (modo extendido de juegos) ===== */
+.slider.extendido .track {
+    -fx-background-color: linear-gradient(to right,
+    -c-ln 0%, -c-ln 49%, -c-tx 49%, -c-tx 51%, #5a1740 51%, #5a1740 100%);
+}
+.slider.sobre-cien .thumb {
+    -fx-background-color: #ff2fa0;
+    -fx-effect: dropshadow(gaussian, rgba(255,47,160,0.9), 8, 0.4, 0, 0);
+}
+.pestana.boton-superar { -fx-text-fill: #ff2fa0; -fx-border-color: #ff2fa0; }
+.pestana.boton-superar:hover { -fx-effect: dropshadow(gaussian, rgba(255,47,160,0.6), 8, 0.2, 0, 0); }

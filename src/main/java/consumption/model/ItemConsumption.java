@@ -82,7 +82,7 @@ public abstract class ItemConsumption {
 
     public void setPorcentaje(double p) {
         if (p < 0 || p > getPorcentajeMaximo()){
-            throw new IllegalArgumentException("El porcentaje de avance debe estar entre 0 y "+ getPorcentajeMaximo()+ ".");
+            throw new IllegalArgumentException("El porcentaje de avance debe estar entre 0 y " + (int) getPorcentajeMaximo() + ".");
         }
         this.porcentaje = p;
     }

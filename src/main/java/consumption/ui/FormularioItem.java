@@ -75,8 +75,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     private final TextField titulo = new TextField();
     private final ToggleGroup grupoEstado = new ToggleGroup();
     private final Map<Estado, ToggleButton> chips = new EnumMap<>(Estado.class);
-    private final TextField porcentaje = new TextField("0");
-    private final BarraAvance barraAvance = new BarraAvance();
+    private DeslizadorAvance avance;
     private final CampoFecha inicio = new CampoFecha("El inicio");
     private final CampoFecha termino = new CampoFecha("El termino");
     private final Map<String, FilaCriterio> criterios = new LinkedHashMap<>();
@@ -102,6 +101,9 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     protected abstract void cargarPropios(T item);
     protected abstract T crear(String titulo, double nota, Estado estado);
     protected abstract void aplicarPropios(T item);
+    protected boolean permiteSuperarCien() {
+        return false;
+    }
     public void setComprobadorDuplicado(ComprobadorDuplicado c) {
         this.comprobador = c;
     }
@@ -288,15 +290,12 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     }
 
     private Node crearAvance() {
-        porcentaje.setPrefColumnCount(5);
-        porcentaje.textProperty().addListener((obs, antes, ahora) -> {
+        avance = new DeslizadorAvance(permiteSuperarCien());
+        avance.valorProperty().addListener((obs, antes, ahora) -> {
             modificado = true;
-            barraAvance.setPorcentaje(leerNumero(ahora));
-            limpiarDe(porcentaje);
+            limpiarDe(avance);
         });
-        HBox caja = new HBox(12, porcentaje, barraAvance);
-        caja.setAlignment(Pos.CENTER_LEFT);
-        return caja;
+        return avance;
     }
 
     private HBox crearPortada() {
@@ -502,7 +501,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         boolean conAvance = CON_AVANCE.contains(e);
         boolean conTermino = CON_TERMINO.contains(e);
 
-        double p = conAvance ? decimal(porcentaje, "El avance") : 0;
+        double p = conAvance ? avance.getValor() : 0;
         LocalDate ini = conAvance ? inicio.getValor() : null;
         LocalDate fin = conTermino ? termino.getValor() : null;
         if (ini != null && fin != null && fin.isBefore(ini)) {
@@ -560,7 +559,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     private void cargar(T item) {
         titulo.setText(item.getTitulo());
         chips.get(item.getEstado()).setSelected(true);
-        porcentaje.setText(ReglasForm.numero(item.getPorcentaje()));
+        avance.setValor(item.getPorcentaje());
         inicio.setValor(item.getFechaInicio());
         termino.setValor(item.getFechaTermino());
         repeticiones.setText(String.valueOf(item.getVecesRepetido()));
@@ -570,14 +569,6 @@ public abstract class FormularioItem<T extends ItemConsumption> {
             if (fila != null) fila.setValor(valor);
         });
         cargarPropios(item);
-    }
-
-    private static double leerNumero(String texto) {
-        try {
-            return Double.parseDouble(texto.trim().replace(',', '.'));
-        } catch (NumberFormatException ex) {
-            return 0;
-        }
     }
 
     protected String texto(TextField f) {

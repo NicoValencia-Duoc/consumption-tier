@@ -88,7 +88,23 @@ public class PaginaDetalle extends VBox{
         if (item.getEstado() != Estado.PENDIENTE) {
             Label etiquetaAvance = new Label("AVANCE");
             etiquetaAvance.getStyleClass().add("subtitulo");
-            datos.getChildren().add(new HBox(10, etiquetaAvance, new BarraAvance(item.getPorcentaje())));
+
+            DeslizadorAvance avance = new DeslizadorAvance(item.getPorcentajeMaximo() > 100);
+            avance.setValor(item.getPorcentaje());
+
+            Label avisoAvance = new Label();
+            avisoAvance.getStyleClass().add("valor-criterio");
+            avance.valorProperty().addListener((obs, antes, ahora) -> avisoAvance.setText(""));
+            avance.setAlConfirmar(() -> {
+                try {
+                    item.setPorcentaje(avance.getValor());
+                    alGuardar.run();
+                    avisoAvance.setText("AVANCE GUARDADO");
+                } catch (IllegalArgumentException ex) {
+                    avisoAvance.setText(ex.getMessage());
+                }
+            });
+            datos.getChildren().add(new HBox(10, etiquetaAvance, avance, avisoAvance));
         }
         datos.getChildren().addAll(filaNota, criterios);
         HBox cabeza = new HBox(24, portada, datos);

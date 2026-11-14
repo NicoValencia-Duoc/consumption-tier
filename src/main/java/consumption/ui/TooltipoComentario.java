@@ -5,7 +5,7 @@ import javafx.util.Duration;
 
 public final class TooltipoComentario {
 
-    private static final Duration ESPERA = Duration.seconds(2);
+    private static final Duration ESPERA = Duration.millis(500);
 
     private TooltipoComentario() {
     }

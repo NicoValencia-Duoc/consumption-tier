@@ -17,6 +17,7 @@ public class FormularioJuego extends FormularioItem<Juego> {
     @Override protected List<String> nombresCriterios() { return Juego.CRITERIOS; }
 
     @Override protected String nombreTipo() { return "JUEGO"; }
+    @Override protected boolean permiteSuperarCien() { return true; }
 
     @Override protected void agregarCamposPropios() {
         agregarFila("PLATAFORMA", plataforma);
