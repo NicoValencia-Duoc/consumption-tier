@@ -33,13 +33,13 @@ public class FormularioPelicula extends FormularioItem<Pelicula> {
 
     @Override protected Pelicula crear(String titulo, double nota, Estado estado) {
         return new Pelicula(titulo, nota, estado, texto(director), texto(genero),
-                entero(duracion, "La duración"), entero(anio, "El año"));
+                entero(duracion, "La duracion"), entero(anio, "El año"));
     }
 
     @Override protected void aplicarPropios(Pelicula p) {
         p.setDirector(texto(director));
         p.setGenero(texto(genero));
-        p.setDuracionMin(entero(duracion, "La duración"));
+        p.setDuracionMin(entero(duracion, "La duracion"));
         p.setAnio(entero(anio, "El año"));
     }
 }

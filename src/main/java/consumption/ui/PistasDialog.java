@@ -8,7 +8,7 @@ import java.util.List;
 
 public class PistasDialog {
 
-    private static final String AYUDA = "Doble clic en una canción para reproducirla";
+    private static final String AYUDA = "Doble clic en una cancion para reproducirla";
 
     public static void mostrar(ReproductorMusica reproductor, List<String> hojas) {
         ListView<Pista> lista = new ListView<>();

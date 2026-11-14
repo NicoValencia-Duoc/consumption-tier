@@ -4,6 +4,12 @@ setlocal
 set NOMBRE=ConsumptionTier
 set VERSION=0.5.1
 set MODULOS=java.desktop,java.logging,java.net.http,java.xml,jdk.unsupported
+set ICONO=
+if exist portable\icono.ico (
+    set ICONO=--icon portable\icono.ico
+) else (
+    echo AVISO: no existe portable\icono.ico, se usara el icono generico.
+)
 
 set CONSOLA=
 if /i "%~1"=="debug" (
@@ -32,6 +38,7 @@ copy /y target\consumption-app.jar target\entrada\ >nul
 
 jpackage --type app-image ^
   --name %NOMBRE% ^
+    %ICONO% ^
   --app-version %VERSION% ^
   --vendor "Nicolas Valencia" ^
   --description "Biblioteca personal de juegos, libros, peliculas y series" ^

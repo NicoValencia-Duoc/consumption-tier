@@ -3,13 +3,16 @@ package consumption;
 import consumption.data.Preferencias;
 import consumption.data.RepositorioJson;
 import consumption.model.ItemConsumption;
+import consumption.ui.GeometriaVentana;
 import consumption.ui.ReproductorMusica;
 import consumption.ui.Tipografia;
 import consumption.ui.VentanaPrincipal;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+import java.io.InputStream;
 import java.util.List;
 
 public class App extends Application {
@@ -35,8 +38,15 @@ public class App extends Application {
         aplicarTema();
 
         stage.setTitle("THE MAW");
+        try (InputStream icono = getClass().getResourceAsStream("/consumption/iconos/icono-app.png")) {
+            if (icono != null) stage.getIcons().add(new Image(icono));
+        } catch (Exception e) {
+            System.err.println("No se pudo cargar el icono de la ventana: " + e.getMessage());
+        }
         stage.setScene(scena);
+        GeometriaVentana.aplicar(stage, preferencias);
         stage.show();
+        GeometriaVentana.registrar(stage, preferencias);
         reproductor.iniciar();
     }
 

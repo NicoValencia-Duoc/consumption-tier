@@ -20,8 +20,8 @@ public class FormularioLibro extends FormularioItem<Libro> {
 
     @Override protected void agregarCamposPropios() {
         agregarFila("AUTOR", autor);
-        agregarFila("GÉNERO", genero);
-        agregarFila("PÁGINAS", paginas);
+        agregarFila("GENERO", genero);
+        agregarFila("PAGINAS", paginas);
         agregarFila("AÑO", anio);
     }
 
@@ -34,13 +34,13 @@ public class FormularioLibro extends FormularioItem<Libro> {
 
     @Override protected Libro crear(String titulo, double nota, Estado estado) {
         return new Libro(titulo, nota, estado, texto(autor), texto(genero),
-                entero(paginas, "Las páginas"), entero(anio, "El año"));
+                entero(paginas, "Las paginas"), entero(anio, "El año"));
     }
 
     @Override protected void aplicarPropios(Libro l) {
         l.setAutor(texto(autor));
         l.setGenero(texto(genero));
-        l.setPaginas(entero(paginas, "Las páginas"));
+        l.setPaginas(entero(paginas, "Las paginas"));
         l.setAnio(entero(anio, "El año"));
     }
 }

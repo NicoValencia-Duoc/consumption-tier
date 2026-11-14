@@ -20,7 +20,7 @@ public class FormularioJuego extends FormularioItem<Juego> {
 
     @Override protected void agregarCamposPropios() {
         agregarFila("PLATAFORMA", plataforma);
-        agregarFila("GÉNERO", genero);
+        agregarFila("GENERO", genero);
         agregarFila("DESARROLLADOR", desarrollador);
         agregarFila("AÑO", anio);
         agregarFila("HORAS JUGADAS", horas);

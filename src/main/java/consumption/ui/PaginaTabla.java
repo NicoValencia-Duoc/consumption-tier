@@ -155,7 +155,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         tabla.getColumns().add(estado);
         tabla.getColumns().add(columna("AVANCE (%)", ItemConsumption::getPorcentaje));
         tabla.getColumns().add(columna("INICIO", i -> fecha(i.getFechaInicio(), "-")));
-        tabla.getColumns().add(columna("TÉRMINO", i -> fecha(i.getFechaTermino(), "EN CURSO")));
+        tabla.getColumns().add(columna("TERMINO", i -> fecha(i.getFechaTermino(), "EN CURSO")));
 
         tabla.getSortOrder().add(nota);
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);

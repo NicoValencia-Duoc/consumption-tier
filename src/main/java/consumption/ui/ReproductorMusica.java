@@ -24,7 +24,7 @@ public class ReproductorMusica {
     private int fallosSeguidos = 0;
     private MediaPlayer jugador;
 
-    private final StringProperty titulo = new SimpleStringProperty("SIN MÚSICA");
+    private final StringProperty titulo = new SimpleStringProperty("SIN MUSICA");
     private final BooleanProperty sonando = new SimpleBooleanProperty(false);
     private final DoubleProperty volumen = new SimpleDoubleProperty(0.5);
 
@@ -95,7 +95,7 @@ public class ReproductorMusica {
         Pista pista = cola.get(indice);
         try {
             URL url = ReproductorMusica.class.getResource(CARPETA + pista.archivo());
-            if (url == null) throw new IOException("No se encontró " + pista.archivo());
+            if (url == null) throw new IOException("No se encontro " + pista.archivo());
 
             jugador = new MediaPlayer(new Media(url.toExternalForm()));
             jugador.setVolume(volumen.get());
@@ -116,7 +116,7 @@ public class ReproductorMusica {
         if (fallosSeguidos >= cola.size()) {
             detenerJugador();
             sonando.set(false);
-            titulo.set("NO SE PUDO REPRODUCIR LA MÚSICA");
+            titulo.set("NO SE PUDO REPRODUCIR LA MUSICA");
             return;
         }
         siguiente();
@@ -154,7 +154,7 @@ public class ReproductorMusica {
                 if (!pista.archivo().isEmpty()) lista.add(pista);
             }
         } catch (IOException e) {
-            System.err.println("No se pudo leer la lista de música: " + e.getMessage());
+            System.err.println("No se pudo leer la lista de musica: " + e.getMessage());
         }
         return lista;
     }

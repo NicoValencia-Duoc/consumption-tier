@@ -17,15 +17,36 @@ public class Preferencias {
     private String nombreUsuario = NOMBRE_INICIAL;
     private boolean bienvenidaVista = false;
 
+    private boolean ventanaGuardada = false;
+    private double ventanaX;
+    private double ventanaY;
+    private double ventanaAncho;
+    private double ventanaAlto;
+
     public double getVolumen() { return volumen; }
     public boolean isNoche() { return noche; }
     public String getNombreUsuario() { return nombreUsuario; }
     public boolean isBienvenidaVista() { return bienvenidaVista; }
 
+    public boolean isVentanaGuardada() { return ventanaGuardada; }
+    public double getVentanaX() { return ventanaX; }
+    public double getVentanaY() { return ventanaY; }
+    public double getVentanaAncho() { return ventanaAncho; }
+    public double getVentanaAlto() { return ventanaAlto; }
+
     public void setVolumen(double v) { this.volumen = Math.max(0, Math.min(1, v)); }
     public void setNoche(boolean n) { this.noche = n; }
     public void setNombreUsuario(String n) { this.nombreUsuario = limpiarNombre(n); }
     public void setBienvenidaVista(boolean v) { this.bienvenidaVista = v; }
+
+    public void setVentana(double x, double y, double ancho, double alto) {
+        if (!Double.isFinite(x) || !Double.isFinite(y) || !Double.isFinite(ancho) || !Double.isFinite(alto)) return;
+        this.ventanaX = x;
+        this.ventanaY = y;
+        this.ventanaAncho = ancho;
+        this.ventanaAlto = alto;
+        this.ventanaGuardada = true;
+    }
 
     public static String limpiarNombre(String n) {
         String t = (n == null) ? "" : n.trim();

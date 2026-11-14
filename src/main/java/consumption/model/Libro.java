@@ -30,9 +30,9 @@ public class Libro extends ItemConsumption{
     }
 
     public void setAutor(String v) { this.autor = texto(v, "El autor", 60); }
-    public void setGenero(String v) { this.genero = texto(v, "El género", 40); }
+    public void setGenero(String v) { this.genero = texto(v, "El genero", 40); }
     public void setPaginas(int v) {
-        if (v <= 0) throw new IllegalArgumentException("Las páginas deben ser más de 0");
+        if (v <= 0) throw new IllegalArgumentException("Las paginas deben ser mas de 0");
         this.paginas = v;
     }
     public void setAnio(int v) { this.anio = anio(v); }

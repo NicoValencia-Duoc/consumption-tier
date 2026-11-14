@@ -33,7 +33,7 @@ public class Juego extends ItemConsumption{
     @Override public double getPorcentajeMaximo(){return 999;}
 
     public void setPlataforma(String v) { this.plataforma = texto(v, "La plataforma", 40); }
-    public void setGenero(String v) { this.genero = texto(v, "El género", 40); }
+    public void setGenero(String v) { this.genero = texto(v, "El genero", 40); }
     public void setDesarrollador(String v) { this.desarrollador = texto(v, "El desarrollador", 60); }
     public void setAnio(int v) { this.anio = anio(v); }
     public void setHorasJugadas(double v) {

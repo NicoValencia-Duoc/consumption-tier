@@ -30,9 +30,9 @@ public class Pelicula extends ItemConsumption{
     }
 
     public void setDirector(String v) { this.director = texto(v, "El director", 60); }
-    public void setGenero(String v) { this.genero = texto(v, "El género", 40); }
+    public void setGenero(String v) { this.genero = texto(v, "El genero", 40); }
     public void setDuracionMin(int v) {
-        if (v <= 0) throw new IllegalArgumentException("La duración debe ser más de 0 minutos");
+        if (v <= 0) throw new IllegalArgumentException("La duracion debe ser mas de 0 minutos");
         this.duracionMin = v;
     }
     public void setAnio(int v) { this.anio = anio(v); }
