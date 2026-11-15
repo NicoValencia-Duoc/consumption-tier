@@ -69,6 +69,8 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     private final List<Fila> filas = new ArrayList<>();
     private VBox seccionActual;
     private VBox seccionProgreso;
+    private VBox seccionCriterios;
+    private boolean irACriterios;
     private T resultado;
     private T original;
 
@@ -107,6 +109,9 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     public void setComprobadorDuplicado(ComprobadorDuplicado c) {
         this.comprobador = c;
     }
+    public void setIrACriterios(boolean valor) {
+        this.irACriterios = valor;
+    }
 
     public Optional<T> mostrar(T existente, List<String> hojas) {
         this.original = existente;
@@ -133,7 +138,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         filaPortada = crearPortada();
         agregarFila("IMAGEN", filaPortada);
 
-        nuevaSeccion("CRITERIOS · 0 A 10 · N/A SI NO APLICA");
+        seccionCriterios = nuevaSeccion("CRITERIOS · 0 A 10 · N/A SI NO APLICA");
         for (String criterio : nombresCriterios()) {
             FilaCriterio fila = new FilaCriterio();
             fila.valorProperty().addListener((obs, antes, ahora) -> {
@@ -212,6 +217,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
                 }));
 
         Platform.runLater(titulo::requestFocus);
+        if (irACriterios) Platform.runLater(() -> Platform.runLater(this::desplazarACriterios));
         Optional<ButtonType> respuesta = dialogo.showAndWait();
         return respuesta.filter(b -> b == guardar).map(b -> resultado);
     }
@@ -451,6 +457,16 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     private void limpiarErrores() {
         mensaje.setText("");
         filas.forEach(this::limpiar);
+    }
+
+    private void desplazarACriterios() {
+        dialogo.getDialogPane().applyCss();
+        dialogo.getDialogPane().layout();
+        Bounds enEscena = seccionCriterios.localToScene(seccionCriterios.getBoundsInLocal());
+        if (enEscena == null) return;
+        double y = cuerpo.sceneToLocal(enEscena).getMinY();
+        double recorrido = cuerpo.getHeight() - scroll.getViewportBounds().getHeight();
+        if (recorrido > 0) scroll.setVvalue(Math.max(0, Math.min(1, (y - 8) / recorrido)));
     }
 
     private void desplazarHasta(Fila fila) {

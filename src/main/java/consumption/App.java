@@ -1,6 +1,7 @@
 package consumption;
 
 import consumption.data.Preferencias;
+import consumption.data.RespaldoAutomatico;
 import consumption.data.RepositorioJson;
 import consumption.model.ItemConsumption;
 import consumption.ui.GeometriaVentana;
@@ -22,6 +23,7 @@ public class App extends Application {
     private Tema tema = Tema.NOCTURNO;
     private Preferencias preferencias;
     private ReproductorMusica reproductor;
+    private VentanaPrincipal ventana;
 
     @Override
     public void start(Stage stage) {
@@ -35,7 +37,9 @@ public class App extends Application {
         reproductor = new ReproductorMusica();
         reproductor.volumenProperty().set(preferencias.getVolumen());
 
-        scena = new Scene(new VentanaPrincipal(items, repositorio, this::elegirTema, reproductor, preferencias), 1295, 720);        aplicarTema();
+        ventana = new VentanaPrincipal(items, repositorio, this::elegirTema, reproductor, preferencias);
+        scena = new Scene(ventana, 1295, 720);
+        aplicarTema();
 
         stage.setTitle("THE MAW");
         try (InputStream icono = getClass().getResourceAsStream("/consumption/iconos/icono-app.png")) {
@@ -51,11 +55,13 @@ public class App extends Application {
 
     @Override
     public void stop() {
+        if (ventana != null) ventana.alCerrar();
         if (reproductor != null) {
             preferencias.setVolumen(reproductor.volumenProperty().get());
             preferencias.guardar();
             reproductor.detener();
         }
+        RespaldoAutomatico.crearSiCambio();
     }
 
     private void elegirTema(Tema nuevo) {
@@ -69,6 +75,7 @@ public class App extends Application {
         String base = getClass().getResource("/consumption/base.css").toExternalForm();
         String actual = getClass().getResource(tema.getRecurso()).toExternalForm();
         scena.getStylesheets().setAll(base, actual);
+        scena.setFill(javafx.scene.paint.Color.web(tema.getFondo()));
     }
 
     public static void main(String[] args) {

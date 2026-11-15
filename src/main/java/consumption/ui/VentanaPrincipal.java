@@ -12,6 +12,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.layout.*;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.function.Supplier;
 import javafx.stage.FileChooser;
 import java.io.File;
@@ -150,13 +151,8 @@ public class VentanaPrincipal extends VBox {
     private <T extends ItemConsumption> void conectarComunes(PaginaTabla<T> pagina) {
         pagina.setAlVerDetalle(this::verDetalle);
         pagina.setAlFavorito(this::alternarFavorito);
-        pagina.setAlEliminar(seleccionado -> {
-            if (confirmarEliminar(seleccionado)) {
-                items.remove(seleccionado);
-                GestorImagenes.eliminar(seleccionado.getRutaImagen());
-                guardarYRefrescar();
-            }
-        });
+        pagina.setAlEliminar(this::eliminarLote);
+        pagina.setAlCambiarEstado((item, transicion) -> cambiarEstado(item, transicion, false));
         pagina.montar();
     }
 
@@ -237,7 +233,8 @@ public class VentanaPrincipal extends VBox {
                 () -> {
                     cabecera.marcarActiva(pestanaActual);
                     mostrar(pestanaActual);
-                }));
+                },
+                transicion -> cambiarEstado(item, transicion, true)));
     }
 
     private void alternarFavorito(ItemConsumption item) {
@@ -277,6 +274,7 @@ public class VentanaPrincipal extends VBox {
         if (archivo == null) return;
 
         try {
+            this.aviso.confirmarPendiente();
             RespaldoZip.restaurar(archivo.toPath());
             GestorImagenes.limpiarCache();
             items.clear();
@@ -300,14 +298,64 @@ public class VentanaPrincipal extends VBox {
         mostrar(pestanaActual);
     }
 
-    private boolean confirmarEliminar(ItemConsumption item) {
+    private boolean confirmarEliminar(List<ItemConsumption> lote) {
+        List<String> titulos = lote.stream().map(ItemConsumption::getTitulo).toList();
         Alert alerta = new Alert(Alert.AlertType.CONFIRMATION,
-                "¿Eliminar «" + item.getTitulo() + "»? Esta accion no se puede deshacer.",
+                ReglasAcciones.textoConfirmarEliminar(titulos),
                 ButtonType.OK, ButtonType.CANCEL);
         alerta.setTitle("CONFIRMAR");
         alerta.setHeaderText(null);
         alerta.getDialogPane().getStylesheets().setAll(hojas());
         return alerta.showAndWait().filter(b -> b == ButtonType.OK).isPresent();
+    }
+    private void eliminarLote(List<? extends ItemConsumption> seleccion) {
+        List<ItemConsumption> lote = new ArrayList<>(seleccion);
+        if (lote.isEmpty() || !confirmarEliminar(lote)) return;
+
+        items.removeAll(lote);
+        repositorio.guardar(items);
+        mostrar(pestanaActual);
+
+        aviso.mostrarConDeshacer(
+                ReglasAcciones.textoEliminado(lote.size()),
+                () -> {
+                    items.addAll(lote);
+                    guardarYRefrescar();
+                    aviso.mostrar(ReglasAcciones.textoRestaurado(lote.size()));
+                },
+                () -> lote.forEach(i -> GestorImagenes.eliminar(i.getRutaImagen())));
+    }
+
+    private void cambiarEstado(ItemConsumption item, Transicion transicion, boolean desdeDetalle) {
+        try {
+            transicion.aplicar(item, LocalDate.now());
+        } catch (IllegalArgumentException ex) {
+            avisar(Alert.AlertType.ERROR, ex.getMessage());
+            return;
+        }
+        repositorio.guardar(items);
+
+        if (transicion == Transicion.TERMINAR) {
+            editarParaCalificar(item);
+            repositorio.guardar(items);
+            avisarGuardado(item);
+        } else {
+            aviso.mostrar(ReglasAcciones.textoAviso(transicion));
+        }
+
+        if (desdeDetalle) verDetalle(item);
+        else mostrar(pestanaActual);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends ItemConsumption> void editarParaCalificar(ItemConsumption item) {
+        FormularioItem<T> formulario = (FormularioItem<T>) formularioPara(item);
+        formulario.setIrACriterios(true);
+        abrir(formulario, (T) item);
+    }
+
+    public void alCerrar() {
+        aviso.confirmarPendiente();
     }
 
     private List<String> hojas() {

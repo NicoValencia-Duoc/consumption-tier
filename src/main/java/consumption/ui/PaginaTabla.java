@@ -5,6 +5,7 @@ import consumption.data.ExportadorCsv;
 import consumption.data.Preferencias;
 import consumption.model.Estado;
 import consumption.model.ItemConsumption;
+import consumption.model.Transicion;
 
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
@@ -36,6 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public class PaginaTabla<T extends ItemConsumption> extends VBox {
@@ -74,13 +76,14 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
     private final Button favorito = new Button("★ FAVORITO");
     private final Button detalle = new Button("DETALLE");
     private final Button eliminar = new Button();
+    private final Button empezar = new Button(Transicion.EMPEZAR.getEtiqueta());
+    private final Button terminar = new Button(Transicion.TERMINAR.getEtiqueta());
+    private final Button abandonar = new Button(Transicion.ABANDONAR.getEtiqueta());
 
-    private Runnable alAgregar = () -> {
-    };
-    private Consumer<T> alEditar = t -> {
-    };
-    private Consumer<T> alEliminar = t -> {
-    };
+    private Runnable alAgregar = () -> {};
+    private Consumer<T> alEditar = t -> {};
+    private Consumer<List<T>> alEliminar = lote -> {};
+    private BiConsumer<T, Transicion> alCambiarEstado = (t, transicion) -> {};
     private Consumer<T> alVerDetalle = t -> {
     };
     private Consumer<T> alFavorito = t -> {
@@ -139,12 +142,19 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         detalle.getStyleClass().add("pestana");
         detalle.setOnAction(e -> alVerDetalle.accept(unico()));
         eliminar.getStyleClass().addAll("pestana", "boton-peligro");
-        eliminar.setOnAction(e -> alEliminar.accept(unico()));
+        eliminar.setOnAction(e -> alEliminar.accept(new ArrayList<>(marcados)));
+
+        empezar.getStyleClass().add("pestana");
+        empezar.setOnAction(e -> alCambiarEstado.accept(unico(), Transicion.EMPEZAR));
+        terminar.getStyleClass().addAll("pestana", "boton-accion");
+        terminar.setOnAction(e -> alCambiarEstado.accept(unico(), Transicion.TERMINAR));
+        abandonar.getStyleClass().add("pestana");
+        abandonar.setOnAction(e -> alCambiarEstado.accept(unico(), Transicion.ABANDONAR));
 
         Region espacioSeleccion = new Region();
         HBox.setHgrow(espacioSeleccion, Priority.ALWAYS);
         barraSeleccion = new HBox(8, cerrar, contador, espacioSeleccion,
-                botonTodo, editar, favorito, detalle, eliminar);
+                botonTodo, editar, empezar, terminar, abandonar, favorito, detalle, eliminar);
         barraSeleccion.getStyleClass().add("barra-seleccion");
         barraSeleccion.setAlignment(Pos.CENTER_LEFT);
         barraSeleccion.setMaxWidth(Double.MAX_VALUE);
@@ -414,10 +424,14 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
 
         contador.setText(ReglasTabla.textoSeleccionados(n));
         botonTodo.setText(ReglasTabla.textoSeleccionarTodo(marcados.containsAll(filtrada)));
-        editar.setDisable(n != 1);
-        detalle.setDisable(n != 1);
+        T unica = unico();
+        editar.setDisable(unica == null);
+        detalle.setDisable(unica == null);
+        empezar.setDisable(unica == null || !Transicion.EMPEZAR.permitidaDesde(unica.getEstado()));
+        terminar.setDisable(unica == null || !Transicion.TERMINAR.permitidaDesde(unica.getEstado()));
+        abandonar.setDisable(unica == null || !Transicion.ABANDONAR.permitidaDesde(unica.getEstado()));
         eliminar.setText(ReglasTabla.textoEliminar(n));
-        eliminar.setDisable(n != 1);
+        eliminar.setDisable(false);
         if (!estabaActiva) tabla.requestFocus();
     }
 
@@ -529,9 +543,8 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         this.alEditar = accion;
     }
 
-    public void setAlEliminar(Consumer<T> accion) {
-        this.alEliminar = accion;
-    }
+    public void setAlEliminar(Consumer<List<T>> accion) { this.alEliminar = accion; }
+    public void setAlCambiarEstado(BiConsumer<T, Transicion> accion) { this.alCambiarEstado = accion; }
 
     public void setAlVerDetalle(Consumer<T> accion) {
         this.alVerDetalle = accion;

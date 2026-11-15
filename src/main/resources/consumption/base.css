@@ -484,3 +484,19 @@
     -fx-font-size: 14px;
     -fx-padding: 10 12 10 12;
 }
+/* ===== Aviso con boton DESHACER ===== */
+.aviso-boton {
+    -fx-background-color: -c-pn;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-border-color: -c-g;
+    -fx-border-width: 1 1 1 0;
+    -fx-border-radius: 0;
+    -fx-text-fill: -c-y;
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 14 8 14;
+    -fx-cursor: hand;
+}
+.aviso-boton:hover { -fx-background-color: -c-ln; }

@@ -3,6 +3,8 @@ package consumption.ui;
 
 import consumption.model.ItemConsumption;
 import consumption.model.Estado;
+import consumption.model.ReglasInicio;
+import consumption.model.Transicion;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -10,12 +12,14 @@ import javafx.scene.layout.*;
 import consumption.data.GestorImagenes;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import consumption.model.ReglasInicio;
+
 import java.time.LocalDate;
+import java.util.function.Consumer;
 
 public class PaginaDetalle extends VBox{
 
-    public PaginaDetalle(ItemConsumption item, Runnable alGuardar, Runnable alVolver){
+    public PaginaDetalle(ItemConsumption item, Runnable alGuardar, Runnable alVolver,
+                         Consumer<Transicion> alCambiarEstado){
 
         setSpacing(12);
         Label titulo = new Label(item.getTitulo());
@@ -93,6 +97,19 @@ public class PaginaDetalle extends VBox{
             repetido.getStyleClass().add("subtitulo");
             datos.getChildren().add(repetido);
         }
+
+        HBox estados = new HBox(8);
+        for (Transicion transicion : Transicion.values()) {
+            if (!transicion.permitidaDesde(item.getEstado())) continue;
+            Button boton = new Button(transicion.getEtiqueta());
+            boton.getStyleClass().add("pestana");
+            if (transicion == Transicion.TERMINAR) boton.getStyleClass().add("boton-accion");
+            if (transicion == Transicion.ABANDONAR) boton.getStyleClass().add("boton-peligro");
+            boton.setOnAction(e -> alCambiarEstado.accept(transicion));
+            estados.getChildren().add(boton);
+        }
+        if (!estados.getChildren().isEmpty()) datos.getChildren().add(estados);
+
         if (item.getEstado() != Estado.PENDIENTE) {
             Label etiquetaAvance = new Label("AVANCE");
             etiquetaAvance.getStyleClass().add("subtitulo");
