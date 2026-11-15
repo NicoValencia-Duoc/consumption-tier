@@ -250,8 +250,12 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         tabla.getColumns().add(nota);
         tabla.getColumns().add(estado);
         tabla.getColumns().add(avance);
-        tabla.getColumns().add(columna("inicio", "INICIO", i -> fecha(i.getFechaInicio(), "-")));
-        tabla.getColumns().add(columna("termino", "TERMINO", i -> fecha(i.getFechaTermino(), "EN CURSO")));
+        TableColumn<T, Object> colInicio = columna("inicio", "INICIO", PaginaTabla::celdaInicio);
+        TableColumn<T, Object> colTermino = columna("termino", "TERMINO", PaginaTabla::celdaTermino);
+        ordenarPorFecha(colInicio);
+        ordenarPorFecha(colTermino);
+        tabla.getColumns().add(colInicio);
+        tabla.getColumns().add(colTermino);
 
         columnaCasillas.setId(ID_CASILLAS);
         columnaCasillas.setSortable(false);
@@ -567,7 +571,29 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         return c;
     }
 
-    private static String fecha(LocalDate f, String siVacia) {
-        return (f == null) ? siVacia : f.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    private static FechaCelda celdaInicio(ItemConsumption i) {
+        if (i.isSinFechaInicio()) return new FechaCelda(null, "SIN REGISTRO");
+        LocalDate f = i.getFechaInicio();
+        return new FechaCelda(f, f == null ? "-" : f.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+    }
+
+    private static FechaCelda celdaTermino(ItemConsumption i) {
+        if (i.isSinFechaTermino()) return new FechaCelda(null, "SIN REGISTRO");
+        LocalDate f = i.getFechaTermino();
+        if (f != null) return new FechaCelda(f, f.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        return new FechaCelda(null, i.getEstado() == Estado.EN_PROGRESO ? "EN CURSO" : "-");
+    }
+
+    private void ordenarPorFecha(TableColumn<T, Object> columna) {
+        columna.setComparator((a, b) -> {
+            LocalDate x = ((FechaCelda) a).fecha();
+            LocalDate y = ((FechaCelda) b).fecha();
+            if (x == null || y == null) {
+                if (x == null && y == null) return 0;
+                int resultado = (x == null) ? 1 : -1;
+                return columna.getSortType() == TableColumn.SortType.DESCENDING ? -resultado : resultado;
+            }
+            return x.compareTo(y);
+        });
     }
 }

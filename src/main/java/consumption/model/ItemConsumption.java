@@ -9,7 +9,7 @@ import java.util.Map;
 public abstract class ItemConsumption {
 
     public static final int MAX_COMENTARIO = 500;
-    public static final int MAX_REPETICIONES = 999;
+    public static final int MAX_VECES = 999;
     private String titulo;
     private double nota;
     private Estado estado;
@@ -21,6 +21,9 @@ public abstract class ItemConsumption {
     private boolean favorito;
     private String rutaImagen;
     private int vecesRepetido;
+    private Integer vecesConsumido;
+    private boolean sinFechaInicio;
+    private boolean sinFechaTermino;
 
     public ItemConsumption(String titulo, double nota, Estado estado){
 
@@ -50,6 +53,7 @@ public abstract class ItemConsumption {
         return 100;
     }
     public double getPorcentaje() {
+        if (estado == Estado.TERMINADO && getPorcentajeMaximo() <= 100) return 100;
         return porcentaje;
     }
     public LocalDate getFechaInicio() {
@@ -61,7 +65,13 @@ public abstract class ItemConsumption {
     public String getComentario() {
         return comentario == null ? "" : comentario;
     }
-    public int getVecesRepetido() { return vecesRepetido; }
+    public boolean isSinFechaInicio() { return sinFechaInicio; }
+    public boolean isSinFechaTermino() { return sinFechaTermino; }
+
+    public int getVecesConsumido() {
+        int v = (vecesConsumido != null) ? vecesConsumido : vecesRepetido + (estado == Estado.TERMINADO ? 1 : 0);
+        return Math.min(v, MAX_VECES);
+    }
     public String getRutaImagen() { return rutaImagen; }
 
     public boolean isFavorito() { return favorito; }
@@ -92,6 +102,7 @@ public abstract class ItemConsumption {
             throw new IllegalArgumentException("La fecha de inicio no puede ser despues de la de termino.");
         }
         this.fechaInicio = f;
+        if (f != null) sinFechaInicio = false;
     }
 
     public void setFechaTermino(LocalDate f) {
@@ -99,6 +110,17 @@ public abstract class ItemConsumption {
             throw new IllegalArgumentException("La fecha de termino no puede ser anterior a la de inicio.");
         }
         this.fechaTermino = f;
+        if (f != null) sinFechaTermino = false;
+    }
+
+    public void setSinFechaInicio(boolean v) {
+        this.sinFechaInicio = v;
+        if (v) fechaInicio = null;
+    }
+
+    public void setSinFechaTermino(boolean v) {
+        this.sinFechaTermino = v;
+        if (v) fechaTermino = null;
     }
 
     public void setFavorito(boolean f) {
@@ -116,11 +138,11 @@ public abstract class ItemConsumption {
         this.rutaImagen = r;
     }
 
-    public void setVecesRepetido(int v) {
-        if (v < 0 || v > MAX_REPETICIONES) {
-            throw new IllegalArgumentException("Las veces repetido deben estar entre 0 y " + MAX_REPETICIONES + ".");
+    public void setVecesConsumido(int v) {
+        if (v < 0 || v > MAX_VECES) {
+            throw new IllegalArgumentException("Las veces consumidas deben estar entre 0 y " + MAX_VECES + ".");
         }
-        this.vecesRepetido = v;
+        this.vecesConsumido = v;
     }
 
     public abstract List<String> getNombresCriterios();
@@ -153,9 +175,11 @@ public abstract class ItemConsumption {
     }
 
     public void validarCoherencia(){
-        if(estado == Estado.TERMINADO && fechaTermino == null){
-            throw new IllegalArgumentException("Un item terminado necesita fecha de termino.");
-        }if (estado == Estado.PENDIENTE && (porcentaje > 0 || fechaInicio != null || fechaTermino != null)){
+        if (estado == Estado.TERMINADO && fechaTermino == null && !sinFechaTermino) {
+            throw new IllegalArgumentException("Un item terminado necesita fecha de termino o marcar SIN REGISTRO.");
+        }
+        if (estado == Estado.PENDIENTE && (porcentaje > 0 || fechaInicio != null || fechaTermino != null
+                || sinFechaInicio || sinFechaTermino)) {
             throw new IllegalArgumentException("Un item pendiente no puede tener avance ni fechas.");
         }
     }
@@ -175,8 +199,8 @@ public abstract class ItemConsumption {
     }
 
     protected static String texto(String v, String campo, int max){
-        String t =(v == null) ? "" : v.trim();
-        if (t.isEmpty()) throw new IllegalArgumentException(campo + " es obligatorio.");
+        String t = (v == null) ? "" : v.trim();
+        if (t.isEmpty()) throw new IllegalArgumentException(campo + " es obligatoria.");
         if (t.length() > max) throw new IllegalArgumentException(campo + " admite maximo " + max + " caracteres.");
         return t;
     }

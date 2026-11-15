@@ -80,6 +80,8 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     private DeslizadorAvance avance;
     private final CampoFecha inicio = new CampoFecha("El inicio");
     private final CampoFecha termino = new CampoFecha("El termino");
+    private final CheckBox sinInicio = new CheckBox("SIN REGISTRO");
+    private final CheckBox sinTermino = new CheckBox("SIN REGISTRO");
     private final Map<String, FilaCriterio> criterios = new LinkedHashMap<>();
     private final HBox notaViva = new HBox(10);
     private final TextField repeticiones = new TextField("0");
@@ -106,6 +108,9 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     protected boolean permiteSuperarCien() {
         return false;
     }
+    protected boolean avanceAutomaticoAlTerminar() {
+        return true;
+    }
     public void setComprobadorDuplicado(ComprobadorDuplicado c) {
         this.comprobador = c;
     }
@@ -122,12 +127,13 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         agregarFila("ESTADO", crearChipsEstado());
 
         seccionProgreso = nuevaSeccion("PROGRESO");
-        agregarFilaCondicional("AVANCE (%)", crearAvance(), CON_AVANCE);
-        agregarFilaCondicional("INICIO", inicio, CON_AVANCE);
-        agregarFilaCondicional("TERMINO", termino, CON_TERMINO);
+        Set<Estado> conAvanceManual = avanceAutomaticoAlTerminar()
+                ? EnumSet.of(Estado.EN_PROGRESO, Estado.ABANDONADO) : CON_AVANCE;
+        agregarFilaCondicional("AVANCE (%)", crearAvance(), conAvanceManual);
+        agregarFilaCondicional("INICIO", conSinRegistro(inicio, sinInicio), CON_AVANCE);
+        agregarFilaCondicional("TERMINO", conSinRegistro(termino, sinTermino), CON_TERMINO);
         repeticiones.setPrefColumnCount(5);
-        agregarFilaCondicional("VECES REPETIDO", repeticiones, CON_AVANCE);
-        termino.setMinimo(() -> inicio.valorProperty().get());
+        agregarFilaCondicional("VECES CONSUMIDO", repeticiones, CON_AVANCE);        termino.setMinimo(() -> inicio.valorProperty().get());
         inicio.valorProperty().addListener((obs, antes, ahora) -> { modificado = true; revisarFechas(); });
         termino.valorProperty().addListener((obs, antes, ahora) -> { modificado = true; revisarFechas(); });
 
@@ -288,11 +294,29 @@ public abstract class FormularioItem<T extends ItemConsumption> {
                 antes.setSelected(true);
             } else {
                 modificado = true;
+                Estado previo = (antes == null) ? null : (Estado) antes.getUserData();
+                Estado nuevo = (ahora == null) ? null : (Estado) ahora.getUserData();
+                alCambiarEstado(previo, nuevo);
                 aplicarVisibilidad();
             }
         });
         chips.get(Estado.PENDIENTE).setSelected(true);
         return caja;
+    }
+    private void alCambiarEstado(Estado previo, Estado nuevo) {
+        if (nuevo == Estado.TERMINADO) {
+            int veces;
+            try {
+                veces = Integer.parseInt(repeticiones.getText().trim());
+            } catch (NumberFormatException ex) {
+                veces = 0;
+            }
+            if (veces < 1) repeticiones.setText("1");
+        }
+        if (avance != null && previo == Estado.TERMINADO && nuevo == Estado.EN_PROGRESO
+                && avanceAutomaticoAlTerminar()) {
+            avance.setValor(0);
+        }
     }
 
     private Node crearAvance() {
@@ -302,6 +326,19 @@ public abstract class FormularioItem<T extends ItemConsumption> {
             limpiarDe(avance);
         });
         return avance;
+    }
+
+    private Node conSinRegistro(CampoFecha campo, CheckBox casilla) {
+        casilla.getStyleClass().add("casilla-sin-registro");
+        campo.disableProperty().bind(casilla.selectedProperty());
+        casilla.selectedProperty().addListener((obs, antes, ahora) -> {
+            modificado = true;
+            if (ahora) campo.setValor(null);
+            revisarFechas();
+        });
+        HBox caja = new HBox(14, campo, casilla);
+        caja.setAlignment(Pos.CENTER_LEFT);
+        return caja;
     }
 
     private HBox crearPortada() {
@@ -518,21 +555,24 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         boolean conTermino = CON_TERMINO.contains(e);
 
         double p = conAvance ? avance.getValor() : 0;
-        LocalDate ini = conAvance ? inicio.getValor() : null;
-        LocalDate fin = conTermino ? termino.getValor() : null;
+        if (e == Estado.TERMINADO && avanceAutomaticoAlTerminar()) p = 100;
+        boolean sinIni = conAvance && sinInicio.isSelected();
+        boolean sinFin = conTermino && sinTermino.isSelected();
+        LocalDate ini = (conAvance && !sinIni) ? inicio.getValor() : null;
+        LocalDate fin = (conTermino && !sinFin) ? termino.getValor() : null;
         if (ini != null && fin != null && fin.isBefore(ini)) {
             throw new ErrorCampo(termino, "El termino no puede ser anterior al inicio.");
         }
 
-        int veces = conAvance ? entero(repeticiones, "Las veces repetido") : 0;
+        int veces = conAvance ? entero(repeticiones, "Las veces consumidas") : 0;
+        if (e == Estado.TERMINADO && veces < 1) veces = 1;
         String textoComentario = comentario.getText();
 
         Map<String, Double> notas = new LinkedHashMap<>();
         criterios.forEach((nombre, fila) -> notas.put(nombre, fila.getValor()));
 
         T prueba = crear(t, 0, e);
-        aplicarComunes(prueba, t, e, p, ini, fin, notas, veces,textoComentario);
-        prueba.validarCoherencia();
+        aplicarComunes(prueba, t, e, p, ini, fin, sinIni, sinFin, notas, veces, textoComentario);        prueba.validarCoherencia();
         boolean tituloCambio = existente == null || !tituloIgual(existente.getTitulo(), t);
         if (comprobador != null && tituloCambio && comprobador.existe(prueba.getTipo(), t, existente)) {
             String texto = "Ya tienes «" + t + "» en " + prueba.getTipo() + ". ¿Guardar de todas formas?";
@@ -549,7 +589,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
 
         T item = prueba;
         if (existente != null) {
-            aplicarComunes(existente, t, e, p, ini, fin, notas, veces, textoComentario);
+            aplicarComunes(existente, t, e, p, ini, fin, sinIni, sinFin, notas, veces, textoComentario);
             aplicarPropios(existente);
             item = existente;
         }
@@ -559,7 +599,8 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     }
 
     private void aplicarComunes(T item, String t, Estado e, double p,
-                                LocalDate ini, LocalDate fin, Map<String, Double> notas,
+                                LocalDate ini, LocalDate fin, boolean sinIni, boolean sinFin,
+                                Map<String, Double> notas,
                                 int veces, String textoComentario) {
         item.setTitulo(t);
         item.setEstado(e);
@@ -567,18 +608,19 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         item.setFechaTermino(null);
         item.setFechaInicio(ini);
         item.setFechaTermino(fin);
-        item.setVecesRepetido(veces);
-        item.setComentario(textoComentario);
-        notas.forEach(item::setCriterio);
-    }
+        item.setSinFechaInicio(sinIni);
+        item.setSinFechaTermino(sinFin);
+        item.setVecesConsumido(veces);
 
     private void cargar(T item) {
         titulo.setText(item.getTitulo());
         chips.get(item.getEstado()).setSelected(true);
         avance.setValor(item.getPorcentaje());
-        inicio.setValor(item.getFechaInicio());
-        termino.setValor(item.getFechaTermino());
-        repeticiones.setText(String.valueOf(item.getVecesRepetido()));
+            inicio.setValor(item.getFechaInicio());
+            termino.setValor(item.getFechaTermino());
+            sinInicio.setSelected(item.isSinFechaInicio());
+            sinTermino.setSelected(item.isSinFechaTermino());
+        repeticiones.setText(String.valueOf(item.getVecesConsumido()));
         comentario.setText(item.getComentario());
         item.getCriterios().forEach((nombre, valor) -> {
             FilaCriterio fila = criterios.get(nombre);

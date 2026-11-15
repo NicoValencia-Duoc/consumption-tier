@@ -6,7 +6,8 @@ public enum Transicion {
 
     EMPEZAR("EMPEZAR"),
     TERMINAR("TERMINAR"),
-    ABANDONAR("ABANDONAR");
+    ABANDONAR("ABANDONAR"),
+    REPETIR("REPETIR");
 
     private final String etiqueta;
 
@@ -23,6 +24,7 @@ public enum Transicion {
             case EMPEZAR -> estado == Estado.PENDIENTE;
             case TERMINAR -> estado == Estado.PENDIENTE || estado == Estado.EN_PROGRESO;
             case ABANDONAR -> estado == Estado.EN_PROGRESO;
+            case REPETIR -> estado == Estado.TERMINADO;
         };
     }
 
@@ -32,6 +34,8 @@ public enum Transicion {
             throw new IllegalArgumentException(
                     "No se puede " + etiqueta + " un registro que esta " + actual.getEtiqueta() + ".");
         }
+
+        item.setVecesConsumido(item.getVecesConsumido());
 
         switch (this) {
             case EMPEZAR -> {
@@ -47,6 +51,21 @@ public enum Transicion {
                 item.setEstado(Estado.TERMINADO);
                 item.setFechaTermino(hoy);
                 item.setPorcentaje(Math.max(100, item.getPorcentaje()));
+                if (item.getVecesConsumido() < 1) item.setVecesConsumido(1);
+            }
+            case REPETIR -> {
+                int veces = item.getVecesConsumido();
+                if (veces >= ItemConsumption.MAX_VECES) {
+                    throw new IllegalArgumentException(
+                            "Ya llegaste al maximo de " + ItemConsumption.MAX_VECES + " veces consumido.");
+                }
+                item.setEstado(Estado.EN_PROGRESO);
+                item.setPorcentaje(0);
+                item.setFechaTermino(null);
+                item.setFechaInicio(null);
+                item.setSinFechaInicio(false);
+                item.setSinFechaTermino(false);
+                item.setVecesConsumido(veces + 1);
             }
             case ABANDONAR -> {
                 comprobarInicio(item, hoy);

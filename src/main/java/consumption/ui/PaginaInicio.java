@@ -79,8 +79,7 @@ public class PaginaInicio extends VBox {
     }
 
     private HBox crearBarraHerramientas() {
-        buscador.setPromptText("BUSCAR POR TITULO, AUTOR, GENERO...");
-        buscador.getStyleClass().add("buscador");
+        buscador.setPromptText("BUSCAR POR TITULO, CREADOR, GENERO...");        buscador.getStyleClass().add("buscador");
         buscador.textProperty().addListener((obs, antes, ahora) -> actualizar());
         HBox.setHgrow(buscador, Priority.ALWAYS);
 

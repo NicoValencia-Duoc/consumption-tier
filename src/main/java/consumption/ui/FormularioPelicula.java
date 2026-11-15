@@ -18,7 +18,7 @@ public class FormularioPelicula extends FormularioItem<Pelicula> {
     @Override protected String nombreTipo() { return "PELICULA"; }
 
     @Override protected void agregarCamposPropios() {
-        agregarFila("DIRECTOR", director);
+        agregarFila("DIRIGIDA POR", director);
         agregarFila("GENERO", genero);
         agregarFila("DURACION (MIN)", duracion);
         agregarFila("AÑO", anio);

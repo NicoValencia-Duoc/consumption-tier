@@ -19,7 +19,7 @@ public class FormularioLibro extends FormularioItem<Libro> {
     @Override protected String nombreTipo() { return "LIBRO"; }
 
     @Override protected void agregarCamposPropios() {
-        agregarFila("AUTOR", autor);
+        agregarFila("AUTORIA", autor);
         agregarFila("GENERO", genero);
         agregarFila("PAGINAS", paginas);
         agregarFila("AÑO", anio);

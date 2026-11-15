@@ -104,8 +104,7 @@ public class VentanaPrincipal extends VBox {
     private Node paginaLibros() {
         List<Libro> libros = items.stream().filter(Libro.class::isInstance).map(Libro.class::cast).toList();
         PaginaTabla<Libro> p = new PaginaTabla<>("LIBROS", libros, preferencias);
-        p.agregarColumna("autor", "AUTOR", Libro::getAutor, true);
-        p.agregarColumna("genero", "GENERO", Libro::getGenero, true);
+        p.agregarColumna("autor", "AUTORIA", Libro::getAutor, true);        p.agregarColumna("genero", "GENERO", Libro::getGenero, true);
         p.agregarColumna("paginas", "PAGINAS", Libro::getPaginas, false);
         p.agregarColumna("anio", "AÑO", Libro::getAnio, false);
         conectar(p, FormularioLibro::new);
@@ -115,8 +114,7 @@ public class VentanaPrincipal extends VBox {
     private Node paginaPeliculas() {
         List<Pelicula> peliculas = items.stream().filter(Pelicula.class::isInstance).map(Pelicula.class::cast).toList();
         PaginaTabla<Pelicula> p = new PaginaTabla<>("PELICULAS", peliculas, preferencias);
-        p.agregarColumna("director", "DIRECTOR", Pelicula::getDirector, true);
-        p.agregarColumna("genero", "GENERO", Pelicula::getGenero, true);
+        p.agregarColumna("director", "DIRIGIDA POR", Pelicula::getDirector, true);        p.agregarColumna("genero", "GENERO", Pelicula::getGenero, true);
         p.agregarColumna("duracion", "DURACION (MIN)", Pelicula::getDuracionMin, false);
         p.agregarColumna("anio", "AÑO", Pelicula::getAnio, false);
         conectar(p, FormularioPelicula::new);

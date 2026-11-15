@@ -91,11 +91,11 @@ public class PaginaDetalle extends VBox{
             dias.getStyleClass().add("dias-en-curso");
             datos.getChildren().add(dias);
         }
-        if (item.getVecesRepetido() > 0) {
-            int n = item.getVecesRepetido();
-            Label repetido = new Label("REPETIDO " + n + (n == 1 ? " VEZ" : " VECES"));
-            repetido.getStyleClass().add("subtitulo");
-            datos.getChildren().add(repetido);
+        int veces = item.getVecesConsumido();
+        if (veces > 0) {
+            Label consumido = new Label("CONSUMIDO " + veces + (veces == 1 ? " VEZ" : " VECES"));
+            consumido.getStyleClass().add("subtitulo");
+            datos.getChildren().add(consumido);
         }
 
         HBox estados = new HBox(8);
@@ -110,7 +110,8 @@ public class PaginaDetalle extends VBox{
         }
         if (!estados.getChildren().isEmpty()) datos.getChildren().add(estados);
 
-        if (item.getEstado() != Estado.PENDIENTE) {
+        boolean avanceFijo = item.getEstado() == Estado.TERMINADO && item.getPorcentajeMaximo() <= 100;
+        if (item.getEstado() != Estado.PENDIENTE && !avanceFijo) {
             Label etiquetaAvance = new Label("AVANCE");
             etiquetaAvance.getStyleClass().add("subtitulo");
 

@@ -29,7 +29,7 @@ public class Pelicula extends ItemConsumption{
         return "P";
     }
 
-    public void setDirector(String v) { this.director = texto(v, "El director", 60); }
+    public void setDirector(String v) { this.director = texto(v, "El campo DIRIGIDA POR", 60); }
     public void setGenero(String v) { this.genero = texto(v, "El genero", 40); }
     public void setDuracionMin(int v) {
         if (v <= 0) throw new IllegalArgumentException("La duracion debe ser mas de 0 minutos");

@@ -42,6 +42,7 @@ public final class ReglasAcciones {
             case EMPEZAR -> "EMPEZADO";
             case ABANDONAR -> "ABANDONADO";
             case TERMINAR -> "TERMINADO";
+            case REPETIR -> "REPETIDO";
         };
     }
 
