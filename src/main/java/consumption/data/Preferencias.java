@@ -6,6 +6,9 @@ import com.google.gson.JsonParseException;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Preferencias {
 
@@ -53,6 +56,25 @@ public class Preferencias {
         this.ventanaAncho = ancho;
         this.ventanaAlto = alto;
         this.ventanaGuardada = true;
+    }
+
+    private static final List<String> PESTANAS =
+            List.of("INICIO", "JUEGOS", "LIBROS", "PELICULAS", "SERIES", "PENDIENTES", "ESTADISTICAS");
+
+    private String ultimaPestana = "INICIO";
+    private Map<String, EstadoTabla> tablas = new HashMap<>();
+
+    public String getUltimaPestana() {
+        return PESTANAS.contains(ultimaPestana) ? ultimaPestana : "INICIO";
+    }
+
+    public void setUltimaPestana(String pestana) {
+        if (PESTANAS.contains(pestana)) this.ultimaPestana = pestana;
+    }
+
+    public EstadoTabla estadoTabla(String clave) {
+        if (tablas == null) tablas = new HashMap<>();
+        return tablas.computeIfAbsent(clave, k -> new EstadoTabla());
     }
 
     public static String limpiarNombre(String n) {

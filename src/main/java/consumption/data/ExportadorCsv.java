@@ -15,7 +15,9 @@ public class ExportadorCsv {
     private static final String SEPARADOR = ";";
 
     public static <T> void exportar(TableView<T> tabla, Path destino) throws IOException {
-        List<TableColumn<T, ?>> columnas = tabla.getColumns();
+        List<TableColumn<T, ?>> columnas = tabla.getColumns().stream()
+                .filter(c -> !"casillas".equals(c.getId()))
+                .toList();
         StringBuilder csv = new StringBuilder("\uFEFF");
 
         for (int i = 0; i < columnas.size(); i++) {

@@ -1,42 +1,186 @@
+/* ===== Base ===== */
 .root {
     -fx-background-color: -c-bg;
     -fx-font-family: "Rajdhani", "Segoe UI";
     -fx-font-size: 15px;
 }
 .label { -fx-text-fill: -c-tx; }
-
-/* Cabecera */
-.cabecera { -fx-border-color: transparent transparent -c-acento transparent; -fx-border-width: 0 0 2 0; -fx-padding: 0 0 12 0; }
-.logo { -fx-font-size: 22px; -fx-font-weight: bold; }
-.cancion { -fx-text-fill: -c-g; -fx-font-weight: bold; -fx-font-size: 12px; }
-.pestana, .filtro {
-    -fx-background-color: transparent; -fx-border-color: -c-ln;
-    -fx-text-fill: -c-mt; -fx-font-weight: bold; -fx-cursor: hand;
-}
-
-.pestana-activa { -fx-background-color: -c-y; -fx-text-fill: -c-yt; -fx-border-color: -c-y; }
-.filtro-activo { -fx-border-color: -c-r; -fx-text-fill: -c-r; }
-
-/* Buscador y subtítulo */
-.buscador { -fx-background-color: -c-pn; -fx-text-fill: -c-tx; -fx-prompt-text-fill: -c-mt; -fx-border-color: -c-ln; }
-.subtitulo { -fx-text-fill: -c-mt; -fx-font-size: 12px; }
-
-/* Galería */
 .scroll-pane, .scroll-pane > .viewport { -fx-background-color: transparent; }
 .scroll-pane { -fx-border-color: transparent; }
+/* ===== Cabecera y pestanas ===== */
+.cabecera {
+    -fx-border-color: transparent transparent -c-acento transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-padding: 0 0 12 0;
+}
+.logo { -fx-font-size: 20px; -fx-font-weight: bold; }
+.cancion { -fx-text-fill: -c-g; -fx-font-weight: bold; -fx-font-size: 12px; }
+/* Pestanas sin caja de la barra superior */
+.pestana-barra {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-text-fill: -c-mt;
+    -fx-font-weight: bold;
+    -fx-padding: 6 10 4 10;
+    -fx-cursor: hand;
+}
+.pestana-barra:hover { -fx-text-fill: -c-tx; }
+.pestana-barra-activa {
+    -fx-text-fill: -c-tx;
+    -fx-border-color: transparent transparent -c-acento transparent;
+}
+.separador-pestanas { -fx-background-color: -c-ln; }
+/* Botones con caja (filtros de INICIO, + AGREGAR, barra de seleccion...) */
+.pestana, .filtro {
+    -fx-background-color: transparent;
+    -fx-border-color: -c-ln;
+    -fx-text-fill: -c-mt;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+.filtro-activo { -fx-border-color: -c-r; -fx-text-fill: -c-r; }
+.pestana.boton-superar { -fx-text-fill: #ff2fa0; -fx-border-color: #ff2fa0; }
+.pestana.boton-superar:hover { -fx-effect: dropshadow(gaussian, rgba(255,47,160,0.6), 8, 0.2, 0, 0); }
+/* ===== Botones, campos y controles ===== */
+.boton-accion { -fx-text-fill: -c-y; -fx-border-color: -c-y; }
+.boton-peligro { -fx-text-fill: -c-r; -fx-border-color: -c-r; }
+.button:disabled { -fx-opacity: 0.35; }
+.mensaje-error { -fx-text-fill: -c-r; -fx-font-weight: bold; }
+
+.text-field, .text-area {
+    -fx-background-color: -c-pn;
+    -fx-text-fill: -c-tx;
+    -fx-border-color: -c-ln;
+}
+.text-area { -fx-control-inner-background: -c-pn; }
+.text-area .content { -fx-background-color: -c-pn; }
+.buscador {
+    -fx-background-color: -c-pn;
+    -fx-text-fill: -c-tx;
+    -fx-prompt-text-fill: -c-mt;
+    -fx-border-color: -c-ln;
+}
+.subtitulo { -fx-text-fill: -c-mt; -fx-font-size: 12px; }
+.combo-box { -fx-background-color: -c-pn; -fx-border-color: -c-ln; }
+.combo-box .list-cell { -fx-text-fill: -c-tx; -fx-background-color: transparent; }
+.combo-box .arrow { -fx-background-color: -c-mt; }
+.combo-box-popup .list-view { -fx-background-color: -c-pn; -fx-border-color: -c-ln; }
+.combo-box-popup .list-cell { -fx-background-color: -c-pn; -fx-text-fill: -c-tx; }
+.combo-box-popup .list-cell:hover { -fx-background-color: -c-ln; }
+
+.check-box { -fx-text-fill: -c-tx; }
+.check-box .box {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: -c-mt;
+    -fx-border-width: 1;
+    -fx-border-radius: 0;
+}
+.check-box:hover .box { -fx-border-color: -c-acento; }
+.check-box:selected .box { -fx-background-color: -c-y; -fx-border-color: -c-y; }
+.check-box:selected .mark { -fx-background-color: -c-yt; }
+
+.slider .track { -fx-background-color: -c-ln; }
+.slider .thumb { -fx-background-color: -c-y; }
+/* ===== Galeria de INICIO: tarjetas, estados y tiers ===== */
 .tarjeta { -fx-background-color: -c-pn; -fx-border-color: -c-ln; -fx-padding: 10; }
-.miniatura { -fx-background-color: #08080a; -fx-border-color: #2a2a33; -fx-border-style: dashed; -fx-pref-height: 104; -fx-min-height: 104; }
-.letra { -fx-font-size: 40px; -fx-font-weight: bold; -fx-text-fill: #fcee0a; }
-.tipo { -fx-text-fill: #9a9aa6; -fx-font-size: 10px; }
-.titulo-item { -fx-font-weight: bold; -fx-font-size: 16px; }
-.nota { -fx-text-fill: -c-g; -fx-font-weight: bold; -fx-font-size: 22px; }
+.miniatura {
+    -fx-background-color: #08080a;
+    -fx-border-color: #2a2a33;
+    -fx-border-style: dashed;
+    -fx-pref-height: 104;
+    -fx-min-height: 104;
+}
+.letra {
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-size: 40px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #fcee0a;
+}
+.tipo {
+    -fx-text-fill: #9a9aa6;
+    -fx-font-size: 10px;
+    -fx-background-color: #14141a;
+    -fx-padding: 0 4 0 4;
+}
+.estrella { -fx-text-fill: #fcee0a; -fx-font-size: 18px; }
+.titulo-item {
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+.nota {
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-size: 20px;
+    -fx-text-fill: -c-g;
+    -fx-font-weight: bold;
+}
 .estado { -fx-border-width: 1; -fx-padding: 2 8 2 8; -fx-font-size: 11px; -fx-font-weight: bold; }
 .estado-terminado { -fx-text-fill: -c-g; -fx-border-color: -c-g; }
 .estado-progreso { -fx-text-fill: -c-y; -fx-border-color: -c-y; }
 .estado-abandonado { -fx-text-fill: -c-r; -fx-border-color: -c-r; }
 .estado-pendiente { -fx-text-fill: -c-gr; -fx-border-color: -c-gr; }
-
-/* Tablas */
+.tarjeta-pendiente {
+    -fx-opacity: 0.45;
+    -fx-border-color: -c-gr;
+    -fx-border-style: dashed;
+}
+.tarjeta-pendiente:hover { -fx-opacity: 1; }
+.dias-en-curso { -fx-text-fill: -c-y; -fx-font-size: 11px; -fx-font-weight: bold; }
+/* Tier: colores fijos (no dependen del tema) */
+.tier {
+    -fx-text-fill: #08080a;
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-alignment: center;
+    -fx-min-width: 24;  -fx-pref-width: 24;
+    -fx-min-height: 24; -fx-pref-height: 24;
+}
+.tier-s { -fx-background-color: #ff2fa0; -fx-effect: dropshadow(gaussian, rgba(255,47,160,0.55), 8, 0.3, 0, 0); }
+.tier-a { -fx-background-color: #ff8a1f; -fx-effect: dropshadow(gaussian, rgba(255,138,31,0.55), 8, 0.3, 0, 0); }
+.tier-b { -fx-background-color: #fcee0a; -fx-effect: dropshadow(gaussian, rgba(252,238,10,0.55), 8, 0.3, 0, 0); }
+.tier-c { -fx-background-color: #39ff88; -fx-effect: dropshadow(gaussian, rgba(57,255,136,0.55), 8, 0.3, 0, 0); }
+.tier-d { -fx-background-color: #2fd8ff; -fx-effect: dropshadow(gaussian, rgba(47,216,255,0.55), 8, 0.3, 0, 0); }
+.tier-f { -fx-background-color: #9b6bff; -fx-effect: dropshadow(gaussian, rgba(155,107,255,0.55), 8, 0.3, 0, 0); }
+/* Variantes de tamano (van despues de los colores para pisar el brillo) */
+.tier-chico {
+    -fx-font-size: 12px;
+    -fx-min-width: 20;  -fx-pref-width: 20;
+    -fx-min-height: 20; -fx-pref-height: 20;
+    -fx-effect: null;
+}
+.tier-grande {
+    -fx-font-size: 22px;
+    -fx-min-width: 38;  -fx-pref-width: 38;
+    -fx-min-height: 38; -fx-pref-height: 38;
+}
+/* Filtros de tier en INICIO */
+.chip-tier {
+    -fx-background-color: transparent;
+    -fx-border-width: 1;
+    -fx-padding: 2 12 2 12;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+.chip-s { -fx-border-color: #ff2fa0; -fx-text-fill: #ff2fa0; }
+.chip-a { -fx-border-color: #ff8a1f; -fx-text-fill: #ff8a1f; }
+.chip-b { -fx-border-color: #fcee0a; -fx-text-fill: #fcee0a; }
+.chip-c { -fx-border-color: #39ff88; -fx-text-fill: #39ff88; }
+.chip-d { -fx-border-color: #2fd8ff; -fx-text-fill: #2fd8ff; }
+.chip-f { -fx-border-color: #9b6bff; -fx-text-fill: #9b6bff; }
+.chip-tier:hover { -fx-effect: dropshadow(gaussian, rgba(242,242,242,0.35), 6, 0.2, 0, 0); }
+.chip-tier.chip-activo { -fx-text-fill: #08080a; }
+.chip-s.chip-activo { -fx-background-color: #ff2fa0; }
+.chip-a.chip-activo { -fx-background-color: #ff8a1f; }
+.chip-b.chip-activo { -fx-background-color: #fcee0a; }
+.chip-c.chip-activo { -fx-background-color: #39ff88; }
+.chip-d.chip-activo { -fx-background-color: #2fd8ff; }
+.chip-f.chip-activo { -fx-background-color: #9b6bff; }
+/* ===== Tablas: estilo cyberpunk y seleccion multiple ===== */
 .table-view {
     -fx-background-color: -c-pn;
     -fx-control-inner-background: -c-pn;
@@ -44,43 +188,94 @@
     -fx-table-cell-border-color: -c-ln;
     -fx-border-color: -c-ln;
 }
-
 .table-view .column-header-background { -fx-background-color: -c-bg; }
 .table-view .column-header, .table-view .filler {
     -fx-background-color: -c-bg;
     -fx-border-color: -c-ln;
     -fx-size: 36;
 }
-
 .table-view .column-header .label { -fx-text-fill: -c-acento; -fx-font-weight: bold; }
-.table-row-cell { -fx-background-color: -c-pn; }
-.table-row-cell:selected { -fx-background-color: -c-ln; }
-.table-cell { -fx-text-fill: -c-tx; -fx-border-color: transparent; }
 .table-view .placeholder .label { -fx-text-fill: -c-mt; }
-
+/* Filas: fondo y lineas punteadas entre ellas */
+.table-row-cell {
+    -fx-background-color: -c-pn;
+    -fx-border-color: transparent transparent -c-ln transparent;
+    -fx-border-style: solid solid segments(2, 3) solid;
+    -fx-border-width: 0 0 1 0;
+}
+.table-row-cell:empty { -fx-border-color: transparent; }
+/* La seleccion nativa no se ve: las filas marcadas lo hacen con las casillas */
+.table-row-cell:selected { -fx-background-color: -c-pn; }
+/* Mouse encima: franja de 2 px a la izquierda. Se dibuja con fondos (no con bordes) para que la fila no se mueva */
+.table-row-cell:destello {
+    -fx-background-color: -c-acento, -c-ln;
+    -fx-background-insets: 0, 0 0 0 2;
+}
+/* Fila marcada: franja de 4 px y leve brillo */
+.table-row-cell:marcada {
+    -fx-background-color: -c-acento, -c-ln;
+    -fx-background-insets: 0, 0 0 0 4;
+    -fx-effect: innershadow(gaussian, -c-acento, 8, 0, 3, 0);
+}
+.table-cell { -fx-text-fill: -c-tx; -fx-border-color: transparent; }
 /* El estado en la tabla: solo color de texto, sin borde */
 .table-cell.estado-terminado, .table-cell.estado-progreso,
 .table-cell.estado-abandonado, .table-cell.estado-pendiente {
     -fx-border-color: transparent;
     -fx-font-weight: bold;
 }
-
 .table-cell.estado-terminado { -fx-text-fill: -c-g; }
 .table-cell.estado-progreso { -fx-text-fill: -c-y; }
 .table-cell.estado-abandonado { -fx-text-fill: -c-r; }
 .table-cell.estado-pendiente { -fx-text-fill: -c-gr; }
-
-/* Botones de acción y formularios */
-.boton-accion { -fx-text-fill: -c-y; -fx-border-color: -c-y; }
-.boton-peligro { -fx-text-fill: -c-r; -fx-border-color: -c-r; }
-.button:disabled { -fx-opacity: 0.35; }
-.mensaje-error { -fx-text-fill: -c-r; -fx-font-weight: bold; }
-.text-field, .text-area {
+/* Barra de seleccion */
+.barra-seleccion {
     -fx-background-color: -c-pn;
-    -fx-text-fill: -c-tx;
-    -fx-border-color: -c-ln;
+    -fx-border-color: -c-acento;
+    -fx-border-width: 0 0 0 3;
+    -fx-padding: 0 0 0 10;
 }
+.contador-seleccion { -fx-text-fill: -c-acento; -fx-font-weight: bold; }
+/* Boton del menu de columnas */
+.menu-mas { -fx-padding: 4 12 4 12; }
+.menu-mas > .arrow-button { -fx-padding: 0 0 0 4; }
+/* Barrita de avance de las tablas */
+.barrita-pista { -fx-background-color: -c-ln; }
+.barrita-normal { -fx-background-color: -c-g; }
+.barrita-exceso {
+    -fx-background-color: #ff2fa0;
+    -fx-effect: dropshadow(gaussian, rgba(255,47,160,0.8), 6, 0.3, 0, 0);
+}
+.barrita-marca { -fx-background-color: #f2f2f2; }
+.barrita-texto { -fx-text-fill: -c-mt; -fx-font-size: 11px; -fx-font-weight: bold; }
+.barrita-texto.exceso { -fx-text-fill: #ff2fa0; }
+/* ===== Detalle y barra de avance ===== */
+.titulo-detalle {
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+.valor-criterio { -fx-text-fill: -c-g; -fx-font-weight: bold; }
 
+.avance-pista  { -fx-background-color: -c-ln; }
+.avance-normal { -fx-background-color: -c-g; }
+/* Sobre 100%: tramo extra magenta con brillo y marca en el 100% */
+.avance-exceso {
+    -fx-background-color: #ff2fa0;
+    -fx-effect: dropshadow(gaussian, rgba(255,47,160,0.85), 8, 0.4, 0, 0);
+}
+.avance-marca { -fx-background-color: -c-tx; }
+.barra-avance.exceso .valor-criterio { -fx-text-fill: #ff2fa0; }
+/* Deslizador de avance (modo extendido de juegos) */
+.slider.extendido .track {
+    -fx-background-color: linear-gradient(to right,
+    -c-ln 0%, -c-ln 49%, -c-tx 49%, -c-tx 51%, #5a1740 51%, #5a1740 100%);
+}
+.slider.sobre-cien .thumb {
+    -fx-background-color: #ff2fa0;
+    -fx-effect: dropshadow(gaussian, rgba(255,47,160,0.9), 8, 0.4, 0, 0);
+}
+/* ===== Formulario de agregar / editar y dialogos ===== */
 .dialog-pane .content { -fx-background-color: -c-bg; }
 .dialog-pane .button {
     -fx-background-color: transparent;
@@ -88,34 +283,109 @@
     -fx-text-fill: -c-tx;
     -fx-font-weight: bold;
 }
-
-/* Detalle */
-.titulo-detalle { -fx-font-size: 26px; -fx-font-weight: bold; }
-.valor-criterio { -fx-text-fill: -c-g; -fx-font-weight: bold; }
-.text-area { -fx-control-inner-background: -c-pn; }
-.text-area .content { -fx-background-color: -c-pn; }
-
-/* Filtros, orden y favoritos */
-.combo-box { -fx-background-color: -c-pn; -fx-border-color: -c-ln; }
-.combo-box .list-cell { -fx-text-fill: -c-tx; -fx-background-color: transparent; }
-.combo-box .arrow { -fx-background-color: -c-mt; }
-.combo-box-popup .list-view { -fx-background-color: -c-pn; -fx-border-color: -c-ln; }
-.combo-box-popup .list-cell { -fx-background-color: -c-pn; -fx-text-fill: -c-tx; }
-.combo-box-popup .list-cell:hover { -fx-background-color: -c-ln; }
-.check-box { -fx-text-fill: -c-tx; }
-.estrella { -fx-text-fill: #fcee0a; -fx-font-size: 18px; }
-
-/* Texto del tipo sobre la miniatura */
-.tipo { -fx-background-color: #14141a; -fx-padding: 0 4 0 4; }
-
-/* Reproductor */
+/* Encabezado de los dialogos ("THE MAW TIENE HAMBRE"), con el destello rojo de las secciones */
+.dialog-pane > .header-panel {
+    -fx-background-color: -c-pn;
+    -fx-border-color: transparent transparent -c-acento transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.dialog-pane > .header-panel .label {
+    -fx-text-fill: -c-acento;
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(255,42,61,0.75), 0, 0, 2, 0);
+}
+/* Botones del dialogo: mismo tamano y forma; solo GUARDAR lleva el color de accion */
+.dialog-pane .button.boton-dialogo {
+    -fx-background-color: transparent;
+    -fx-border-color: -c-ln;
+    -fx-text-fill: -c-tx;
+    -fx-font-weight: bold;
+    -fx-padding: 6 18 6 18;
+    -fx-min-width: 110;
+    -fx-cursor: hand;
+}
+.dialog-pane .button.boton-dialogo:hover { -fx-border-color: -c-acento; }
+.dialog-pane .button.boton-dialogo.boton-accion { -fx-text-fill: -c-y; -fx-border-color: -c-y; }
+.cuerpo-form { -fx-background-color: -c-bg; }
+/* Cabeceras de seccion: texto con un destello rojo desplazado (detalle "glitcheado") */
+.seccion-form {
+    -fx-text-fill: -c-acento;
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(255,42,61,0.75), 0, 0, 2, 0);
+}
+.seccion-linea {
+    -fx-background-color: -c-ln;
+    -fx-min-height: 1; -fx-pref-height: 1; -fx-max-height: 1;
+}
+.etiqueta-form { -fx-text-fill: -c-mt; -fx-font-weight: bold; -fx-font-size: 13px; }
+.error-campo { -fx-text-fill: -c-r; -fx-font-size: 12px; -fx-font-weight: bold; }
+/* Estado como etiquetas */
+.chip {
+    -fx-background-color: transparent;
+    -fx-border-color: -c-ln;
+    -fx-text-fill: -c-mt;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-padding: 4 10 4 10;
+    -fx-cursor: hand;
+}
+.chip:hover { -fx-border-color: -c-acento; }
+.chip:selected { -fx-background-color: -c-pn; }
+.chip-terminado:selected { -fx-text-fill: -c-g; -fx-border-color: -c-g; -fx-effect: dropshadow(gaussian, rgba(57,255,136,0.5), 8, 0.2, 0, 0); }
+.chip-progreso:selected { -fx-text-fill: -c-y; -fx-border-color: -c-y; -fx-effect: dropshadow(gaussian, rgba(252,238,10,0.5), 8, 0.2, 0, 0); }
+.chip-abandonado:selected { -fx-text-fill: -c-r; -fx-border-color: -c-r; -fx-effect: dropshadow(gaussian, rgba(255,42,61,0.5), 8, 0.2, 0, 0); }
+.chip-pendiente:selected { -fx-text-fill: -c-gr; -fx-border-color: -c-gr; -fx-effect: dropshadow(gaussian, rgba(154,154,166,0.4), 8, 0.2, 0, 0); }
+/* Vista previa de la portada (colores fijos, como la miniatura) */
+.vista-previa {
+    -fx-background-color: #08080a;
+    -fx-border-color: #2a2a33;
+    -fx-border-style: dashed;
+}
+/* ===== Calendario ===== */
+.cal-panel {
+    -fx-background-color: -c-pn;
+    -fx-border-color: -c-acento;
+    -fx-effect: dropshadow(gaussian, rgba(252,238,10,0.30), 14, 0.2, 0, 0);
+}
+.cal-titulo {
+    -fx-text-fill: -c-acento;
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+.cal-nav {
+    -fx-background-color: transparent;
+    -fx-border-color: -c-ln;
+    -fx-text-fill: -c-tx;
+    -fx-font-weight: bold;
+    -fx-min-width: 30;
+    -fx-cursor: hand;
+}
+.cal-nav:hover { -fx-border-color: -c-acento; -fx-text-fill: -c-acento; }
+.cal-dia-nombre { -fx-text-fill: -c-mt; -fx-font-weight: bold; -fx-font-size: 11px; }
+.cal-dia {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -c-tx;
+    -fx-min-width: 32; -fx-pref-width: 32;
+    -fx-min-height: 28; -fx-pref-height: 28;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+.cal-dia:hover { -fx-border-color: -c-acento; }
+.cal-hoy { -fx-border-color: -c-r; }
+.cal-sel { -fx-background-color: -c-y; -fx-text-fill: -c-yt; -fx-border-color: -c-y; -fx-font-weight: bold; }
+.cal-dia:disabled { -fx-opacity: 0.25; }
+/* ===== Reproductor ===== */
 .reproductor {
     -fx-background-color: -c-pn;
     -fx-border-color: -c-ln;
 }
-.reproductor-fila {
-    -fx-padding: 6 12 6 12;
-}
+.reproductor-fila { -fx-padding: 6 12 6 12; }
 .linea-progreso { -fx-cursor: hand; }
 .linea-progreso-pista { -fx-background-color: -c-ln; }
 .linea-progreso-relleno { -fx-background-color: -c-y; }
@@ -130,17 +400,6 @@
     -fx-text-overrun: clip;
 }
 .icono-musica { -fx-fill: -c-y; }
-.slider .track { -fx-background-color: -c-ln; }
-.slider .thumb { -fx-background-color: -c-y; }
-
-/* Tipografía de títulos y números */
-.logo, .letra, .nota, .titulo-detalle, .titulo-item {
-    -fx-font-family: "Orbitron", "Segoe UI";
-}
-.logo { -fx-font-size: 20px; }
-.titulo-item { -fx-font-size: 14px; }
-.nota { -fx-font-size: 20px; }
-
 /* Lista de pistas */
 .list-view {
     -fx-background-color: -c-pn;
@@ -150,8 +409,7 @@
 .list-cell { -fx-background-color: -c-pn; -fx-text-fill: -c-tx; }
 .list-cell:filled:selected { -fx-background-color: -c-ln; }
 .list-cell:filled:hover { -fx-background-color: -c-ln; }
-
-/* Identidad: nombre de usuario, globo de bienvenida y aviso */
+/* ===== Identidad: nombre de usuario, globo de bienvenida y aviso ===== */
 .nombre-usuario {
     -fx-font-size: 16px;
     -fx-text-fill: -c-acento;
@@ -194,158 +452,27 @@
     -fx-padding: 8 14 8 14;
     -fx-effect: dropshadow(gaussian, rgba(57,255,136,0.45), 12, 0.2, 0, 0);
 }
-
-/* Encabezado de los diálogos ("THE MAW TIENE HAMBRE") */
-.dialog-pane > .header-panel {
+/* ===== Menus emergentes (temas y columnas) ===== */
+.context-menu {
     -fx-background-color: -c-pn;
-    -fx-border-color: transparent transparent -c-acento transparent;
-    -fx-border-width: 0 0 1 0;
-}
-.dialog-pane > .header-panel .label {
-    -fx-text-fill: -c-acento;
-    -fx-font-family: "Orbitron", "Segoe UI";
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-}
-
-/* Tier: colores fijos (no dependen del tema) */
-.tier {
-    -fx-text-fill: #08080a;
-    -fx-font-family: "Orbitron", "Segoe UI";
-    -fx-font-weight: bold;
-    -fx-font-size: 14px;
-    -fx-alignment: center;
-    -fx-min-width: 24;  -fx-pref-width: 24;
-    -fx-min-height: 24; -fx-pref-height: 24;
-}
-.tier-s { -fx-background-color: #ff2fa0; -fx-effect: dropshadow(gaussian, rgba(255,47,160,0.55), 8, 0.3, 0, 0); }
-.tier-a { -fx-background-color: #ff8a1f; -fx-effect: dropshadow(gaussian, rgba(255,138,31,0.55), 8, 0.3, 0, 0); }
-.tier-b { -fx-background-color: #fcee0a; -fx-effect: dropshadow(gaussian, rgba(252,238,10,0.55), 8, 0.3, 0, 0); }
-.tier-c { -fx-background-color: #39ff88; -fx-effect: dropshadow(gaussian, rgba(57,255,136,0.55), 8, 0.3, 0, 0); }
-.tier-d { -fx-background-color: #2fd8ff; -fx-effect: dropshadow(gaussian, rgba(47,216,255,0.55), 8, 0.3, 0, 0); }
-.tier-f { -fx-background-color: #9b6bff; -fx-effect: dropshadow(gaussian, rgba(155,107,255,0.55), 8, 0.3, 0, 0); }
-
-/* Variantes de tamano (van despues de los colores para pisar el brillo) */
-.tier-chico {
-    -fx-font-size: 12px;
-    -fx-min-width: 20;  -fx-pref-width: 20;
-    -fx-min-height: 20; -fx-pref-height: 20;
-    -fx-effect: null;
-}
-.tier-grande {
-    -fx-font-size: 22px;
-    -fx-min-width: 38;  -fx-pref-width: 38;
-    -fx-min-height: 38; -fx-pref-height: 38;
-}
-
-/* ===== Formulario de agregar / editar ===== */
-.cuerpo-form { -fx-background-color: -c-bg; }
-
-/* Cabeceras de seccion: texto con un destello rojo desplazado (detalle "glitcheado") */
-.seccion-form {
-    -fx-text-fill: -c-acento;
-    -fx-font-family: "Orbitron", "Segoe UI";
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-    -fx-effect: dropshadow(gaussian, rgba(255,42,61,0.75), 0, 0, 2, 0);
-}
-.seccion-linea {
-    -fx-background-color: -c-ln;
-    -fx-min-height: 1; -fx-pref-height: 1; -fx-max-height: 1;
-}
-.etiqueta-form { -fx-text-fill: -c-mt; -fx-font-weight: bold; -fx-font-size: 13px; }
-.error-campo { -fx-text-fill: -c-r; -fx-font-size: 12px; -fx-font-weight: bold; }
-
-/* Estado como etiquetas */
-.chip {
-    -fx-background-color: transparent;
-    -fx-border-color: -c-ln;
-    -fx-text-fill: -c-mt;
-    -fx-font-weight: bold;
-    -fx-font-size: 12px;
-    -fx-padding: 4 10 4 10;
-    -fx-cursor: hand;
-}
-.chip:hover { -fx-border-color: -c-acento; }
-.chip:selected { -fx-background-color: -c-pn; }
-.chip-terminado:selected { -fx-text-fill: -c-g; -fx-border-color: -c-g; -fx-effect: dropshadow(gaussian, rgba(57,255,136,0.5), 8, 0.2, 0, 0); }
-.chip-progreso:selected { -fx-text-fill: -c-y; -fx-border-color: -c-y; -fx-effect: dropshadow(gaussian, rgba(252,238,10,0.5), 8, 0.2, 0, 0); }
-.chip-abandonado:selected { -fx-text-fill: -c-r; -fx-border-color: -c-r; -fx-effect: dropshadow(gaussian, rgba(255,42,61,0.5), 8, 0.2, 0, 0); }
-.chip-pendiente:selected { -fx-text-fill: -c-gr; -fx-border-color: -c-gr; -fx-effect: dropshadow(gaussian, rgba(154,154,166,0.4), 8, 0.2, 0, 0); }
-
-/* Vista previa de la portada (colores fijos, como la miniatura) */
-.vista-previa {
-    -fx-background-color: #08080a;
-    -fx-border-color: #2a2a33;
-    -fx-border-style: dashed;
-}
-
-/* Botones del dialogo: mismo tamano y forma; solo GUARDAR lleva el color de accion */
-.dialog-pane .button.boton-dialogo {
-    -fx-background-color: transparent;
-    -fx-border-color: -c-ln;
-    -fx-text-fill: -c-tx;
-    -fx-font-weight: bold;
-    -fx-padding: 6 18 6 18;
-    -fx-min-width: 110;
-    -fx-cursor: hand;
-}
-.dialog-pane .button.boton-dialogo:hover { -fx-border-color: -c-acento; }
-.dialog-pane .button.boton-dialogo.boton-accion { -fx-text-fill: -c-y; -fx-border-color: -c-y; }
-
-/* Titulo del dialogo con el mismo destello de las secciones */
-.dialog-pane > .header-panel .label {
-    -fx-effect: dropshadow(gaussian, rgba(255,42,61,0.75), 0, 0, 2, 0);
-}
-
-/* ===== Barra de avance ===== */
-.avance-pista  { -fx-background-color: -c-ln; }
-.avance-normal { -fx-background-color: -c-g; }
-
-/* Sobre 100%: tramo extra magenta con brillo y marca en el 100% */
-.avance-exceso {
-    -fx-background-color: #ff2fa0;
-    -fx-effect: dropshadow(gaussian, rgba(255,47,160,0.85), 8, 0.4, 0, 0);
-}
-.avance-marca { -fx-background-color: -c-tx; }
-.barra-avance.exceso .valor-criterio { -fx-text-fill: #ff2fa0; }
-
-/* ===== Calendario ===== */
-.cal-panel {
-    -fx-background-color: -c-pn;
+    -fx-background-radius: 0;
     -fx-border-color: -c-acento;
-    -fx-effect: dropshadow(gaussian, rgba(252,238,10,0.30), 14, 0.2, 0, 0);
+    -fx-border-width: 1;
+    -fx-padding: 4 0 4 0;
 }
-.cal-titulo {
-    -fx-text-fill: -c-acento;
-    -fx-font-family: "Orbitron", "Segoe UI";
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-}
-.cal-nav {
+.context-menu .menu-item {
     -fx-background-color: transparent;
-    -fx-border-color: -c-ln;
+    -fx-background-radius: 0;
+    -fx-padding: 6 18 6 12;
+}
+.context-menu .menu-item .label {
     -fx-text-fill: -c-tx;
     -fx-font-weight: bold;
-    -fx-min-width: 30;
-    -fx-cursor: hand;
 }
-.cal-nav:hover { -fx-border-color: -c-acento; -fx-text-fill: -c-acento; }
-.cal-dia-nombre { -fx-text-fill: -c-mt; -fx-font-weight: bold; -fx-font-size: 11px; }
-.cal-dia {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
-    -fx-text-fill: -c-tx;
-    -fx-min-width: 32; -fx-pref-width: 32;
-    -fx-min-height: 28; -fx-pref-height: 28;
-    -fx-padding: 0;
-    -fx-cursor: hand;
-}
-.cal-dia:hover { -fx-border-color: -c-acento; }
-.cal-hoy { -fx-border-color: -c-r; }
-.cal-sel { -fx-background-color: -c-y; -fx-text-fill: -c-yt; -fx-border-color: -c-y; -fx-font-weight: bold; }
-.cal-dia:disabled { -fx-opacity: 0.25; }
-
+.context-menu .menu-item:focused { -fx-background-color: -c-y; }
+.context-menu .menu-item:focused .label { -fx-text-fill: -c-yt; }
+.context-menu .menu-item:disabled .label { -fx-text-fill: -c-mt; }
+.context-menu .separator .line { -fx-border-color: -c-ln; -fx-border-width: 1 0 0 0; }
 /* Globo del comentario (siempre oscuro: la ventana del globo no hereda las variables de tema) */
 .tooltip {
     -fx-background-color: #14141a;
@@ -357,86 +484,3 @@
     -fx-font-size: 14px;
     -fx-padding: 10 12 10 12;
 }
-
-/* ===== Deslizador de avance (modo extendido de juegos) ===== */
-.slider.extendido .track {
-    -fx-background-color: linear-gradient(to right,
-    -c-ln 0%, -c-ln 49%, -c-tx 49%, -c-tx 51%, #5a1740 51%, #5a1740 100%);
-}
-.slider.sobre-cien .thumb {
-    -fx-background-color: #ff2fa0;
-    -fx-effect: dropshadow(gaussian, rgba(255,47,160,0.9), 8, 0.4, 0, 0);
-}
-.pestana.boton-superar { -fx-text-fill: #ff2fa0; -fx-border-color: #ff2fa0; }
-.pestana.boton-superar:hover { -fx-effect: dropshadow(gaussian, rgba(255,47,160,0.6), 8, 0.2, 0, 0); }
-
-
-/* ===== Barra superior: pestanas sin caja ===== */
-.pestana-barra {
-    -fx-background-color: transparent;
-    -fx-background-radius: 0;
-    -fx-border-color: transparent;
-    -fx-border-width: 0 0 2 0;
-    -fx-text-fill: -c-mt;
-    -fx-font-weight: bold;
-    -fx-padding: 6 10 4 10;
-    -fx-cursor: hand;
-}
-.pestana-barra:hover { -fx-text-fill: -c-tx; }
-.pestana-barra-activa {
-    -fx-text-fill: -c-tx;
-    -fx-border-color: transparent transparent -c-acento transparent;
-}
-.separador-pestanas { -fx-background-color: -c-ln; }
-
-/* ===== Menu de temas ===== */
-.context-menu {
-    -fx-background-color: -c-pn;
-    -fx-background-radius: 0;
-    -fx-border-color: -c-acento;
-    -fx-border-width: 1;
-    -fx-padding: 4 0 4 0;
-}
-.context-menu .menu-item {
-    -fx-background-color: transparent;
-    -fx-padding: 6 18 6 12;
-}
-.context-menu .menu-item .label {
-    -fx-text-fill: -c-tx;
-    -fx-font-weight: bold;
-}
-.context-menu .menu-item:focused { -fx-background-color: -c-y; }
-.context-menu .menu-item:focused .label { -fx-text-fill: -c-yt; }
-
-/* ===== INICIO: pendientes apagados, chips de tier, dias en curso ===== */
-.tarjeta-pendiente {
-    -fx-opacity: 0.45;
-    -fx-border-color: -c-gr;
-    -fx-border-style: dashed;
-}
-.tarjeta-pendiente:hover { -fx-opacity: 1; }
-
-.dias-en-curso { -fx-text-fill: -c-y; -fx-font-size: 11px; -fx-font-weight: bold; }
-
-.chip-tier {
-    -fx-background-color: transparent;
-    -fx-border-width: 1;
-    -fx-padding: 2 12 2 12;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-    -fx-cursor: hand;
-}
-.chip-s { -fx-border-color: #ff2fa0; -fx-text-fill: #ff2fa0; }
-.chip-a { -fx-border-color: #ff8a1f; -fx-text-fill: #ff8a1f; }
-.chip-b { -fx-border-color: #fcee0a; -fx-text-fill: #fcee0a; }
-.chip-c { -fx-border-color: #39ff88; -fx-text-fill: #39ff88; }
-.chip-d { -fx-border-color: #2fd8ff; -fx-text-fill: #2fd8ff; }
-.chip-f { -fx-border-color: #9b6bff; -fx-text-fill: #9b6bff; }
-.chip-tier:hover { -fx-effect: dropshadow(gaussian, rgba(242,242,242,0.35), 6, 0.2, 0, 0); }
-.chip-tier.chip-activo { -fx-text-fill: #08080a; }
-.chip-s.chip-activo { -fx-background-color: #ff2fa0; }
-.chip-a.chip-activo { -fx-background-color: #ff8a1f; }
-.chip-b.chip-activo { -fx-background-color: #fcee0a; }
-.chip-c.chip-activo { -fx-background-color: #39ff88; }
-.chip-d.chip-activo { -fx-background-color: #2fd8ff; }
-.chip-f.chip-activo { -fx-background-color: #9b6bff; }

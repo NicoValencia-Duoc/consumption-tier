@@ -26,6 +26,7 @@ public class VentanaPrincipal extends VBox {
 
     private final List<ItemConsumption> items;
     private final RepositorioJson repositorio;
+    private final Preferencias preferencias;
     private final Cabecera cabecera;
     private final StackPane contenido = new StackPane();
     private String pestanaActual = "INICIO";
@@ -36,6 +37,7 @@ public class VentanaPrincipal extends VBox {
                             Preferencias preferencias) {
         this.items = items;
         this.repositorio = repositorio;
+        this.preferencias = preferencias;
         setSpacing(14);
         setPadding(new Insets(20, 28, 20, 28));
 
@@ -45,11 +47,19 @@ public class VentanaPrincipal extends VBox {
         VBox.setVgrow(zona, Priority.ALWAYS);
         getChildren().addAll(cabecera, zona, new BarraMusica(reproductor));
 
-        mostrar("INICIO");
+        String inicial = preferencias.getUltimaPestana();
+        cabecera.marcarActiva(inicial);
+        mostrar(inicial);
     }
 
     private void mostrar(String pestana) {
         pestanaActual = pestana;
+
+        if (!pestana.equals(preferencias.getUltimaPestana())) {
+            preferencias.setUltimaPestana(pestana);
+            preferencias.guardar();
+        }
+
         Node pagina = switch (pestana) {
             case "JUEGOS" -> paginaJuegos();
             case "LIBROS" -> paginaLibros();
@@ -80,47 +90,47 @@ public class VentanaPrincipal extends VBox {
 
     private Node paginaJuegos() {
         List<Juego> juegos = items.stream().filter(Juego.class::isInstance).map(Juego.class::cast).toList();
-        PaginaTabla<Juego> p = new PaginaTabla<>("JUEGOS", juegos);
-        p.agregarColumna("PLATAFORMA", Juego::getPlataforma);
-        p.agregarColumna("GENERO", Juego::getGenero);
-        p.agregarColumna("DESARROLLADORA", Juego::getDesarrollador);
-        p.agregarColumna("AÑO", Juego::getAnio);
-        p.agregarColumna("HORAS", Juego::getHorasJugadas);
+        PaginaTabla<Juego> p = new PaginaTabla<>("JUEGOS", juegos, preferencias);
+        p.agregarColumna("plataforma", "PLATAFORMA", Juego::getPlataforma, true);
+        p.agregarColumna("genero", "GENERO", Juego::getGenero, true);
+        p.agregarColumna("desarrollador", "DESARROLLADORA", Juego::getDesarrollador, false);
+        p.agregarColumna("anio", "AÑO", Juego::getAnio, false);
+        p.agregarColumna("horas", "HORAS", Juego::getHorasJugadas, false);
         conectar(p, FormularioJuego::new);
         return p;
     }
 
     private Node paginaLibros() {
         List<Libro> libros = items.stream().filter(Libro.class::isInstance).map(Libro.class::cast).toList();
-        PaginaTabla<Libro> p = new PaginaTabla<>("LIBROS", libros);
-        p.agregarColumna("AUTOR", Libro::getAutor);
-        p.agregarColumna("GENERO", Libro::getGenero);
-        p.agregarColumna("PAGINAS", Libro::getPaginas);
-        p.agregarColumna("AÑO", Libro::getAnio);
+        PaginaTabla<Libro> p = new PaginaTabla<>("LIBROS", libros, preferencias);
+        p.agregarColumna("autor", "AUTOR", Libro::getAutor, true);
+        p.agregarColumna("genero", "GENERO", Libro::getGenero, true);
+        p.agregarColumna("paginas", "PAGINAS", Libro::getPaginas, false);
+        p.agregarColumna("anio", "AÑO", Libro::getAnio, false);
         conectar(p, FormularioLibro::new);
         return p;
     }
 
     private Node paginaPeliculas() {
         List<Pelicula> peliculas = items.stream().filter(Pelicula.class::isInstance).map(Pelicula.class::cast).toList();
-        PaginaTabla<Pelicula> p = new PaginaTabla<>("PELICULAS", peliculas);
-        p.agregarColumna("DIRECTOR", Pelicula::getDirector);
-        p.agregarColumna("GENERO", Pelicula::getGenero);
-        p.agregarColumna("DURACION (MIN)", Pelicula::getDuracionMin);
-        p.agregarColumna("AÑO", Pelicula::getAnio);
+        PaginaTabla<Pelicula> p = new PaginaTabla<>("PELICULAS", peliculas, preferencias);
+        p.agregarColumna("director", "DIRECTOR", Pelicula::getDirector, true);
+        p.agregarColumna("genero", "GENERO", Pelicula::getGenero, true);
+        p.agregarColumna("duracion", "DURACION (MIN)", Pelicula::getDuracionMin, false);
+        p.agregarColumna("anio", "AÑO", Pelicula::getAnio, false);
         conectar(p, FormularioPelicula::new);
         return p;
     }
 
     private Node paginaSeries() {
         List<Serie> series = items.stream().filter(Serie.class::isInstance).map(Serie.class::cast).toList();
-        PaginaTabla<Serie> p = new PaginaTabla<>("SERIES", series);
-        p.agregarColumna("CREADOR", Serie::getCreador);
-        p.agregarColumna("GENERO", Serie::getGenero);
-        p.agregarColumna("TEMPORADAS", Serie::getTemporadas);
-        p.agregarColumna("EPISODIOS", Serie::getEpisodios);
-        p.agregarColumna("AÑO", Serie::getAnio);
-        p.agregarColumna("ORIGEN", s -> s.getOrigen().isEmpty() ? "-" : s.getOrigen());
+        PaginaTabla<Serie> p = new PaginaTabla<>("SERIES", series, preferencias);
+        p.agregarColumna("creador", "CREADOR", Serie::getCreador, true);
+        p.agregarColumna("genero", "GENERO", Serie::getGenero, true);
+        p.agregarColumna("temporadas", "TEMPORADAS", Serie::getTemporadas, false);
+        p.agregarColumna("episodios", "EPISODIOS", Serie::getEpisodios, false);
+        p.agregarColumna("anio", "AÑO", Serie::getAnio, false);
+        p.agregarColumna("origen", "ORIGEN", s -> s.getOrigen().isEmpty() ? "-" : s.getOrigen(), false);
         conectar(p, FormularioSerie::new);
         return p;
     }
@@ -128,9 +138,9 @@ public class VentanaPrincipal extends VBox {
     private Node paginaPendientes() {
         List<ItemConsumption> pendientes = items.stream()
                 .filter(i -> i.getEstado() == Estado.PENDIENTE).toList();
-        PaginaTabla<ItemConsumption> p = new PaginaTabla<>("PENDIENTES", pendientes);
-        p.agregarColumna("TIPO", ItemConsumption::getTipo);
-        p.agregarColumna("GENERO", ItemConsumption::getGenero);
+        PaginaTabla<ItemConsumption> p = new PaginaTabla<>("PENDIENTES", pendientes, preferencias);
+        p.agregarColumna("tipo", "TIPO", ItemConsumption::getTipo, true);
+        p.agregarColumna("genero", "GENERO", ItemConsumption::getGenero, true);
         conectarComunes(p);
         p.setAlAgregar(this::agregarPendiente);
         p.setAlEditar(this::editarPendiente);
@@ -147,6 +157,7 @@ public class VentanaPrincipal extends VBox {
                 guardarYRefrescar();
             }
         });
+        pagina.montar();
     }
 
     private <T extends ItemConsumption> void conectar(PaginaTabla<T> pagina, Supplier<FormularioItem<T>> formulario) {
