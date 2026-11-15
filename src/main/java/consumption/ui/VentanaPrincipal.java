@@ -76,7 +76,7 @@ public class VentanaPrincipal extends VBox {
 
     private void actualizarContadores() {
         Map<String, Integer> cantidades = new LinkedHashMap<>();
-        cantidades.put("INICIO", (int) items.stream().filter(i -> i.getEstado() != Estado.PENDIENTE).count());
+        cantidades.put("INICIO", items.size());
         cantidades.put("JUEGOS", contar(Juego.class));
         cantidades.put("LIBROS", contar(Libro.class));
         cantidades.put("PELICULAS", contar(Pelicula.class));
