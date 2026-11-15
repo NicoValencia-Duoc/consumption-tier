@@ -48,7 +48,9 @@ public class PaginaDetalle extends VBox{
             fila++;
         }
 
-        Label tituloComentario = new Label("COMENTARIO");
+        String conQuien = item.getConQuien();
+        Label tituloComentario = new Label(conQuien.isEmpty()
+                ? "COMENTARIO" : "COMENTARIO · CON " + conQuien.toUpperCase());
         tituloComentario.getStyleClass().add("subtitulo");
 
         TextArea comentario = new TextArea(item.getComentario());

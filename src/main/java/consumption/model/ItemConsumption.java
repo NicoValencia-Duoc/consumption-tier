@@ -10,6 +10,7 @@ public abstract class ItemConsumption {
 
     public static final int MAX_COMENTARIO = 500;
     public static final int MAX_VECES = 999;
+    public static final int MAX_CON_QUIEN = 40;
     private String titulo;
     private double nota;
     private Estado estado;
@@ -21,6 +22,7 @@ public abstract class ItemConsumption {
     private boolean favorito;
     private String rutaImagen;
     private int vecesRepetido;
+    private String conQuien = "";
     private Integer vecesConsumido;
     private boolean sinFechaInicio;
     private boolean sinFechaTermino;
@@ -65,6 +67,10 @@ public abstract class ItemConsumption {
     public String getComentario() {
         return comentario == null ? "" : comentario;
     }
+    public String getConQuien() {
+        return conQuien == null ? "" : conQuien;
+    }
+
     public boolean isSinFechaInicio() { return sinFechaInicio; }
     public boolean isSinFechaTermino() { return sinFechaTermino; }
 
@@ -136,6 +142,14 @@ public abstract class ItemConsumption {
 
     public void setRutaImagen(String r) {
         this.rutaImagen = r;
+    }
+
+    public void setConQuien(String c) {
+        String t = (c == null) ? "" : c.trim();
+        if (t.length() > MAX_CON_QUIEN) {
+            throw new IllegalArgumentException("Con quien admite maximo " + MAX_CON_QUIEN + " caracteres.");
+        }
+        this.conQuien = t;
     }
 
     public void setVecesConsumido(int v) {

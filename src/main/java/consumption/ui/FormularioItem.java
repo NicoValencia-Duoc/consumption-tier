@@ -86,6 +86,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     private final HBox notaViva = new HBox(10);
     private final TextField repeticiones = new TextField("0");
     private final TextArea comentario = new TextArea();
+    private final TextField conQuien = new TextField();
 
     private boolean modificado;
     private boolean descarteConfirmado;
@@ -156,6 +157,10 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         }
         agregarFila("NOTA FINAL", notaViva);
         nuevaSeccion("COMENTARIO");
+        conQuien.setPromptText("Opcional · por ejemplo, Mati");
+        conQuien.setTextFormatter(new TextFormatter<String>(cambio ->
+                cambio.getControlNewText().length() <= ItemConsumption.MAX_CON_QUIEN ? cambio : null));
+        agregarFila("CON QUIEN", conQuien);
         comentario.setWrapText(true);
         comentario.setPrefRowCount(4);
         comentario.setPromptText("Opcional · hasta " + ItemConsumption.MAX_COMENTARIO + " caracteres");
@@ -163,6 +168,13 @@ public abstract class FormularioItem<T extends ItemConsumption> {
                 cambio.getControlNewText().length() <= ItemConsumption.MAX_COMENTARIO ? cambio : null));
         HBox.setHgrow(comentario, Priority.ALWAYS);
         agregarFila("COMENTARIO", comentario);
+
+        Label contadorComentario = new Label();
+        contadorComentario.getStyleClass().add("subtitulo");
+        contadorComentario.setPadding(new Insets(0, 0, 0, 160));
+        contadorComentario.textProperty().bind(
+                comentario.textProperty().length().asString("%d/" + ItemConsumption.MAX_COMENTARIO));
+        seccionActual.getChildren().add(contadorComentario);
 
         if (existente != null) cargar(existente);
         aplicarVisibilidad();
@@ -611,6 +623,10 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         item.setSinFechaInicio(sinIni);
         item.setSinFechaTermino(sinFin);
         item.setVecesConsumido(veces);
+        item.setComentario(textoComentario);
+        item.setConQuien(conQuien.getText());
+        notas.forEach(item::setCriterio);
+    }
 
     private void cargar(T item) {
         titulo.setText(item.getTitulo());
@@ -622,6 +638,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
             sinTermino.setSelected(item.isSinFechaTermino());
         repeticiones.setText(String.valueOf(item.getVecesConsumido()));
         comentario.setText(item.getComentario());
+        conQuien.setText(item.getConQuien());
         item.getCriterios().forEach((nombre, valor) -> {
             FilaCriterio fila = criterios.get(nombre);
             if (fila != null) fila.setValor(valor);
