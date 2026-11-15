@@ -4,6 +4,7 @@ import consumption.data.EstadoTabla;
 import consumption.data.ExportadorCsv;
 import consumption.data.Preferencias;
 import consumption.model.Estado;
+import consumption.model.Formato;
 import consumption.model.ItemConsumption;
 import consumption.model.Transicion;
 
@@ -209,7 +210,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
                     return;
                 }
                 T item = getTableView().getItems().get(fila);
-                setText(String.format("%.1f", item.getNota()));
+                setText(Formato.decimal(item.getNota()));
                 setGraphic(EtiquetaTier.de(item, "tier-chico"));
                 setContentDisplay(ContentDisplay.RIGHT);
                 setGraphicTextGap(8);
@@ -567,6 +568,19 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         TableColumn<T, Object> c = new TableColumn<>(titulo);
         c.setId(id);
         c.setCellValueFactory(d -> new ReadOnlyObjectWrapper<>(extractor.apply(d.getValue())));
+        c.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Object valor, boolean vacio) {
+                super.updateItem(valor, vacio);
+                if (vacio || valor == null) {
+                    setText(null);
+                } else if (valor instanceof Double decimal) {
+                    setText(Formato.decimal(decimal));
+                } else {
+                    setText(valor.toString());
+                }
+            }
+        });
         c.sortTypeProperty().addListener((obs, antes, ahora) -> guardarOrden());
         return c;
     }

@@ -3,6 +3,7 @@ package consumption.ui;
 import consumption.data.GestorImagenes;
 import consumption.model.ItemConsumption;
 import consumption.model.Estado;
+import consumption.model.Formato;
 import consumption.model.ReglasInicio;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -67,7 +68,7 @@ public class TarjetaItem extends VBox {
         if (pendiente) {
             fila = new HBox(estado);
         } else {
-            Label nota = new Label(String.format("%.1f", item.getNota()));
+            Label nota = new Label(Formato.decimal(item.getNota()));
             nota.getStyleClass().add("nota");
             Region espacio = new Region();
             HBox.setHgrow(espacio, Priority.ALWAYS);

@@ -3,6 +3,7 @@ package consumption.ui;
 
 import consumption.model.ItemConsumption;
 import consumption.model.Estado;
+import consumption.model.Formato;
 import consumption.model.ReglasInicio;
 import consumption.model.Transicion;
 
@@ -26,7 +27,7 @@ public class PaginaDetalle extends VBox{
         titulo.getStyleClass().add("titulo-detalle");
         Label resumen = new Label(item.getTipo() + " · " + item.getEstado().getEtiqueta());
         resumen.getStyleClass().add("subtitulo");
-        Label nota = new Label(String.format("NOTA FINAL %.1f", item.getNota()));
+        Label nota = new Label("NOTA FINAL " + Formato.decimal(item.getNota()));
         nota.getStyleClass().add("nota");
         EtiquetaTier tier = EtiquetaTier.de(item, "tier-grande");
         HBox filaNota = new HBox(12, nota);
@@ -41,7 +42,7 @@ public class PaginaDetalle extends VBox{
         for (String nombre : item.getNombresCriterios()){
 
             Double valor = item.getCriterios().get(nombre);
-            Label numero = new Label(valor == null ? "N/A" : String.format("%.1f", valor));
+            Label numero = new Label(valor == null ? "N/A" : Formato.decimal(valor));
             numero.getStyleClass().add("valor-criterio");
             criterios.add(new Label(nombre), 0, fila);
             criterios.add(numero, 1, fila);
@@ -55,7 +56,7 @@ public class PaginaDetalle extends VBox{
 
         TextArea comentario = new TextArea(item.getComentario());
         comentario.setWrapText(true);
-        comentario.setPromptText("Escribre lo que te parecio...");
+        comentario.setPromptText("Escribe lo que te parecio...");
         comentario.setPrefRowCount(6);
         comentario.setTextFormatter(new TextFormatter<String>(cambio -> cambio.getControlNewText().length() <= ItemConsumption.MAX_COMENTARIO ? cambio : null));
 

@@ -17,8 +17,7 @@ public class Estadisticas {
         double promedio = conNota.stream().mapToDouble(ItemConsumption::getNota).average().orElse(0);
         String mejor = conNota.stream()
                 .max(Comparator.comparingDouble(ItemConsumption::getNota))
-                .map(i -> i.getTitulo() + " (" + String.format("%.1f", i.getNota()) + ")")
-                .orElse("-");
+                .map(i -> i.getTitulo() + " (" + Formato.decimal(i.getNota()) + ")")                .orElse("-");
 
         return new Resumen(nombre, items.size(),
                 contar(items, Estado.TERMINADO), contar(items, Estado.EN_PROGRESO),

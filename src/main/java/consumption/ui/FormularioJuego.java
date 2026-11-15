@@ -1,6 +1,7 @@
 package consumption.ui;
 
 import consumption.model.Estado;
+import consumption.model.Formato;
 import consumption.model.Juego;
 
 import javafx.scene.control.TextField;
@@ -33,7 +34,7 @@ public class FormularioJuego extends FormularioItem<Juego> {
         genero.setText(j.getGenero());
         desarrollador.setText(j.getDesarrollador());
         anio.setText(String.valueOf(j.getAnio()));
-        horas.setText(String.valueOf(j.getHorasJugadas()));
+        horas.setText(Formato.decimal(j.getHorasJugadas()));
     }
 
     @Override protected Juego crear(String titulo, double nota, Estado estado) {

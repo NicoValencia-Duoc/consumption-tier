@@ -1,5 +1,6 @@
 package consumption.ui;
 
+import consumption.model.Formato;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Pos;
@@ -72,7 +73,7 @@ public class FilaCriterio extends HBox {
 
     private void refrescar() {
         Double v = valor.get();
-        texto.setText(v == null ? "N/A" : String.format("%.1f", v));
+        texto.setText(v == null ? "N/A" : Formato.decimal(v));
         deslizador.setOpacity(v == null ? 0.4 : 1);
     }
 }

@@ -2,6 +2,7 @@ package consumption.ui;
 
 import consumption.data.GestorImagenes;
 import consumption.model.Estado;
+import consumption.model.Formato;
 import consumption.model.ItemConsumption;
 import consumption.model.Tier;
 
@@ -446,7 +447,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
             return;
         }
         double nota = (calculada != null) ? calculada : anterior;
-        Label numero = new Label(String.format("%.1f", nota));
+        Label numero = new Label(Formato.decimal(nota));
         numero.getStyleClass().add("nota");
         notaViva.getChildren().addAll(numero, new EtiquetaTier(Tier.de(nota), null));
     }

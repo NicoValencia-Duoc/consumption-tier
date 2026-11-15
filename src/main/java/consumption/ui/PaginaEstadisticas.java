@@ -38,9 +38,9 @@ public class PaginaEstadisticas extends VBox {
         ColumnConstraints mitad = new ColumnConstraints();
         mitad.setPercentWidth(50);
         paneles.getColumnConstraints().addAll(mitad, mitad);
-        paneles.add(panel(Estadisticas.resumir("JUEGOS", juegos), "HORAS JUGADAS", String.format("%.1f", horasJuego)), 0, 0);
+        paneles.add(panel(Estadisticas.resumir("JUEGOS", juegos), "HORAS JUGADAS", Formato.decimal(horasJuego)), 0, 0);
         paneles.add(panel(Estadisticas.resumir("LIBROS", libros), "PAGINAS (TERMINADOS)", String.valueOf(paginas)), 1, 0);
-        paneles.add(panel(Estadisticas.resumir("PELICULAS", peliculas), "HORAS (TERMINADAS)", String.format("%.1f", horasPeliculas)), 0, 1);
+        paneles.add(panel(Estadisticas.resumir("PELICULAS", peliculas), "HORAS (TERMINADAS)", Formato.decimal(horasPeliculas)), 0, 1);
         paneles.add(panel(Estadisticas.resumir("SERIES", series), "EPISODIOS (TERMINADAS)", String.valueOf(episodios)), 1, 1);
 
         Label herramientas = new Label("RESPALDO DE TUS DATOS (INCLUYE LAS IMAGENES)");
@@ -76,7 +76,7 @@ public class PaginaEstadisticas extends VBox {
                 {"EN PROGRESO", String.valueOf(r.enProgreso())},
                 {"ABANDONADOS", String.valueOf(r.abandonados())},
                 {"PENDIENTES", String.valueOf(r.pendientes())},
-                {"NOTA PROMEDIO", r.notaPromedio() > 0 ? String.format("%.1f", r.notaPromedio()) : "-"},
+                {"NOTA PROMEDIO", r.notaPromedio() > 0 ? Formato.decimal(r.notaPromedio()) : "-"},
                 {"MEJOR VALORADO", r.mejor()},
                 {etiquetaExtra, valorExtra}};
 
