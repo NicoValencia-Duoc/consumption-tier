@@ -64,7 +64,7 @@ Varias licencias son **no comerciales** (NC) o **sin obra derivada** (ND): este 
 
 ## Tipografías
 
-[Orbitron](https://fonts.google.com/specimen/Orbitron) y [Rajdhani](https://fonts.google.com/specimen/Rajdhani), de Google Fonts, bajo licencia SIL Open Font License.
+[Orbitron](https://fonts.google.com/specimen/Orbitron), [Rajdhani](https://fonts.google.com/specimen/Rajdhani) y [Share Tech Mono](https://fonts.google.com/specimen/Share+Tech+Mono), de Google Fonts, bajo licencia SIL Open Font License.
 
 ## Estructura
 

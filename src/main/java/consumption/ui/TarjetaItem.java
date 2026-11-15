@@ -61,12 +61,16 @@ public class TarjetaItem extends VBox {
         Label titulo = new Label(item.getTitulo());
         titulo.getStyleClass().add("titulo-item");
 
-        Label estado = new Label(item.getEstado().getEtiqueta());
+        Label estado = new Label(pendiente ? "SIN DEVORAR" : item.getEstado().getEtiqueta());
         estado.getStyleClass().addAll("estado", item.getEstado().getClaseCss());
 
         HBox fila;
         if (pendiente) {
-            fila = new HBox(estado);
+            Label vacia = new Label("░.░");
+            vacia.getStyleClass().add("nota-vacia");
+            Region espacio = new Region();
+            HBox.setHgrow(espacio, Priority.ALWAYS);
+            fila = new HBox(vacia, espacio, estado);
         } else {
             Label nota = new Label(Formato.decimal(item.getNota()));
             nota.getStyleClass().add("nota");

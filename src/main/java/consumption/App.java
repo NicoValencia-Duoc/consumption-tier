@@ -74,7 +74,8 @@ public class App extends Application {
     private void aplicarTema() {
         String base = getClass().getResource("/consumption/base.css").toExternalForm();
         String actual = getClass().getResource(tema.getRecurso()).toExternalForm();
-        scena.getStylesheets().setAll(base, actual);
+        String estilo = getClass().getResource("/consumption/estilo.css").toExternalForm();
+        scena.getStylesheets().setAll(base, estilo, actual);
         scena.setFill(javafx.scene.paint.Color.web(tema.getFondo()));
     }
 

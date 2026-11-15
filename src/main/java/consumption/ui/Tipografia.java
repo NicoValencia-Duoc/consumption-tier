@@ -9,7 +9,8 @@ public class Tipografia {
 
     private static final String[] ARCHIVOS = {
             "Orbitron-Regular.ttf", "Orbitron-Bold.ttf",
-            "Rajdhani-Regular.ttf", "Rajdhani-Bold.ttf"};
+            "Rajdhani-Regular.ttf", "Rajdhani-Bold.ttf",
+            "ShareTechMono-Regular.ttf"};
 
     public static void cargar() {
         for (String archivo : ARCHIVOS) {

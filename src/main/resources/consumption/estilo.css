@@ -1,0 +1,134 @@
+/* =====================================================================
+   ESTILO TERMINAL - parte 1
+   Va despues de base.css y antes del tema. No define colores propios:
+   usa las variables de cada tema (-c-bg -c-pn -c-ln -c-tx -c-mt -c-y
+   -c-yt -c-r -c-g -c-gr -c-acento), asi funciona en los 6 temas.
+   ===================================================================== */
+
+/* ----- Todo sin esquinas redondas ----- */
+.button, .toggle-button, .menu-button,
+.text-field, .text-area, .text-area .content, .combo-box, .buscador {
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+}
+
+/* ----- Tipografia "de maquina": monoespaciada ----- */
+.subtitulo, .etiqueta-form, .error-campo, .mensaje-error, .tiempo, .cancion,
+.dias-en-curso, .tipo, .estado, .contador-seleccion, .barrita-texto,
+.cal-dia-nombre, .globo, .aviso-maw, .aviso-boton,
+.table-cell, .table-view .column-header .label, .table-view .placeholder .label,
+.pestana, .filtro, .chip, .chip-tier, .boton-musica, .cal-nav, .cal-dia,
+.text-field, .text-area, .buscador,
+.combo-box .list-cell, .combo-box-popup .list-cell,
+.context-menu .menu-item .label,
+.dialog-pane .button, .dialog-pane .button.boton-dialogo {
+    -fx-font-family: "Share Tech Mono", "Consolas";
+    -fx-font-weight: normal;
+}
+.pestana, .filtro { -fx-font-size: 13px; }
+.table-cell { -fx-font-size: 14px; }
+.text-field, .text-area, .buscador { -fx-font-size: 14px; }
+
+/* ----- Pestanas: la activa es un bloque lleno ----- */
+.pestana-barra {
+    -fx-font-family: "Share Tech Mono", "Consolas";
+    -fx-font-weight: normal;
+    -fx-font-size: 14px;
+    -fx-border-width: 0;
+    -fx-padding: 6 12 6 12;
+}
+.pestana-barra:hover { -fx-text-fill: -c-y; }
+.pestana-barra-activa {
+    -fx-background-color: -c-y;
+    -fx-text-fill: -c-yt;
+    -fx-border-color: transparent;
+}
+.pestana-barra-activa:hover { -fx-text-fill: -c-yt; }
+.cabecera { -fx-border-color: transparent transparent -c-ln transparent; }
+
+/* ----- Botones con caja ----- */
+.pestana:hover, .filtro:hover { -fx-background-color: -c-pn; }
+.boton-accion:hover { -fx-background-color: -c-y; -fx-text-fill: -c-yt; }
+.boton-peligro:hover { -fx-background-color: -c-r; -fx-text-fill: -c-bg; }
+.filtro-activo { -fx-background-color: -c-r; -fx-text-fill: -c-bg; }
+.filtro-activo:hover { -fx-background-color: -c-r; -fx-text-fill: -c-bg; }
+
+/* ----- Campos ----- */
+.text-field, .text-area, .buscador, .combo-box {
+    -fx-highlight-fill: -c-y;
+    -fx-highlight-text-fill: -c-yt;
+}
+.text-field:focused, .text-area:focused, .buscador:focused, .combo-box:focused {
+    -fx-border-color: -c-y;
+}
+.slider .track, .slider .thumb { -fx-background-radius: 0; }
+
+/* ----- Tarjetas de INICIO ----- */
+.tarjeta:hover { -fx-border-color: -c-acento; }
+/* Pendiente: la nota vacia en lugar de un numero */
+.nota-vacia {
+    -fx-font-family: "Share Tech Mono", "Consolas";
+    -fx-font-size: 20px;
+    -fx-text-fill: -c-gr;
+}
+
+/* ----- Titulo de las tablas: se lee como un prompt ----- */
+.titulo-terminal {
+    -fx-font-family: "Share Tech Mono", "Consolas";
+    -fx-font-size: 18px;
+    -fx-text-fill: -c-acento;
+}
+
+/* ----- Barra de seleccion: roja, la unica cosa roja de la tabla ----- */
+.barra-seleccion { -fx-border-color: -c-r; -fx-border-width: 1 1 1 4; }
+.contador-seleccion { -fx-text-fill: -c-r; }
+
+/* ----- Dialogos: ventanas de terminal con barra de titulo amarilla ----- */
+.dialog-pane {
+    -fx-background-color: -c-bg;
+    -fx-border-color: -c-y;
+    -fx-border-width: 1;
+}
+.dialog-pane > .header-panel {
+    -fx-background-color: -c-y;
+    -fx-border-color: transparent;
+}
+.dialog-pane > .header-panel .label {
+    -fx-text-fill: -c-yt;
+    -fx-effect: null;
+}
+.dialog-pane .button:hover { -fx-border-color: -c-y; -fx-text-fill: -c-y; }
+.dialog-pane .button.boton-dialogo:hover { -fx-border-color: -c-y; }
+.seccion-form {
+    -fx-font-family: "Share Tech Mono", "Consolas";
+    -fx-font-weight: normal;
+    -fx-font-size: 13px;
+}
+
+/* ----- Menus emergentes ----- */
+.context-menu { -fx-border-color: -c-y; }
+
+/* ----- Barras de desplazamiento: finas y cuadradas ----- */
+.scroll-bar { -fx-background-color: transparent; -fx-padding: 0; }
+.scroll-bar .track {
+    -fx-background-color: -c-pn;
+    -fx-background-radius: 0;
+    -fx-border-color: -c-ln;
+    -fx-border-radius: 0;
+}
+.scroll-bar .thumb {
+    -fx-background-color: -c-ln;
+    -fx-background-radius: 0;
+    -fx-background-insets: 1;
+}
+.scroll-bar .thumb:hover, .scroll-bar .thumb:pressed { -fx-background-color: -c-acento; }
+.scroll-bar .increment-button, .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+.scroll-bar .increment-arrow, .scroll-bar .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+.scroll-bar:vertical { -fx-pref-width: 10; }
+.scroll-bar:horizontal { -fx-pref-height: 10; }

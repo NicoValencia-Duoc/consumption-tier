@@ -65,7 +65,7 @@ public class Aviso extends StackPane {
         this.alDeshacer = alDeshacer;
         this.alConfirmar = alConfirmar;
 
-        texto.setText(mensaje);
+        texto.setText("[ OK ] " + mensaje);
         boolean conBoton = alDeshacer != null;
         deshacer.setVisible(conBoton);
         deshacer.setManaged(conBoton);

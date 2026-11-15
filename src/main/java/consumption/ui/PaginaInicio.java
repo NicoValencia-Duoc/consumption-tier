@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 public class PaginaInicio extends VBox {
 
     private static final String[] FILTROS =
-            {"TODO", "JUEGOS", "LIBROS", "PELICULAS", "SERIES", "FAVORITOS", "PENDIENTES"};
+            {"TODO", "JUEGOS", "LIBROS", "PELICULAS", "SERIES", "FAVORITOS", "SIN DEVORAR"};
 
     private final List<ItemConsumption> items;
     private final Consumer<ItemConsumption> alAbrir;
@@ -32,7 +32,7 @@ public class PaginaInicio extends VBox {
     private final Consumer<String> alAgregarTipo;
     private final ScrollPane scroll;
     private final VBox bienvenida;
-    private final Label sinResultados = new Label("NADA QUE MOSTRAR CON ESTE FILTRO");
+    private final Label sinResultados = new Label("( ◉ ) NADA RESPONDE A ESE FILTRO");
     private String filtroActual = "TODO";
     private Tier tierActual = null;
 
@@ -162,8 +162,8 @@ public class PaginaInicio extends VBox {
 
         long pendientes = visibles.stream().filter(i -> i.getEstado() == Estado.PENDIENTE).count();
         String texto = visibles.size() + (visibles.size() == 1 ? " ITEM" : " ITEMS");
-        if (pendientes > 0) texto += " · " + pendientes + (pendientes == 1 ? " PENDIENTE" : " PENDIENTES");
-        subtitulo.setText(texto + " · ORDENADOS POR " + orden.getValue());
+        if (pendientes > 0) texto += " · " + pendientes + " SIN DEVORAR";
+        subtitulo.setText("// " + texto + " · ORDENADOS POR " + orden.getValue());
 
         boolean sinNada = items.isEmpty();
         bienvenida.setVisible(sinNada);
@@ -175,7 +175,7 @@ public class PaginaInicio extends VBox {
         return switch (filtroActual) {
             case "JUEGOS", "LIBROS", "PELICULAS", "SERIES" -> i.getTipo().equals(filtroActual);
             case "FAVORITOS" -> i.isFavorito();
-            case "PENDIENTES" -> i.getEstado() == Estado.PENDIENTE;
+            case "SIN DEVORAR" -> i.getEstado() == Estado.PENDIENTE;
             default -> true;
         };
     }

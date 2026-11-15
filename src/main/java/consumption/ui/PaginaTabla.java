@@ -110,13 +110,13 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         tabla.setSortPolicy(t -> t.getItems() instanceof SortedList
                 ? Boolean.TRUE
                 : TableView.DEFAULT_SORT_POLICY.call(t));
-        tabla.setPlaceholder(new Label("SIN REGISTROS · THE MAW TIENE HAMBRE"));
+        tabla.setPlaceholder(new Label("( ◉ ) ALGO RESPIRA AQUI · SIN REGISTROS"));
         VBox.setVgrow(tabla, Priority.ALWAYS);
 
         Label titulo = new Label();
-        titulo.getStyleClass().add("subtitulo");
+        titulo.getStyleClass().add("titulo-terminal");
         titulo.textProperty().bind(Bindings.createStringBinding(
-                () -> ReglasTabla.textoRegistros(nombreTipo, filtrada.size()), filtrada));
+                () -> "> " + ReglasTabla.textoRegistros(nombreTipo, filtrada.size()), filtrada));
 
         Button agregar = new Button("+ AGREGAR");
         agregar.getStyleClass().addAll("pestana", "boton-accion");
