@@ -2,17 +2,24 @@ package consumption.ui;
 
 import consumption.data.GestorImagenes;
 import consumption.model.ItemConsumption;
-
+import consumption.model.Estado;
+import consumption.model.ReglasInicio;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.control.Tooltip;
+import java.time.LocalDate;
 
 public class TarjetaItem extends VBox {
+
+    private static final ColorAdjust GRISES = new ColorAdjust(0, -1, -0.15, 0);
     public TarjetaItem(ItemConsumption item){
+
+        boolean pendiente = item.getEstado() == Estado.PENDIENTE;
 
         getStyleClass().add("tarjeta");
         setSpacing(8);
@@ -53,18 +60,36 @@ public class TarjetaItem extends VBox {
         Label titulo = new Label(item.getTitulo());
         titulo.getStyleClass().add("titulo-item");
 
-        Label nota = new Label(String.format("%.1f", item.getNota()));
-        nota.getStyleClass().add("nota");
-
         Label estado = new Label(item.getEstado().getEtiqueta());
         estado.getStyleClass().addAll("estado", item.getEstado().getClaseCss());
 
-        Region espacio = new Region();
-        HBox.setHgrow(espacio, Priority.ALWAYS);
-        HBox fila = new HBox(nota, espacio, estado);
+        HBox fila;
+        if (pendiente) {
+            fila = new HBox(estado);
+        } else {
+            Label nota = new Label(String.format("%.1f", item.getNota()));
+            nota.getStyleClass().add("nota");
+            Region espacio = new Region();
+            HBox.setHgrow(espacio, Priority.ALWAYS);
+            fila = new HBox(nota, espacio, estado);
+        }
         fila.setAlignment(Pos.CENTER_LEFT);
 
         getChildren().addAll(miniatura, titulo, fila);
+
+        String dias = ReglasInicio.textoDias(item, LocalDate.now());
+        if (dias != null) {
+            Label diasEnCurso = new Label(dias);
+            diasEnCurso.getStyleClass().add("dias-en-curso");
+            getChildren().add(diasEnCurso);
+        }
+
+        if (pendiente) {
+            getStyleClass().add("tarjeta-pendiente");
+            miniatura.setEffect(GRISES);
+            hoverProperty().addListener((obs, antes, ahora) -> miniatura.setEffect(ahora ? null : GRISES));
+        }
+
         Tooltip globo = TooltipoComentario.de(item.getComentario());
         if (globo != null) Tooltip.install(this, globo);
     }

@@ -407,3 +407,36 @@
 }
 .context-menu .menu-item:focused { -fx-background-color: -c-y; }
 .context-menu .menu-item:focused .label { -fx-text-fill: -c-yt; }
+
+/* ===== INICIO: pendientes apagados, chips de tier, dias en curso ===== */
+.tarjeta-pendiente {
+    -fx-opacity: 0.45;
+    -fx-border-color: -c-gr;
+    -fx-border-style: dashed;
+}
+.tarjeta-pendiente:hover { -fx-opacity: 1; }
+
+.dias-en-curso { -fx-text-fill: -c-y; -fx-font-size: 11px; -fx-font-weight: bold; }
+
+.chip-tier {
+    -fx-background-color: transparent;
+    -fx-border-width: 1;
+    -fx-padding: 2 12 2 12;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+.chip-s { -fx-border-color: #ff2fa0; -fx-text-fill: #ff2fa0; }
+.chip-a { -fx-border-color: #ff8a1f; -fx-text-fill: #ff8a1f; }
+.chip-b { -fx-border-color: #fcee0a; -fx-text-fill: #fcee0a; }
+.chip-c { -fx-border-color: #39ff88; -fx-text-fill: #39ff88; }
+.chip-d { -fx-border-color: #2fd8ff; -fx-text-fill: #2fd8ff; }
+.chip-f { -fx-border-color: #9b6bff; -fx-text-fill: #9b6bff; }
+.chip-tier:hover { -fx-effect: dropshadow(gaussian, rgba(242,242,242,0.35), 6, 0.2, 0, 0); }
+.chip-tier.chip-activo { -fx-text-fill: #08080a; }
+.chip-s.chip-activo { -fx-background-color: #ff2fa0; }
+.chip-a.chip-activo { -fx-background-color: #ff8a1f; }
+.chip-b.chip-activo { -fx-background-color: #fcee0a; }
+.chip-c.chip-activo { -fx-background-color: #39ff88; }
+.chip-d.chip-activo { -fx-background-color: #2fd8ff; }
+.chip-f.chip-activo { -fx-background-color: #9b6bff; }

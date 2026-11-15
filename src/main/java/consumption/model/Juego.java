@@ -50,6 +50,9 @@ public class Juego extends ItemConsumption{
     public String getDesarrollador(){
         return desarrollador;
     }
+    @Override public String textoBusqueda() {
+        return unir(super.textoBusqueda(), getDesarrollador(), getPlataforma());
+    }
     public int getAnio() {
         return anio;
     }

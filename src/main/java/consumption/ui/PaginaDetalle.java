@@ -10,6 +10,8 @@ import javafx.scene.layout.*;
 import consumption.data.GestorImagenes;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import consumption.model.ReglasInicio;
+import java.time.LocalDate;
 
 public class PaginaDetalle extends VBox{
 
@@ -79,6 +81,12 @@ public class PaginaDetalle extends VBox{
         if (imagen != null) portada.setImage(imagen);
 
         VBox datos = new VBox(8, titulo, resumen);
+        String textoDias = ReglasInicio.textoDias(item, LocalDate.now());
+        if (textoDias != null) {
+            Label dias = new Label(textoDias);
+            dias.getStyleClass().add("dias-en-curso");
+            datos.getChildren().add(dias);
+        }
         if (item.getVecesRepetido() > 0) {
             int n = item.getVecesRepetido();
             Label repetido = new Label("REPETIDO " + n + (n == 1 ? " VEZ" : " VECES"));

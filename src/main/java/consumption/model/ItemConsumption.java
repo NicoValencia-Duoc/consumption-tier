@@ -160,6 +160,20 @@ public abstract class ItemConsumption {
         }
     }
 
+    public String textoBusqueda() {
+        return unir(titulo, getGenero(), comentario);
+    }
+
+    protected static String unir(String... partes) {
+        StringBuilder sb = new StringBuilder();
+        for (String p : partes) {
+            if (p == null || p.isBlank()) continue;
+            if (sb.length() > 0) sb.append(' ');
+            sb.append(p.trim());
+        }
+        return sb.toString();
+    }
+
     protected static String texto(String v, String campo, int max){
         String t =(v == null) ? "" : v.trim();
         if (t.isEmpty()) throw new IllegalArgumentException(campo + " es obligatorio.");

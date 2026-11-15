@@ -59,6 +59,9 @@ public class Serie extends ItemConsumption {
     }
 
     public String getCreador() { return creador; }
+    @Override public String textoBusqueda() {
+        return unir(super.textoBusqueda(), getCreador(), getOrigen());
+    }
     @Override public String getGenero() { return genero; }
     public int getAnio() { return anio; }
     public int getTemporadas() { return temporadas; }

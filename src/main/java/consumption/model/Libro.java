@@ -40,6 +40,9 @@ public class Libro extends ItemConsumption{
     public String getAutor() {
         return autor;
     }
+    @Override public String textoBusqueda() {
+        return unir(super.textoBusqueda(), getAutor());
+    }
     public String getGenero() {
         return genero;
     }

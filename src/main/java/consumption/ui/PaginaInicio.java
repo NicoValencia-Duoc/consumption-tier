@@ -2,6 +2,8 @@ package consumption.ui;
 
 import consumption.model.Estado;
 import consumption.model.ItemConsumption;
+import consumption.model.ReglasInicio;
+import consumption.model.Tier;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
@@ -9,12 +11,15 @@ import javafx.scene.layout.*;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class PaginaInicio extends VBox {
 
-    private static final String[] FILTROS = {"TODO", "JUEGOS", "LIBROS", "PELICULAS", "SERIES", "FAVORITOS"};
+    private static final String[] FILTROS =
+            {"TODO", "JUEGOS", "LIBROS", "PELICULAS", "SERIES", "FAVORITOS", "PENDIENTES"};
 
     private final List<ItemConsumption> items;
     private final Consumer<ItemConsumption> alAbrir;
@@ -23,11 +28,13 @@ public class PaginaInicio extends VBox {
     private final ComboBox<String> orden = new ComboBox<>();
     private final Label subtitulo = new Label();
     private final List<Button> botonesFiltro = new ArrayList<>();
+    private final Map<Tier, Button> chipsTier = new EnumMap<>(Tier.class);
     private final Consumer<String> alAgregarTipo;
     private final ScrollPane scroll;
     private final VBox bienvenida;
     private final Label sinResultados = new Label("NADA QUE MOSTRAR CON ESTE FILTRO");
     private String filtroActual = "TODO";
+    private Tier tierActual = null;
 
     public PaginaInicio(List<ItemConsumption> items, Consumer<ItemConsumption> alAbrir,
                         Consumer<String> alAgregarTipo) {
@@ -47,7 +54,7 @@ public class PaginaInicio extends VBox {
         VBox.setVgrow(zona, Priority.ALWAYS);
 
         subtitulo.getStyleClass().add("subtitulo");
-        getChildren().addAll(crearBarraHerramientas(), crearFilaOrden(), zona);
+        getChildren().addAll(crearBarraHerramientas(), crearFilaTier(), crearFilaOrden(), zona);
         actualizar();
     }
 
@@ -72,7 +79,7 @@ public class PaginaInicio extends VBox {
     }
 
     private HBox crearBarraHerramientas() {
-        buscador.setPromptText("BUSCAR POR TITULO...");
+        buscador.setPromptText("BUSCAR POR TITULO, AUTOR, GENERO...");
         buscador.getStyleClass().add("buscador");
         buscador.textProperty().addListener((obs, antes, ahora) -> actualizar());
         HBox.setHgrow(buscador, Priority.ALWAYS);
@@ -92,6 +99,25 @@ public class PaginaInicio extends VBox {
         HBox barra = new HBox(12, buscador, filtros);
         barra.setAlignment(Pos.CENTER_LEFT);
         return barra;
+    }
+
+    private HBox crearFilaTier() {
+        Label etiqueta = new Label("TIER");
+        etiqueta.getStyleClass().add("subtitulo");
+
+        HBox fila = new HBox(6, etiqueta);
+        fila.setAlignment(Pos.CENTER_LEFT);
+        for (Tier t : Tier.values()) {
+            Button chip = new Button(t.getLetra());
+            chip.getStyleClass().addAll("chip-tier", "chip-" + t.getLetra().toLowerCase());
+            chip.setOnAction(e -> {
+                tierActual = (tierActual == t) ? null : t;
+                actualizar();
+            });
+            chipsTier.put(t, chip);
+            fila.getChildren().add(chip);
+        }
+        return fila;
     }
 
     private HBox crearFilaOrden() {
@@ -114,13 +140,17 @@ public class PaginaInicio extends VBox {
             b.getStyleClass().remove("filtro-activo");
             if (b.getText().equals(filtroActual)) b.getStyleClass().add("filtro-activo");
         }
-        String texto = buscador.getText().trim().toLowerCase();
+        for (Map.Entry<Tier, Button> e : chipsTier.entrySet()) {
+            e.getValue().getStyleClass().remove("chip-activo");
+            if (e.getKey() == tierActual) e.getValue().getStyleClass().add("chip-activo");
+        }
+        String consulta = buscador.getText();
 
         List<ItemConsumption> visibles = items.stream()
-                .filter(i -> i.getEstado() != Estado.PENDIENTE)   // los pendientes tienen su propia pestana
                 .filter(this::coincideConFiltro)
-                .filter(i -> texto.isEmpty() || i.getTitulo().toLowerCase().contains(texto))
-                .sorted(comparador())
+                .filter(i -> ReglasInicio.pasaTier(i, tierActual))
+                .filter(i -> ReglasInicio.coincideBusqueda(i, consulta))
+                .sorted(ReglasInicio.pendientesAlFinal(comparador()))
                 .toList();
 
         galeria.getChildren().clear();
@@ -130,7 +160,11 @@ public class PaginaInicio extends VBox {
             tarjeta.setOnMouseClicked(e -> alAbrir.accept(i));
             galeria.getChildren().add(tarjeta);
         }
-        subtitulo.setText(visibles.size() + " ITEMS · ORDENADOS POR " + orden.getValue());
+
+        long pendientes = visibles.stream().filter(i -> i.getEstado() == Estado.PENDIENTE).count();
+        String texto = visibles.size() + (visibles.size() == 1 ? " ITEM" : " ITEMS");
+        if (pendientes > 0) texto += " · " + pendientes + (pendientes == 1 ? " PENDIENTE" : " PENDIENTES");
+        subtitulo.setText(texto + " · ORDENADOS POR " + orden.getValue());
 
         boolean sinNada = items.isEmpty();
         bienvenida.setVisible(sinNada);
@@ -142,6 +176,7 @@ public class PaginaInicio extends VBox {
         return switch (filtroActual) {
             case "JUEGOS", "LIBROS", "PELICULAS", "SERIES" -> i.getTipo().equals(filtroActual);
             case "FAVORITOS" -> i.isFavorito();
+            case "PENDIENTES" -> i.getEstado() == Estado.PENDIENTE;
             default -> true;
         };
     }

@@ -40,6 +40,9 @@ public class Pelicula extends ItemConsumption{
     public String getDirector() {
         return director;
     }
+    @Override public String textoBusqueda() {
+        return unir(super.textoBusqueda(), getDirector());
+    }
     public String getGenero() {
         return genero;
     }
