@@ -51,6 +51,7 @@ public class PistasDialog {
         dialogo.getDialogPane().getStylesheets().setAll(hojas);
         dialogo.getDialogPane().setContent(contenido);
         dialogo.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        Terminal.dialogo(dialogo, "PISTAS", null, null);
         dialogo.showAndWait();
     }
 }

@@ -132,3 +132,45 @@
 }
 .scroll-bar:vertical { -fx-pref-width: 10; }
 .scroll-bar:horizontal { -fx-pref-height: 10; }
+
+/* =====================================================================
+   PARTE 2
+   ===================================================================== */
+
+.cal-sel { -fx-font-weight: bold; }
+
+/* Botones de dialogo destructivos */
+.dialog-pane .button.boton-dialogo.boton-peligro { -fx-text-fill: -c-r; -fx-border-color: -c-r; }
+.dialog-pane .button.boton-dialogo.boton-peligro:hover { -fx-background-color: -c-r; -fx-text-fill: -c-bg; }
+.dialog-pane .button.boton-dialogo.boton-accion:hover { -fx-background-color: -c-y; -fx-text-fill: -c-yt; }
+
+/* Marcos de esquina de las tarjetas */
+.esquina { -fx-background-color: transparent; -fx-border-color: -c-mt; }
+.esquina-si { -fx-border-width: 2 0 0 2; }
+.esquina-sd { -fx-border-width: 2 2 0 0; }
+.esquina-ii { -fx-border-width: 0 0 2 2; }
+.esquina-id { -fx-border-width: 0 2 2 0; }
+.tarjeta:hover .esquina { -fx-border-color: -c-acento; }
+.tarjeta-pendiente .esquina { -fx-border-color: -c-gr; }
+
+/* Barras de avance con segmentos tipo LED */
+.avance-pista, .barrita-pista {
+    -fx-background-color: linear-gradient(from 0px 0px to 6px 0px, repeat,
+    -c-ln 0%, -c-ln 66%, transparent 66%, transparent 100%);
+}
+.avance-normal, .barrita-normal {
+    -fx-background-color: linear-gradient(from 0px 0px to 6px 0px, repeat,
+    -c-g 0%, -c-g 66%, transparent 66%, transparent 100%);
+}
+
+/* Pie de pagina */
+.pie-maw {
+    -fx-font-family: "Share Tech Mono", "Consolas";
+    -fx-font-size: 12px;
+    -fx-text-fill: -c-mt;
+    -fx-border-color: -c-ln transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 6 0 0 0;
+}
+
+.chip-tier { -fx-background-color: #08080a; }

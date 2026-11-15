@@ -32,6 +32,7 @@ public class VentanaPrincipal extends VBox {
     private final StackPane contenido = new StackPane();
     private String pestanaActual = "INICIO";
     private final Aviso aviso = new Aviso();
+    private final javafx.scene.control.Label pie = new javafx.scene.control.Label();
 
     public VentanaPrincipal(List<ItemConsumption> items, RepositorioJson repositorio,
                             Consumer<Tema> alElegirTema, ReproductorMusica reproductor,
@@ -46,7 +47,9 @@ public class VentanaPrincipal extends VBox {
 
         StackPane zona = new StackPane(contenido, aviso);
         VBox.setVgrow(zona, Priority.ALWAYS);
-        getChildren().addAll(cabecera, zona, new BarraMusica(reproductor));
+        pie.getStyleClass().add("pie-maw");
+        pie.setMaxWidth(Double.MAX_VALUE);
+        getChildren().addAll(cabecera, zona, new BarraMusica(reproductor), pie);
 
         String inicial = preferencias.getUltimaPestana();
         cabecera.marcarActiva(inicial);
@@ -83,6 +86,11 @@ public class VentanaPrincipal extends VBox {
         cantidades.put("SERIES", contar(Serie.class));
         cantidades.put("PENDIENTES", (int) items.stream().filter(i -> i.getEstado() == Estado.PENDIENTE).count());
         cabecera.setContadores(cantidades);
+
+        int sinDevorar = cantidades.get("PENDIENTES");
+        int devorados = items.size() - sinDevorar;
+        pie.setText("THE MAW TE OBSERVA · " + devorados + (devorados == 1 ? " DEVORADO" : " DEVORADOS")
+                + " · " + sinDevorar + " SIN DEVORAR");
     }
 
     private int contar(Class<? extends ItemConsumption> tipo) {
@@ -170,6 +178,7 @@ public class VentanaPrincipal extends VBox {
         eleccion.setHeaderText(null);
         eleccion.setContentText("¿Que quieres agregar?");
         eleccion.getDialogPane().getStylesheets().setAll(hojas());
+        Terminal.dialogo(eleccion, "AGREGAR PENDIENTE", "boton-accion", null);
 
         eleccion.showAndWait().ifPresent(this::agregarDeTipo);
     }
@@ -263,6 +272,7 @@ public class VentanaPrincipal extends VBox {
         aviso.setHeaderText(null);
         aviso.setTitle("RESTAURAR RESPALDO");
         aviso.getDialogPane().getStylesheets().setAll(hojas());
+        Terminal.dialogo(aviso, "RESTAURAR RESPALDO", "boton-peligro", "RESTAURAR");
         if (aviso.showAndWait().filter(b -> b == ButtonType.OK).isEmpty()) return;
 
         FileChooser selector = new FileChooser();
@@ -288,6 +298,7 @@ public class VentanaPrincipal extends VBox {
         Alert alerta = new Alert(tipo, texto, ButtonType.OK);
         alerta.setHeaderText(null);
         alerta.getDialogPane().getStylesheets().setAll(hojas());
+        Terminal.dialogo(alerta, tipo == Alert.AlertType.ERROR ? "!! ERROR" : "AVISO", "boton-accion", null);
         alerta.showAndWait();
     }
 
@@ -304,6 +315,7 @@ public class VentanaPrincipal extends VBox {
         alerta.setTitle("CONFIRMAR");
         alerta.setHeaderText(null);
         alerta.getDialogPane().getStylesheets().setAll(hojas());
+        Terminal.dialogo(alerta, "CONFIRMAR ELIMINACION", "boton-peligro", "ELIMINAR");
         return alerta.showAndWait().filter(b -> b == ButtonType.OK).isPresent();
     }
     private void eliminarLote(List<? extends ItemConsumption> seleccion) {

@@ -186,12 +186,12 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         cuerpo.getStyleClass().add("cuerpo-form");
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scroll.setPrefViewportWidth(560);
+        scroll.setPrefViewportWidth(700);
         scroll.setPrefViewportHeight(480);
 
         mensaje.getStyleClass().add("mensaje-error");
         mensaje.setWrapText(true);
-        mensaje.setMaxWidth(540);
+        mensaje.setMaxWidth(680);
         VBox raiz = new VBox(8, scroll, mensaje);
 
         dialogo = new Dialog<>();
@@ -207,6 +207,8 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         Button botonCancelar = (Button) dialogo.getDialogPane().lookupButton(cancelar);
         botonGuardar.getStyleClass().addAll("boton-dialogo", "boton-accion");
         botonCancelar.getStyleClass().add("boton-dialogo");
+        Terminal.corchetes(botonGuardar);
+        Terminal.corchetes(botonCancelar);
 
         botonGuardar.addEventFilter(ActionEvent.ACTION, ev -> {
             limpiarErrores();
@@ -242,7 +244,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     }
 
     private VBox nuevaSeccion(String nombre) {
-        Label cabecera = new Label(nombre);
+        Label cabecera = new Label("// " + nombre);
         cabecera.getStyleClass().add("seccion-form");
         cabecera.setMaxWidth(Double.MAX_VALUE);
         Region linea = new Region();
@@ -268,6 +270,9 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         et.getStyleClass().add("etiqueta-form");
         et.setMinWidth(150);
         et.setPrefWidth(150);
+        if (campo instanceof TextField campoTexto && campoTexto.getPrefColumnCount() == 12) {
+            campoTexto.setPrefColumnCount(28);
+        }
 
         HBox linea = new HBox(10, et, campo);
         linea.setAlignment(Pos.CENTER_LEFT);
@@ -477,7 +482,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
             mensaje.setText(texto);
             return;
         }
-        fila.error().setText(texto);
+        fila.error().setText("!! " + texto);
         fila.error().setVisible(true);
         fila.error().setManaged(true);
         desplazarHasta(fila);
@@ -542,6 +547,9 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         Button b2 = (Button) alerta.getDialogPane().lookupButton(botonNo);
         b1.getStyleClass().add("boton-dialogo");
         b2.getStyleClass().addAll("boton-dialogo", "boton-accion");
+        Terminal.corchetes(b1);
+        Terminal.corchetes(b2);
+        alerta.setHeaderText("CONFIRMAR");
         b1.setDefaultButton(false);
         b2.setDefaultButton(true);
 

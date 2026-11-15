@@ -125,7 +125,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
 
         Region espacio = new Region();
         HBox.setHgrow(espacio, Priority.ALWAYS);
-        acciones = new HBox(8, titulo, espacio, agregar, mas);
+        acciones = new HBox(8, titulo, new CursorTerminal(), espacio, agregar, mas);
         acciones.setAlignment(Pos.CENTER_LEFT);
         acciones.setMaxWidth(Double.MAX_VALUE);
 
@@ -151,6 +151,11 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         terminar.setOnAction(e -> alCambiarEstado.accept(unico(), Transicion.TERMINAR));
         abandonar.getStyleClass().add("pestana");
         abandonar.setOnAction(e -> alCambiarEstado.accept(unico(), Transicion.ABANDONAR));
+
+        Terminal.corchetes(agregar);
+        for (Button b : new Button[] {botonTodo, editar, empezar, terminar, abandonar, favorito, detalle, eliminar}) {
+            Terminal.corchetes(b);
+        }
 
         Region espacioSeleccion = new Region();
         HBox.setHgrow(espacioSeleccion, Priority.ALWAYS);
@@ -531,6 +536,8 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         }
         alerta.setHeaderText(null);
         alerta.getDialogPane().getStylesheets().setAll(getScene().getStylesheets());
+        Terminal.dialogo(alerta, alerta.getAlertType() == Alert.AlertType.ERROR ? "!! ERROR" : "EXPORTAR CSV",
+                "boton-accion", null);
         alerta.showAndWait();
     }
 

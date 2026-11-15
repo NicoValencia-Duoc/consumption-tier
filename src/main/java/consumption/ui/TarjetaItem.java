@@ -18,6 +18,8 @@ import java.time.LocalDate;
 public class TarjetaItem extends VBox {
 
     private static final ColorAdjust GRISES = new ColorAdjust(0, -1, -0.15, 0);
+    private static final double ESQUINA = 10;
+    private final Region[] esquinas = new Region[4];
     public TarjetaItem(ItemConsumption item){
 
         boolean pendiente = item.getEstado() == Estado.PENDIENTE;
@@ -97,5 +99,26 @@ public class TarjetaItem extends VBox {
 
         Tooltip globo = TooltipoComentario.de(item.getComentario());
         if (globo != null) Tooltip.install(this, globo);
+
+        String[] clases = {"esquina-si", "esquina-sd", "esquina-ii", "esquina-id"};
+        for (int i = 0; i < esquinas.length; i++) {
+            Region esquina = new Region();
+            esquina.getStyleClass().addAll("esquina", clases[i]);
+            esquina.setManaged(false);
+            esquina.setMouseTransparent(true);
+            esquinas[i] = esquina;
+            getChildren().add(esquina);
+        }
+    }
+
+    @Override
+    protected void layoutChildren() {
+        super.layoutChildren();
+        double ancho = getWidth();
+        double alto = getHeight();
+        esquinas[0].resizeRelocate(0, 0, ESQUINA, ESQUINA);
+        esquinas[1].resizeRelocate(ancho - ESQUINA, 0, ESQUINA, ESQUINA);
+        esquinas[2].resizeRelocate(0, alto - ESQUINA, ESQUINA, ESQUINA);
+        esquinas[3].resizeRelocate(ancho - ESQUINA, alto - ESQUINA, ESQUINA, ESQUINA);
     }
 }

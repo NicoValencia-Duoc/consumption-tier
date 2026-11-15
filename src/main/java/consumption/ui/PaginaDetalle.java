@@ -23,9 +23,9 @@ public class PaginaDetalle extends VBox{
                          Consumer<Transicion> alCambiarEstado){
 
         setSpacing(12);
-        Label titulo = new Label(item.getTitulo());
+        Label titulo = new Label("> " + item.getTitulo());
         titulo.getStyleClass().add("titulo-detalle");
-        Label resumen = new Label(item.getTipo() + " · " + item.getEstado().getEtiqueta());
+        Label resumen = new Label("// " + item.getTipo() + " · " + item.getEstado().getEtiqueta());
         resumen.getStyleClass().add("subtitulo");
         Label nota = new Label("NOTA FINAL " + Formato.decimal(item.getNota()));
         nota.getStyleClass().add("nota");
@@ -68,11 +68,11 @@ public class PaginaDetalle extends VBox{
         aviso.getStyleClass().add("valor-criterio");
         comentario.textProperty().addListener((obs, antes, ahora) -> aviso.setText(""));
 
-        Button volver = new Button("← VOLVER");
+        Button volver = Terminal.corchetes(new Button("← VOLVER"));
         volver.getStyleClass().add("pestana");
         volver.setOnAction(e -> alVolver.run());
 
-        Button guardar = new Button("GUARDAR COMENTARIO");
+        Button guardar = Terminal.corchetes(new Button("GUARDAR COMENTARIO"));
         guardar.getStyleClass().addAll("pestana", "boton-accion");
         guardar.setOnAction(e ->{
             item.setComentario(comentario.getText());
@@ -104,7 +104,7 @@ public class PaginaDetalle extends VBox{
         HBox estados = new HBox(8);
         for (Transicion transicion : Transicion.values()) {
             if (!transicion.permitidaDesde(item.getEstado())) continue;
-            Button boton = new Button(transicion.getEtiqueta());
+            Button boton = Terminal.corchetes(new Button(transicion.getEtiqueta()));
             boton.getStyleClass().add("pestana");
             if (transicion == Transicion.TERMINAR) boton.getStyleClass().add("boton-accion");
             if (transicion == Transicion.ABANDONAR) boton.getStyleClass().add("boton-peligro");

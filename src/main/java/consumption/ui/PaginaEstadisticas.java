@@ -21,7 +21,7 @@ public class PaginaEstadisticas extends VBox {
         List<Serie> series = items.stream().filter(Serie.class::isInstance).map(Serie.class::cast).toList();
 
         long favoritos = items.stream().filter(ItemConsumption::isFavorito).count();
-        Label general = new Label(items.size() + " ITEMS EN TOTAL · " + favoritos + " FAVORITOS");
+        Label general = new Label("// " + items.size() + " ITEMS EN TOTAL · " + favoritos + " FAVORITOS");
         general.getStyleClass().add("subtitulo");
 
         double horasJuego = juegos.stream().mapToDouble(Juego::getHorasJugadas).sum();
@@ -43,14 +43,14 @@ public class PaginaEstadisticas extends VBox {
         paneles.add(panel(Estadisticas.resumir("PELICULAS", peliculas), "HORAS (TERMINADAS)", Formato.decimal(horasPeliculas)), 0, 1);
         paneles.add(panel(Estadisticas.resumir("SERIES", series), "EPISODIOS (TERMINADAS)", String.valueOf(episodios)), 1, 1);
 
-        Label herramientas = new Label("RESPALDO DE TUS DATOS (INCLUYE LAS IMAGENES)");
+        Label herramientas = new Label("// RESPALDO DE TUS DATOS (INCLUYE LAS IMAGENES)");
         herramientas.getStyleClass().add("subtitulo");
 
-        Button respaldar = new Button("CREAR RESPALDO");
+        Button respaldar = Terminal.corchetes(new Button("CREAR RESPALDO"));
         respaldar.getStyleClass().addAll("pestana", "boton-accion");
         respaldar.setOnAction(e -> alRespaldar.run());
 
-        Button restaurar = new Button("RESTAURAR RESPALDO");
+        Button restaurar = Terminal.corchetes(new Button("RESTAURAR RESPALDO"));
         restaurar.getStyleClass().addAll("pestana", "boton-peligro");
         restaurar.setOnAction(e -> alRestaurar.run());
 

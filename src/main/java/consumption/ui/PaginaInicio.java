@@ -67,7 +67,7 @@ public class PaginaInicio extends VBox {
         HBox botones = new HBox(8);
         botones.setAlignment(Pos.CENTER);
         for (String tipo : new String[] {"JUEGO", "LIBRO", "PELICULA", "SERIE"}) {
-            Button b = new Button("+ " + tipo);
+            Button b = Terminal.corchetes(new Button("+ " + tipo));
             b.getStyleClass().addAll("pestana", "boton-accion");
             b.setOnAction(e -> alAgregarTipo.accept(tipo));
             botones.getChildren().add(b);
