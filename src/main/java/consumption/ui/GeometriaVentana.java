@@ -11,7 +11,7 @@ import java.util.List;
 
 public final class GeometriaVentana {
 
-    public static final double MIN_ANCHO = 1300;
+    public static final double MIN_ANCHO = 1400;
     public static final double MIN_ALTO = 720;
 
     private GeometriaVentana() {

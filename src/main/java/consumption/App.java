@@ -7,6 +7,7 @@ import consumption.ui.GeometriaVentana;
 import consumption.ui.ReproductorMusica;
 import consumption.ui.Tipografia;
 import consumption.ui.VentanaPrincipal;
+import consumption.ui.Tema;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -18,7 +19,7 @@ import java.util.List;
 public class App extends Application {
 
     private Scene scena;
-    private boolean noche = true;
+    private Tema tema = Tema.NOCTURNO;
     private Preferencias preferencias;
     private ReproductorMusica reproductor;
 
@@ -26,7 +27,7 @@ public class App extends Application {
     public void start(Stage stage) {
         Tipografia.cargar();
         preferencias = Preferencias.cargar();
-        noche = preferencias.isNoche();
+        tema = Tema.de(preferencias.getTema());
 
         RepositorioJson repositorio = new RepositorioJson();
         List<ItemConsumption> items = repositorio.cargar();
@@ -34,8 +35,7 @@ public class App extends Application {
         reproductor = new ReproductorMusica();
         reproductor.volumenProperty().set(preferencias.getVolumen());
 
-        scena = new Scene(new VentanaPrincipal(items, repositorio, this::cambiarTema, reproductor, preferencias), 1295, 720);
-        aplicarTema();
+        scena = new Scene(new VentanaPrincipal(items, repositorio, this::elegirTema, reproductor, preferencias), 1295, 720);        aplicarTema();
 
         stage.setTitle("THE MAW");
         try (InputStream icono = getClass().getResourceAsStream("/consumption/iconos/icono-app.png")) {
@@ -58,17 +58,17 @@ public class App extends Application {
         }
     }
 
-    private void cambiarTema() {
-        noche = !noche;
+    private void elegirTema(Tema nuevo) {
+        tema = nuevo;
         aplicarTema();
-        preferencias.setNoche(noche);
+        preferencias.setTema(nuevo.name());
         preferencias.guardar();
     }
 
     private void aplicarTema() {
         String base = getClass().getResource("/consumption/base.css").toExternalForm();
-        String tema = getClass().getResource(noche ? "/consumption/noche.css" : "/consumption/dia.css").toExternalForm();
-        scena.getStylesheets().setAll(base, tema);
+        String actual = getClass().getResource(tema.getRecurso()).toExternalForm();
+        scena.getStylesheets().setAll(base, actual);
     }
 
     public static void main(String[] args) {

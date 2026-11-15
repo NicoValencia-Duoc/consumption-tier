@@ -369,3 +369,41 @@
 }
 .pestana.boton-superar { -fx-text-fill: #ff2fa0; -fx-border-color: #ff2fa0; }
 .pestana.boton-superar:hover { -fx-effect: dropshadow(gaussian, rgba(255,47,160,0.6), 8, 0.2, 0, 0); }
+
+
+/* ===== Barra superior: pestanas sin caja ===== */
+.pestana-barra {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-text-fill: -c-mt;
+    -fx-font-weight: bold;
+    -fx-padding: 6 10 4 10;
+    -fx-cursor: hand;
+}
+.pestana-barra:hover { -fx-text-fill: -c-tx; }
+.pestana-barra-activa {
+    -fx-text-fill: -c-tx;
+    -fx-border-color: transparent transparent -c-acento transparent;
+}
+.separador-pestanas { -fx-background-color: -c-ln; }
+
+/* ===== Menu de temas ===== */
+.context-menu {
+    -fx-background-color: -c-pn;
+    -fx-background-radius: 0;
+    -fx-border-color: -c-acento;
+    -fx-border-width: 1;
+    -fx-padding: 4 0 4 0;
+}
+.context-menu .menu-item {
+    -fx-background-color: transparent;
+    -fx-padding: 6 18 6 12;
+}
+.context-menu .menu-item .label {
+    -fx-text-fill: -c-tx;
+    -fx-font-weight: bold;
+}
+.context-menu .menu-item:focused { -fx-background-color: -c-y; }
+.context-menu .menu-item:focused .label { -fx-text-fill: -c-yt; }

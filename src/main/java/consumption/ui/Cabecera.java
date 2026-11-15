@@ -3,9 +3,13 @@ package consumption.ui;
 import consumption.data.Preferencias;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Side;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.input.KeyCode;
@@ -13,13 +17,19 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class Cabecera extends HBox {
 
-    private final List<Button> pestanas = new ArrayList<>();
+    private static final String[][] GRUPOS = {
+            {"INICIO"},
+            {"JUEGOS", "LIBROS", "PELICULAS", "SERIES"},
+            {"PENDIENTES", "ESTADISTICAS"}
+    };
+
+    private final Map<String, Button> pestanas = new LinkedHashMap<>();
     private final Button pestanaDetalle = new Button("DETALLE");
     private final Preferencias preferencias;
     private final HBox logo = new HBox();
@@ -27,7 +37,7 @@ public class Cabecera extends HBox {
     private final Label globo = new Label("▲ HAZ CLIC EN TU NOMBRE PARA CAMBIARLO");
     private final PauseTransition cierreGlobo = new PauseTransition(Duration.seconds(12));
 
-    public Cabecera(Consumer<String> alElegirPestana, Runnable alCambiarTema, Preferencias preferencias) {
+    public Cabecera(Consumer<String> alElegirPestana, Consumer<Tema> alElegirTema, Preferencias preferencias) {
         this.preferencias = preferencias;
 
         Label marca = new Label("Consumption Tier // ");
@@ -39,34 +49,73 @@ public class Cabecera extends HBox {
         logo.getChildren().addAll(marca, nombre);
         prepararGlobo();
 
-        HBox contenedorPestanas = new HBox(6);
-        for (String nombrePestana : new String[] {"INICIO", "JUEGOS", "LIBROS", "PELICULAS", "SERIES", "PENDIENTES", "ESTADISTICAS"}) {
-            Button b = new Button(nombrePestana);
-            b.getStyleClass().add("pestana");
-            b.setOnAction(e -> {
-                marcarActiva(nombrePestana);
-                alElegirPestana.accept(nombrePestana);
-            });
-            pestanas.add(b);
-            contenedorPestanas.getChildren().add(b);
+        HBox contenedorPestanas = new HBox(2);
+        contenedorPestanas.setAlignment(Pos.CENTER_LEFT);
+        for (int g = 0; g < GRUPOS.length; g++) {
+            if (g > 0) contenedorPestanas.getChildren().add(crearSeparador());
+            for (String nombrePestana : GRUPOS[g]) {
+                Button b = new Button(nombrePestana);
+                b.getStyleClass().add("pestana-barra");
+                b.setOnAction(e -> {
+                    marcarActiva(nombrePestana);
+                    alElegirPestana.accept(nombrePestana);
+                });
+                pestanas.put(nombrePestana, b);
+                contenedorPestanas.getChildren().add(b);
+            }
         }
-        pestanaDetalle.getStyleClass().add("pestana");
+        pestanaDetalle.getStyleClass().add("pestana-barra");
         contenedorPestanas.getChildren().add(pestanaDetalle);
 
-        Button tema = new Button("DIA / NOCHE");
-        tema.getStyleClass().add("pestana");
-        tema.setOnAction(event -> alCambiarTema.run());
+        Button botonTema = new Button("TEMA ▾");
+        botonTema.getStyleClass().add("pestana-barra");
+        ContextMenu menuTema = new ContextMenu();
+        botonTema.setOnAction(e -> {
+            if (menuTema.isShowing()) {
+                menuTema.hide();
+                return;
+            }
+            llenarMenuTema(menuTema, alElegirTema);
+            menuTema.show(botonTema, Side.BOTTOM, 0, 4);
+        });
 
         Region izq = new Region();
         Region der = new Region();
         HBox.setHgrow(izq, Priority.ALWAYS);
         HBox.setHgrow(der, Priority.ALWAYS);
 
-        getChildren().addAll(logo, izq, contenedorPestanas, der, tema);
+        getChildren().addAll(logo, izq, contenedorPestanas, der, botonTema);
         setSpacing(20);
         setAlignment(Pos.CENTER_LEFT);
         getStyleClass().add("cabecera");
         marcarActiva("INICIO");
+    }
+
+    private Region crearSeparador() {
+        Region linea = new Region();
+        linea.getStyleClass().add("separador-pestanas");
+        linea.setMinSize(1, 18);
+        linea.setPrefSize(1, 18);
+        linea.setMaxSize(1, 18);
+        HBox.setMargin(linea, new Insets(0, 8, 0, 8));
+        return linea;
+    }
+
+    private void llenarMenuTema(ContextMenu menu, Consumer<Tema> alElegirTema) {
+        Tema actual = Tema.de(preferencias.getTema());
+        menu.getItems().clear();
+        for (Tema t : Tema.values()) {
+            MenuItem item = new MenuItem((t == actual ? "● " : "   ") + t.name());
+            item.setOnAction(e -> alElegirTema.accept(t));
+            menu.getItems().add(item);
+        }
+    }
+
+    public void setContadores(Map<String, Integer> cantidades) {
+        cantidades.forEach((nombrePestana, cantidad) -> {
+            Button b = pestanas.get(nombrePestana);
+            if (b != null) b.setText(nombrePestana + " · " + cantidad);
+        });
     }
 
     private void prepararGlobo() {
@@ -130,15 +179,14 @@ public class Cabecera extends HBox {
     }
 
     public void marcarActiva(String nombrePestana) {
-        for (Button b : pestanas) {
-            b.getStyleClass().remove("pestana-activa");
-            if (b.getText().equals(nombrePestana))
-                b.getStyleClass().add("pestana-activa");
-        }
+        pestanas.forEach((clave, b) -> {
+            b.getStyleClass().remove("pestana-barra-activa");
+            if (clave.equals(nombrePestana)) b.getStyleClass().add("pestana-barra-activa");
+        });
         boolean detalle = nombrePestana.equals("DETALLE");
         pestanaDetalle.setVisible(detalle);
         pestanaDetalle.setManaged(detalle);
-        pestanaDetalle.getStyleClass().remove("pestana-activa");
-        if (detalle) pestanaDetalle.getStyleClass().add("pestana-activa");
+        pestanaDetalle.getStyleClass().remove("pestana-barra-activa");
+        if (detalle) pestanaDetalle.getStyleClass().add("pestana-barra-activa");
     }
 }

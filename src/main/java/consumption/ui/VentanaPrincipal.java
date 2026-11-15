@@ -18,6 +18,9 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class VentanaPrincipal extends VBox {
 
@@ -29,15 +32,14 @@ public class VentanaPrincipal extends VBox {
     private final Aviso aviso = new Aviso();
 
     public VentanaPrincipal(List<ItemConsumption> items, RepositorioJson repositorio,
-                            Runnable alCambiarTema, ReproductorMusica reproductor,
+                            Consumer<Tema> alElegirTema, ReproductorMusica reproductor,
                             Preferencias preferencias) {
         this.items = items;
         this.repositorio = repositorio;
         setSpacing(14);
         setPadding(new Insets(20, 28, 20, 28));
 
-        cabecera = new Cabecera(this::mostrar, alCambiarTema, preferencias);
-        cabecera.setViewOrder(-1);
+        cabecera = new Cabecera(this::mostrar, alElegirTema, preferencias);        cabecera.setViewOrder(-1);
 
         StackPane zona = new StackPane(contenido, aviso);
         VBox.setVgrow(zona, Priority.ALWAYS);
@@ -58,6 +60,22 @@ public class VentanaPrincipal extends VBox {
             default -> new PaginaInicio(items, this::verDetalle, this::agregarDeTipo);
         };
         contenido.getChildren().setAll(pagina);
+        actualizarContadores();
+    }
+
+    private void actualizarContadores() {
+        Map<String, Integer> cantidades = new LinkedHashMap<>();
+        cantidades.put("INICIO", (int) items.stream().filter(i -> i.getEstado() != Estado.PENDIENTE).count());
+        cantidades.put("JUEGOS", contar(Juego.class));
+        cantidades.put("LIBROS", contar(Libro.class));
+        cantidades.put("PELICULAS", contar(Pelicula.class));
+        cantidades.put("SERIES", contar(Serie.class));
+        cantidades.put("PENDIENTES", (int) items.stream().filter(i -> i.getEstado() == Estado.PENDIENTE).count());
+        cabecera.setContadores(cantidades);
+    }
+
+    private int contar(Class<? extends ItemConsumption> tipo) {
+        return (int) items.stream().filter(tipo::isInstance).count();
     }
 
     private Node paginaJuegos() {

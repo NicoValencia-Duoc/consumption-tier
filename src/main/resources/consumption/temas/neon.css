@@ -1,0 +1,7 @@
+.root, .cal-panel, .context-menu {
+    -c-bg: #0b0614;  -c-pn: #150c24;  -c-ln: #3a2358;
+    -c-tx: #f4eaff;  -c-mt: #a58cc4;
+    -c-y: #b36bff;   -c-yt: #0b0614;
+    -c-r: #ff4d5e;   -c-g: #00ffb3;   -c-gr: #7b6a99;
+    -c-acento: #00e5ff;
+}
