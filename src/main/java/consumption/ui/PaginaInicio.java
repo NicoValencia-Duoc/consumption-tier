@@ -27,7 +27,8 @@ public class PaginaInicio extends VBox {
     private final List<ItemConsumption> items;
     private final Consumer<ItemConsumption> alAbrir;
     private final TilePane galeria = new TilePane(14, 14);
-    private final CampoBusqueda buscador = new CampoBusqueda();    private final ComboBox<String> orden = new ComboBox<>();
+    private final CampoBusqueda buscador = new CampoBusqueda();
+    private final ComboBox<String> orden = new ComboBox<>();
     private final Label subtitulo = new Label();
     private final List<Button> botonesFiltro = new ArrayList<>();
     private final Map<Tier, Button> chipsTier = new EnumMap<>(Tier.class);

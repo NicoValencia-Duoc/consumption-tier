@@ -5,3 +5,7 @@
     -c-r: #ff4a38;   -c-g: #8fdc5a;   -c-gr: #7d6250;
     -c-acento: #ff7a1a;
 }
+.efecto-lineas {
+    -fx-background-color: linear-gradient(from 0px 0px to 0px 4px, repeat,
+    rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.05) 50%, transparent 50%, transparent 100%);
+}

@@ -374,7 +374,7 @@
     -fx-font-family: "Share Tech Mono", "Consolas";
     -fx-font-size: 12px;
     -fx-font-weight: normal;
-    -fx-text-fill: -c-mt;
+    -fx-text-fill: -c-acento;
 }
 .col-id, .col-inicio, .col-termino, .col-avance { -fx-text-fill: -c-mt; }
 .col-titulo { -fx-text-fill: -c-tx; }
@@ -428,3 +428,39 @@
     -fx-border-width: 0;
 }
 .pie-fila { -fx-padding: 6 0 0 0; }
+
+
+/* =====================================================================
+   MENU DE CLIC DERECHO Y MINIATURAS DE TABLA (todos los temas)
+   ===================================================================== */
+
+.miniatura-fila {
+    -fx-background-color: #08080a;
+    -fx-border-color: -c-ln;
+    -fx-border-width: 1;
+}
+
+.context-menu { -fx-padding: 2 0 2 0; }
+.context-menu .menu-item {
+    -fx-background-color: transparent;
+    -fx-padding: 7 36 7 10;
+}
+.context-menu .menu-item .label {
+    -fx-font-size: 14px;
+    -fx-font-weight: normal;
+    -fx-text-fill: -c-mt;
+}
+.context-menu .menu-item:focused { -fx-background-color: -c-ln; }
+.context-menu .menu-item:focused .label { -fx-text-fill: -c-tx; }
+.context-menu .menu-item:disabled .label { -fx-text-fill: -c-mt; -fx-opacity: 0.45; }
+
+.context-menu .menu-item .menu-icono { -fx-text-fill: -c-mt; }
+.context-menu .menu-item:focused .menu-icono { -fx-opacity: 0; }
+.context-menu .menu-item .menu-flecha { -fx-text-fill: -c-tx; -fx-opacity: 0; }
+.context-menu .menu-item:focused .menu-flecha { -fx-opacity: 1; }
+
+.context-menu .menu .arrow { -fx-background-color: -c-mt; }
+.context-menu .menu:focused .arrow { -fx-background-color: -c-tx; }
+
+.context-menu .menu-item.menu-peligro .label { -fx-text-fill: -c-r; }
+.context-menu .menu-item.menu-peligro:focused .label { -fx-text-fill: -c-r; }
