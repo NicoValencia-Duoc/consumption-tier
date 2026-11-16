@@ -24,8 +24,7 @@ public class PaginaInicio extends VBox {
     private final List<ItemConsumption> items;
     private final Consumer<ItemConsumption> alAbrir;
     private final TilePane galeria = new TilePane(14, 14);
-    private final TextField buscador = new TextField();
-    private final ComboBox<String> orden = new ComboBox<>();
+    private final CampoBusqueda buscador = new CampoBusqueda();    private final ComboBox<String> orden = new ComboBox<>();
     private final Label subtitulo = new Label();
     private final List<Button> botonesFiltro = new ArrayList<>();
     private final Map<Tier, Button> chipsTier = new EnumMap<>(Tier.class);
@@ -54,17 +53,18 @@ public class PaginaInicio extends VBox {
         VBox.setVgrow(zona, Priority.ALWAYS);
 
         subtitulo.getStyleClass().add("subtitulo");
-        getChildren().addAll(Terminal.titulo("BIBLIOTECA", null), crearBarraHerramientas(),
-                crearFilaTier(), crearFilaOrden(), zona);
+        getChildren().addAll(new VBox(2, Terminal.titulo("BIBLIOTECA", null), subtitulo),
+                crearBarraHerramientas(), crearFilaTier(), zona);
         actualizar();
     }
 
     private VBox crearBienvenida() {
         Label titulo = new Label("( ◉ )");
         titulo.getStyleClass().add("ojo-maw");
-        Label texto = new Label("ALGO RESPIRA AQUI.\nAUN NO HAS ALIMENTADO A THE MAW.");
-        texto.getStyleClass().add("subtitulo");
-        texto.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+        Label texto = new Label("ALGO RESPIRA AQUI.");
+        texto.getStyleClass().add("vacio-titulo");
+        Label detalle = new Label("AUN NO HAS ALIMENTADO A THE MAW. ELIGE QUE DARLE DE COMER.");
+        detalle.getStyleClass().add("subtitulo");
 
         HBox botones = new HBox(8);
         botones.setAlignment(Pos.CENTER);
@@ -75,13 +75,15 @@ public class PaginaInicio extends VBox {
             botones.getChildren().add(b);
         }
 
-        VBox caja = new VBox(14, titulo, texto, botones);
+        VBox caja = new VBox(14, titulo, texto, detalle, botones);
+        caja.getStyleClass().add("vacio-caja");
         caja.setAlignment(Pos.CENTER);
+        caja.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
         return caja;
     }
 
     private HBox crearBarraHerramientas() {
-        buscador.setPromptText("$ buscar --titulo --autor --genero");       buscador.getStyleClass().add("buscador");
+        buscador.setPromptText("buscar --titulo --autor --genero");
         buscador.textProperty().addListener((obs, antes, ahora) -> actualizar());
         HBox.setHgrow(buscador, Priority.ALWAYS);
 
@@ -120,24 +122,17 @@ public class PaginaInicio extends VBox {
             chipsTier.put(t, chip);
             fila.getChildren().add(chip);
         }
-        return fila;
-    }
 
-    private HBox crearFilaOrden() {
         orden.getItems().addAll("NOTA ▼", "NOTA ▲", "TITULO A-Z", "TERMINADOS PRIMERO");
         orden.setValue("NOTA ▼");
         orden.setOnAction(e -> actualizar());
-
-        Label etiqueta = new Label("ORDENAR POR");
-        etiqueta.getStyleClass().add("subtitulo");
+        Label ordenar = new Label("ORDENAR");
+        ordenar.getStyleClass().add("subtitulo");
         Region espacio = new Region();
         HBox.setHgrow(espacio, Priority.ALWAYS);
-
-        HBox fila = new HBox(10, subtitulo, espacio, etiqueta, orden);
-        fila.setAlignment(Pos.CENTER_LEFT);
+        fila.getChildren().addAll(espacio, ordenar, orden);
         return fila;
     }
-
     private void actualizar() {
         for (Button b : botonesFiltro) {
             b.getStyleClass().remove("filtro-activo");
@@ -167,7 +162,7 @@ public class PaginaInicio extends VBox {
         long pendientes = visibles.stream().filter(i -> i.getEstado() == Estado.PENDIENTE).count();
         String texto = visibles.size() + (visibles.size() == 1 ? " ITEM" : " ITEMS");
         if (pendientes > 0) texto += " · " + pendientes + " SIN DEVORAR";
-        subtitulo.setText("// " + texto + " · ORDENADOS POR " + orden.getValue());
+        subtitulo.setText("// " + texto);
 
         boolean sinNada = items.isEmpty();
         bienvenida.setVisible(sinNada);

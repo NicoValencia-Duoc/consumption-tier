@@ -41,13 +41,16 @@ public class Cabecera extends HBox {
     public Cabecera(Consumer<String> alElegirPestana, Consumer<Tema> alElegirTema, Preferencias preferencias) {
         this.preferencias = preferencias;
 
-        Label marca = new Label("Consumption Tier // ");
+        Label marca = new Label("THE MAW// ");
         marca.getStyleClass().add("logo");
+        Efectos.glitchAlPasar(marca);
+        Label sesion = new Label("sesion: ");
+        sesion.getStyleClass().add("etiqueta-sesion");
         nombre.setText(preferencias.getNombreUsuario());
         nombre.getStyleClass().addAll("logo", "nombre-usuario");
         nombre.setOnMouseClicked(e -> editarNombre());
         logo.setAlignment(Pos.CENTER_LEFT);
-        logo.getChildren().addAll(marca, nombre);
+        logo.getChildren().addAll(marca, sesion, nombre);
         prepararGlobo();
 
         HBox contenedorPestanas = new HBox(2);

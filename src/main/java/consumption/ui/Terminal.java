@@ -8,8 +8,10 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 public final class Terminal {
@@ -32,12 +34,19 @@ public final class Terminal {
         return caja;
     }
 
-    public static VBox panel(String titulo, Node contenido) {
-        Label etiqueta = new Label("┤ " + titulo + " ├");
+    public static StackPane panel(String titulo, Node contenido) {
+        Label etiqueta = new Label(titulo);
         etiqueta.getStyleClass().add("panel-titulo");
-        VBox caja = new VBox(8, etiqueta, contenido);
+        StackPane.setAlignment(etiqueta, Pos.TOP_LEFT);
+        StackPane.setMargin(etiqueta, new Insets(0, 0, 0, 12));
+
+        VBox caja = new VBox(contenido);
         caja.getStyleClass().add("panel-ficha");
-        return caja;
+        StackPane.setMargin(caja, new Insets(8, 0, 0, 0));
+
+        StackPane marco = new StackPane(caja, etiqueta);
+        marco.setAlignment(Pos.TOP_LEFT);
+        return marco;
     }
 
     public static <B extends ButtonBase> B corchetes(B boton) {

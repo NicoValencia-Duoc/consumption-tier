@@ -32,7 +32,7 @@ public class VentanaPrincipal extends VBox {
     private final StackPane contenido = new StackPane();
     private String pestanaActual = "INICIO";
     private final Aviso aviso = new Aviso();
-    private final PieMaw pie = new PieMaw();
+    private final PieMaw pie;
 
     public VentanaPrincipal(List<ItemConsumption> items, RepositorioJson repositorio,
                             Consumer<Tema> alElegirTema, ReproductorMusica reproductor,
@@ -48,9 +48,9 @@ public class VentanaPrincipal extends VBox {
 
         StackPane zona = new StackPane(contenido, aviso);
         VBox.setVgrow(zona, Priority.ALWAYS);
-        pie.getStyleClass().add("pie-maw");
+        pie = new PieMaw(reproductor);
         pie.setMaxWidth(Double.MAX_VALUE);
-        getChildren().addAll(cabecera, zona, new BarraMusica(reproductor), pie);
+        getChildren().addAll(cabecera, zona, pie);
 
         String inicial = preferencias.getUltimaPestana();
         cabecera.marcarActiva(inicial);
@@ -146,7 +146,7 @@ public class VentanaPrincipal extends VBox {
         List<ItemConsumption> pendientes = items.stream()
                 .filter(i -> i.getEstado() == Estado.PENDIENTE).toList();
         PaginaTabla<ItemConsumption> p = new PaginaTabla<>("PENDIENTES", pendientes, preferencias);
-        p.agregarColumna("tipo", "TIPO", ItemConsumption::getTipo, true);
+        p.agregarColumna("tipo", "TIPO", i -> Nombres.singular(i.getTipo()), true);
         p.agregarColumna("genero", "GENERO", ItemConsumption::getGenero, true);
         conectarComunes(p);
         p.setAlAgregar(this::agregarPendiente);
@@ -242,7 +242,13 @@ public class VentanaPrincipal extends VBox {
                     cabecera.marcarActiva(pestanaActual);
                     mostrar(pestanaActual);
                 },
-                transicion -> cambiarEstado(item, transicion, true)));
+                transicion -> cambiarEstado(item, transicion, true),
+                () -> editarDesdeDetalle(item)));
+    }
+
+    private void editarDesdeDetalle(ItemConsumption item) {
+        editarCon(formularioPara(item), item);
+        verDetalle(item);
     }
 
     private void alternarFavorito(ItemConsumption item) {

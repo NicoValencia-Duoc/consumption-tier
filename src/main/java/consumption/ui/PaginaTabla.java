@@ -18,6 +18,7 @@ import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
+import consumption.model.Numeracion;
 import javafx.css.PseudoClass;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -48,6 +49,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
 
     private static final String ID_CASILLAS = "casillas";
     private static final String ID_FAVORITO = "fav";
+    private static final String ID_NUMERO = "id";
     private static final String ID_TITULO = "titulo";
     private static final String ID_NOTA = "nota";
     private static final int COMUNES = 5;
@@ -63,7 +65,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
     private final TableColumn<T, Boolean> columnaCasillas = new TableColumn<>("");
     private boolean restaurando = false;
 
-    private final TextField buscador = new TextField();
+    private final CampoBusqueda buscador = new CampoBusqueda();
     private final ComboBox<String> filtroEstado = new ComboBox<>();
     private final ComboBox<String> filtroGenero = new ComboBox<>();
     private final CheckBox soloFavoritos = new CheckBox("★ SOLO FAVORITOS");
@@ -113,10 +115,10 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         tabla.setPlaceholder(new Label("( ◉ ) ALGO RESPIRA AQUI · SIN REGISTROS"));
         VBox.setVgrow(tabla, Priority.ALWAYS);
 
-        Label titulo = new Label();
-        titulo.getStyleClass().add("titulo-terminal");
-        titulo.textProperty().bind(Bindings.createStringBinding(
-                () -> "> " + ReglasTabla.textoRegistros(nombreTipo, filtrada.size()), filtrada));
+        Label cantidad = new Label();
+        cantidad.textProperty().bind(Bindings.createStringBinding(
+                () -> "// " + ReglasTabla.textoCantidad(filtrada.size()), filtrada));
+        HBox titulo = Terminal.titulo(nombreTipo, cantidad);
 
         Button agregar = new Button("+ AGREGAR");
         agregar.getStyleClass().addAll("pestana", "boton-accion");
@@ -125,12 +127,12 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
 
         Region espacio = new Region();
         HBox.setHgrow(espacio, Priority.ALWAYS);
-        acciones = new HBox(8, titulo, new CursorTerminal(), espacio, agregar, mas);
+        acciones = new HBox(8, titulo, espacio, agregar, mas);
         acciones.setAlignment(Pos.CENTER_LEFT);
         acciones.setMaxWidth(Double.MAX_VALUE);
 
         Button cerrar = new Button("✕");
-        cerrar.getStyleClass().add("pestana");
+        cerrar.getStyleClass().addAll("pestana", "cerrar-plano");
         cerrar.setOnAction(e -> marcados.clear());
         contador.getStyleClass().add("contador-seleccion");
 
@@ -153,6 +155,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         abandonar.setOnAction(e -> alCambiarEstado.accept(unico(), Transicion.ABANDONAR));
 
         Terminal.corchetes(agregar);
+        Terminal.corchetes(mas);
         for (Button b : new Button[] {botonTodo, editar, empezar, terminar, abandonar, favorito, detalle, eliminar}) {
             Terminal.corchetes(b);
         }
@@ -168,8 +171,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
 
         StackPane zonaAcciones = new StackPane(acciones, barraSeleccion);
 
-        buscador.setPromptText("BUSCAR POR TITULO...");
-        buscador.getStyleClass().add("buscador");
+        buscador.setPromptText("buscar --titulo");
         HBox.setHgrow(buscador, Priority.ALWAYS);
 
         filtroEstado.getItems().add("TODOS");
@@ -199,6 +201,10 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
                 new Label("GENERO"), filtroGenero, soloFavoritos);
         filtros.setAlignment(Pos.CENTER_LEFT);
 
+        TableColumn<T, Object> colNumero = columna(ID_NUMERO, "ID", i -> Numeracion.etiqueta(i.getNumero()));
+        colNumero.setPrefWidth(64);
+        colNumero.setMaxWidth(90);
+        tabla.getColumns().add(colNumero);
         tabla.getColumns().add(columna(ID_FAVORITO, "★", i -> i.isFavorito() ? "★" : ""));
         tabla.getColumns().add(columna(ID_TITULO, "TITULO", ItemConsumption::getTitulo));
 
@@ -233,7 +239,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
                     return;
                 }
                 Estado e = (Estado) valor;
-                setText(e.getEtiqueta());
+                setText((e == Estado.PENDIENTE ? "▒ " : "● ") + e.getEtiqueta());
                 getStyleClass().add(e.getClaseCss());
             }
         });
@@ -272,7 +278,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         columnaCasillas.setMaxWidth(44);
         columnaCasillas.setCellValueFactory(d -> new ReadOnlyObjectWrapper<>(Boolean.TRUE));
         columnaCasillas.setCellFactory(col -> new CeldaCasilla());
-        tabla.getColumns().add(1, columnaCasillas);
+        tabla.getColumns().add(0, columnaCasillas);
 
 
         tabla.setRowFactory(tv -> new FilaTabla());
@@ -301,7 +307,8 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         List<String> guardadas = recordado.getColumnas();
         for (TableColumn<T, ?> c : tabla.getColumns()) {
             String id = c.getId();
-            if (id == null || ID_FAVORITO.equals(id) || ID_TITULO.equals(id) || ID_CASILLAS.equals(id)) continue;
+            if (id == null || ID_FAVORITO.equals(id) || ID_TITULO.equals(id) || ID_NUMERO.equals(id)
+                    || ID_CASILLAS.equals(id)) continue;
             c.setVisible(guardadas == null ? !ocultasPorDefecto.contains(id) : guardadas.contains(id));
         }
 
@@ -574,6 +581,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
     private TableColumn<T, Object> columna(String id, String titulo, Function<T, Object> extractor) {
         TableColumn<T, Object> c = new TableColumn<>(titulo);
         c.setId(id);
+        c.getStyleClass().add("col-" + id);
         c.setCellValueFactory(d -> new ReadOnlyObjectWrapper<>(extractor.apply(d.getValue())));
         c.setCellFactory(col -> new TableCell<>() {
             @Override

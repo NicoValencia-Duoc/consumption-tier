@@ -41,7 +41,7 @@ public class TarjetaItem extends VBox {
             miniatura.getChildren().add(letra);
         }
 
-        Label tipo = new Label(Numeracion.etiqueta(item.getNumero()) + " · " + item.getTipo());
+        Label tipo = new Label(Numeracion.etiqueta(item.getNumero()) + " · " + Nombres.singular(item.getTipo()));
         tipo.getStyleClass().add("tipo");
         StackPane.setAlignment(tipo, Pos.BOTTOM_LEFT);
         miniatura.getChildren().add(tipo);
@@ -94,6 +94,11 @@ public class TarjetaItem extends VBox {
 
         if (pendiente) {
             getStyleClass().add("tarjeta-pendiente");
+            Region trama = new Region();
+            trama.getStyleClass().add("trama-pendiente");
+            trama.setMouseTransparent(true);
+            miniatura.getChildren().add(1, trama);
+            trama.visibleProperty().bind(hoverProperty().not());
             miniatura.setEffect(GRISES);
             hoverProperty().addListener((obs, antes, ahora) -> miniatura.setEffect(ahora ? null : GRISES));
         }

@@ -30,8 +30,12 @@ public final class ReglasTabla {
         return tipo + " · " + cantidad + (cantidad == 1 ? " REGISTRO" : " REGISTROS");
     }
 
+    public static String textoCantidad(int cantidad) {
+        return cantidad + (cantidad == 1 ? " REGISTRO" : " REGISTROS");
+    }
+
     public static String textoSeleccionados(int cantidad) {
-        return cantidad + (cantidad == 1 ? " SELECCIONADO" : " SELECCIONADOS");
+        return cantidad + (cantidad == 1 ? " MARCADO" : " MARCADOS");
     }
 
     public static String textoEliminar(int cantidad) {

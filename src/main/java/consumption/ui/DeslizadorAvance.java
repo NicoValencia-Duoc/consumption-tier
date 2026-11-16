@@ -136,7 +136,7 @@ public class DeslizadorAvance extends VBox {
                 "El avance es " + String.format("%.0f", valor.get()) + "%. Volver a 100% lo recortaria a 100%. ¿Continuar?",
                 recortar, mantener);
         alerta.setTitle("CONFIRMAR");
-        alerta.setHeaderText(null);
+        alerta.setHeaderText("CONFIRMAR");
         if (getScene() != null) {
             alerta.initOwner(getScene().getWindow());
             alerta.getDialogPane().getStylesheets().setAll(getScene().getStylesheets());
@@ -147,6 +147,8 @@ public class DeslizadorAvance extends VBox {
         b2.getStyleClass().addAll("boton-dialogo", "boton-accion");
         b1.setDefaultButton(false);
         b2.setDefaultButton(true);
+        Terminal.corchetes(b1);
+        Terminal.corchetes(b2);
         return alerta.showAndWait().filter(b -> b == recortar).isPresent();
     }
 }

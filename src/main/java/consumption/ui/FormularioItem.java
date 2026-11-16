@@ -193,12 +193,12 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         mensaje.setWrapText(true);
         mensaje.setMaxWidth(680);
         Label atajos = new Label("ESC CANCELAR · ENTER GUARDAR");
-        atajos.getStyleClass().add("subtitulo");
+        atajos.getStyleClass().addAll("subtitulo", "barra-atajos");
         VBox raiz = new VBox(8, scroll, mensaje, atajos);
 
         dialogo = new Dialog<>();
         dialogo.setTitle((existente == null ? "AGREGAR " : "EDITAR ") + nombreTipo());
-        dialogo.setHeaderText(existente == null ? TITULO_NUEVO : TITULO_EDICION);
+        dialogo.setHeaderText((existente == null ? TITULO_NUEVO : TITULO_EDICION) + " · " + nombreTipo());
         dialogo.getDialogPane().getStylesheets().setAll(hojas);
         dialogo.getDialogPane().setContent(raiz);
         ButtonType guardar = new ButtonType("GUARDAR", ButtonBar.ButtonData.OK_DONE);
@@ -252,7 +252,13 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         Region linea = new Region();
         linea.getStyleClass().add("seccion-linea");
 
-        VBox seccion = new VBox(8, cabecera, linea);
+        HBox encabezado = new HBox(10, cabecera, linea);
+        encabezado.setAlignment(Pos.CENTER_LEFT);
+        encabezado.setFillHeight(false);
+        HBox.setHgrow(linea, Priority.ALWAYS);
+        linea.setPrefHeight(1);
+        linea.setMaxHeight(1);
+        VBox seccion = new VBox(8, encabezado);
         cuerpo.getChildren().add(seccion);
         seccionActual = seccion;
         return seccion;
@@ -305,6 +311,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
             ToggleButton chip = new ToggleButton(e.getEtiqueta());
             chip.setToggleGroup(grupoEstado);
             chip.setUserData(e);
+            Terminal.corchetes(chip);
             chip.getStyleClass().addAll("chip", e.getClaseCss().replace("estado-", "chip-"));
             chips.put(e, chip);
             caja.getChildren().add(chip);
@@ -485,6 +492,8 @@ public abstract class FormularioItem<T extends ItemConsumption> {
             return;
         }
         fila.error().setText("!! " + texto);
+        fila.campo().getStyleClass().remove("campo-error");
+        fila.campo().getStyleClass().add("campo-error");
         fila.error().setVisible(true);
         fila.error().setManaged(true);
         desplazarHasta(fila);
@@ -502,6 +511,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
 
     private void limpiar(Fila fila) {
         fila.error().setText("");
+        fila.campo().getStyleClass().remove("campo-error");
         fila.error().setVisible(false);
         fila.error().setManaged(false);
     }

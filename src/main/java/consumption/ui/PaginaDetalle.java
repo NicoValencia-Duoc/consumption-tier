@@ -4,6 +4,7 @@ package consumption.ui;
 import consumption.model.ItemConsumption;
 import consumption.model.Estado;
 import consumption.model.Formato;
+import consumption.model.Numeracion;
 import consumption.model.ReglasInicio;
 import consumption.model.Transicion;
 
@@ -20,12 +21,13 @@ import java.util.function.Consumer;
 public class PaginaDetalle extends VBox{
 
     public PaginaDetalle(ItemConsumption item, Runnable alGuardar, Runnable alVolver,
-                         Consumer<Transicion> alCambiarEstado){
+                         Consumer<Transicion> alCambiarEstado, Runnable alEditar){
 
         setSpacing(12);
         Label titulo = new Label("> " + item.getTitulo());
         titulo.getStyleClass().add("titulo-detalle");
-        Label resumen = new Label("// " + item.getTipo() + " · " + item.getEstado().getEtiqueta());
+        Efectos.glitchAlPasar(titulo);
+        Label resumen = new Label("// " + Nombres.singular(item.getTipo()) + " · " + item.getEstado().getEtiqueta());
         resumen.getStyleClass().add("subtitulo");
         Label nota = new Label("NOTA FINAL " + Formato.decimal(item.getNota()));
         nota.getStyleClass().add("nota");
@@ -44,8 +46,11 @@ public class PaginaDetalle extends VBox{
             Double valor = item.getCriterios().get(nombre);
             Label numero = new Label(valor == null ? "N/A" : Formato.decimal(valor));
             numero.getStyleClass().add("valor-criterio");
-            criterios.add(new Label(nombre), 0, fila);
-            criterios.add(numero, 1, fila);
+            Label nombreCriterio = new Label(nombre);
+            nombreCriterio.getStyleClass().add("nombre-criterio");
+            criterios.add(nombreCriterio, 0, fila);
+            criterios.add(new BarraLed(valor), 1, fila);
+            criterios.add(numero, 2, fila);
             fila++;
         }
 
@@ -80,7 +85,11 @@ public class PaginaDetalle extends VBox{
             aviso.setText("GUARDADO");
         });
 
-        HBox botones = new HBox(10, volver, guardar, contador, aviso);
+        Button editar = Terminal.corchetes(new Button("EDITAR"));
+        editar.getStyleClass().add("pestana");
+        editar.setOnAction(e -> alEditar.run());
+
+        HBox botones = new HBox(10, volver, editar, guardar, contador, aviso);
         botones.setAlignment(Pos.CENTER_LEFT);
 
         ImageView portada = new ImageView();
@@ -135,10 +144,17 @@ public class PaginaDetalle extends VBox{
             });
             datos.getChildren().add(new HBox(10, etiquetaAvance, avance, avisoAvance));
         }
+        if (avanceFijo) {
+            Label etiquetaFija = new Label("AVANCE");
+            etiquetaFija.getStyleClass().add("subtitulo");
+            BarraAvance fija = new BarraAvance();
+            fija.setPorcentaje(item.getPorcentaje());
+            datos.getChildren().add(new HBox(10, etiquetaFija, fija));
+        }
         datos.getChildren().addAll(filaNota, Terminal.panel("CRITERIOS", criterios));
         HBox cabeza = new HBox(24, portada, datos);
         getChildren().addAll(
-                Terminal.panel("FICHA · " + item.getTipo(), cabeza),
+                Terminal.panel("FICHA " + Numeracion.etiqueta(item.getNumero()).replace("#", ""), cabeza),
                 Terminal.panel(tituloComentario.getText(), comentario),
                 botones);
     }

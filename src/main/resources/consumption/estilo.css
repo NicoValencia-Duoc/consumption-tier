@@ -287,3 +287,144 @@
 .pie-punto { -fx-text-fill: -c-r; -fx-font-size: 10px; }
 .pie-segmento { -fx-background-color: -c-ln; }
 .pie-segmento-lleno { -fx-background-color: -c-r; }
+
+/* =====================================================================
+   PARTE 5 - capsula mockup
+   ===================================================================== */
+
+/* Cabecera: THE MAW// sesion: nombre */
+.logo { -fx-font-family: "Orbitron", "Segoe UI"; }
+.etiqueta-sesion {
+    -fx-font-family: "Share Tech Mono", "Consolas";
+    -fx-font-size: 14px;
+    -fx-text-fill: -c-mt;
+}
+
+/* Buscador con $ fijo */
+.campo-busqueda {
+    -fx-background-color: -c-pn;
+    -fx-border-color: -c-ln;
+    -fx-border-width: 1;
+    -fx-padding: 0 0 0 10;
+}
+.campo-busqueda-foco { -fx-border-color: -c-y; }
+.campo-busqueda-signo {
+    -fx-font-family: "Share Tech Mono", "Consolas";
+    -fx-font-size: 14px;
+    -fx-text-fill: -c-yl;
+}
+.campo-busqueda .campo-busqueda-texto,
+.campo-busqueda .campo-busqueda-texto:focused {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-text-fill: -c-tx;
+    -fx-prompt-text-fill: -c-mt;
+    -fx-font-family: "Share Tech Mono", "Consolas";
+    -fx-font-size: 14px;
+}
+
+/* Chips de TIER: letra de titulo */
+.chip-tier {
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+/* Tarjetas pendientes: borde discontinuo y trama rayada */
+.tarjeta-pendiente {
+    -fx-opacity: 0.75;
+    -fx-border-color: -c-mt;
+    -fx-border-style: segments(6, 4);
+    -fx-border-width: 1;
+}
+.tarjeta-pendiente:hover { -fx-opacity: 1; -fx-border-color: -c-acento; }
+.trama-pendiente {
+    -fx-background-color: linear-gradient(from 0px 0px to 8px 8px, repeat,
+    rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.08) 50%, transparent 50%, transparent 100%);
+}
+
+/* Pantalla vacia */
+.vacio-caja {
+    -fx-border-color: -c-ln;
+    -fx-border-style: segments(6, 4);
+    -fx-border-width: 1;
+    -fx-padding: 36 56 36 56;
+}
+.vacio-titulo {
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -c-tx;
+}
+
+/* Tablas */
+.cerrar-plano, .cerrar-plano:hover {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -c-r;
+    -fx-padding: 2 8 2 8;
+}
+.table-view .column-header {
+    -fx-border-color: transparent transparent -c-acento transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-size: 30;
+}
+.table-view .column-header .label {
+    -fx-font-family: "Share Tech Mono", "Consolas";
+    -fx-font-size: 12px;
+    -fx-font-weight: normal;
+    -fx-text-fill: -c-mt;
+}
+.col-id, .col-inicio, .col-termino, .col-avance { -fx-text-fill: -c-mt; }
+.col-titulo { -fx-text-fill: -c-tx; }
+.col-nota { -fx-text-fill: -c-tx; -fx-font-weight: bold; }
+.table-row-cell:marcada {
+    -fx-background-color: -c-r, -c-ln;
+    -fx-effect: innershadow(gaussian, -c-r, 8, 0, 3, 0);
+}
+
+/* Marcos del detalle: el titulo interrumpe el borde */
+.panel-ficha { -fx-padding: 16 12 12 12; }
+.panel-titulo {
+    -fx-background-color: -c-bg;
+    -fx-padding: 0 6 0 6;
+}
+.nombre-criterio {
+    -fx-font-family: "Share Tech Mono", "Consolas";
+    -fx-font-size: 13px;
+    -fx-text-fill: -c-mt;
+}
+.led-seg { -fx-background-color: -c-ln; }
+.led-seg-lleno { -fx-background-color: -c-g; }
+
+/* Sliders con pista de segmentos */
+.slider .track {
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-background-color: linear-gradient(from 0px 0px to 8px 0px, repeat,
+    -c-ln 0%, -c-ln 70%, transparent 70%, transparent 100%);
+}
+.slider .thumb {
+    -fx-background-color: -c-y;
+    -fx-background-radius: 0;
+    -fx-padding: 8 4 8 4;
+}
+
+/* Formulario */
+.campo-error, .text-field.campo-error, .text-area.campo-error, .combo-box.campo-error {
+    -fx-border-color: -c-r;
+}
+.barra-atajos {
+    -fx-border-color: -c-ln transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 6 0 0 0;
+}
+
+/* Pie con reproductor: la linea de progreso hace de borde superior */
+.pie-maw {
+    -fx-padding: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+.pie-fila { -fx-padding: 6 0 0 0; }
