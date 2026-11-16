@@ -174,3 +174,116 @@
 }
 
 .chip-tier { -fx-background-color: #08080a; }
+
+
+/* =====================================================================
+   PARTE 3
+   ===================================================================== */
+
+/* Amarillo para texto: igual a -c-y salvo que el tema lo redefina (SOLAR) */
+.root, .cal-panel, .context-menu { -c-yl: -c-y; }
+
+.boton-accion { -fx-text-fill: -c-yl; -fx-border-color: -c-yl; }
+.estado-progreso { -fx-text-fill: -c-yl; -fx-border-color: -c-yl; }
+.table-cell.estado-progreso { -fx-text-fill: -c-yl; }
+.dias-en-curso { -fx-text-fill: -c-yl; }
+.chip-progreso:selected { -fx-text-fill: -c-yl; -fx-border-color: -c-yl; }
+.boton-musica { -fx-text-fill: -c-yl; }
+.aviso-boton { -fx-text-fill: -c-yl; }
+.pestana-barra:hover { -fx-text-fill: -c-yl; }
+.pestana-barra-activa:hover { -fx-text-fill: -c-yt; }
+.dialog-pane .button.boton-dialogo.boton-accion { -fx-text-fill: -c-yl; -fx-border-color: -c-yl; }
+.dialog-pane .button:hover, .dialog-pane .button.boton-dialogo:hover {
+    -fx-border-color: -c-yl;
+    -fx-text-fill: -c-yl;
+}
+.dialog-pane .button.boton-dialogo.boton-peligro { -fx-text-fill: -c-r; -fx-border-color: -c-r; }
+
+/* Valores numericos y de datos: letra de maquina */
+.valor-criterio {
+    -fx-font-family: "Share Tech Mono", "Consolas";
+    -fx-font-weight: normal;
+    -fx-font-size: 15px;
+}
+
+/* Paneles enmarcados del detalle */
+.panel-ficha {
+    -fx-border-color: -c-ln;
+    -fx-border-width: 1;
+    -fx-padding: 12;
+}
+.panel-titulo {
+    -fx-font-family: "Share Tech Mono", "Consolas";
+    -fx-font-size: 12px;
+    -fx-text-fill: -c-acento;
+}
+
+/* Efectos: lineas de escaneo y viñeta roja (los dibuja Efectos.java) */
+.efecto-lineas {
+    -fx-background-color: linear-gradient(from 0px 0px to 0px 4px, repeat,
+    rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.06) 50%, transparent 50%, transparent 100%);
+}
+.efecto-vineta {
+    -fx-background-color: radial-gradient(center 50% 50%, radius 75%,
+    transparent 80%, rgba(196,18,42,0.14) 100%);
+}
+
+/* =====================================================================
+   PARTE 4
+   ===================================================================== */
+
+/* Titulos de pagina: > NOMBRE▌ */
+.titulo-prompt {
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -c-acento;
+}
+.titulo-pagina {
+    -fx-font-family: "Orbitron", "Segoe UI";
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -c-tx;
+}
+
+/* Contador de las pestanas */
+.contador-pestana {
+    -fx-font-family: "Share Tech Mono", "Consolas";
+    -fx-font-size: 14px;
+    -fx-text-fill: -c-yl;
+}
+.pestana-barra-activa .contador-pestana { -fx-text-fill: -c-yt; }
+
+/* Filtro activo: borde amarillo, sin relleno */
+.filtro-activo, .filtro-activo:hover {
+    -fx-background-color: transparent;
+    -fx-border-color: -c-yl;
+    -fx-text-fill: -c-yl;
+}
+
+/* Tarjetas: esquinas de color, estado sin caja, nota blanca */
+.esquina { -fx-border-color: -c-acento; }
+.estado { -fx-border-width: 0; -fx-padding: 0; }
+.nota { -fx-text-fill: -c-tx; }
+
+/* Estado vacio */
+.ojo-maw {
+    -fx-font-family: "Share Tech Mono", "Consolas";
+    -fx-font-size: 48px;
+    -fx-text-fill: -c-r;
+}
+
+/* Pie de ventana */
+.pie-texto {
+    -fx-font-family: "Share Tech Mono", "Consolas";
+    -fx-font-size: 12px;
+    -fx-text-fill: -c-mt;
+}
+.pie-nivel {
+    -fx-font-family: "Share Tech Mono", "Consolas";
+    -fx-font-size: 12px;
+    -fx-text-fill: -c-yl;
+}
+.pie-punto { -fx-text-fill: -c-r; -fx-font-size: 10px; }
+.pie-segmento { -fx-background-color: -c-ln; }
+.pie-segmento-lleno { -fx-background-color: -c-r; }

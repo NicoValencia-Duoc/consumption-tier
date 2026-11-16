@@ -4,11 +4,7 @@ import consumption.data.Preferencias;
 import consumption.data.RespaldoAutomatico;
 import consumption.data.RepositorioJson;
 import consumption.model.ItemConsumption;
-import consumption.ui.GeometriaVentana;
-import consumption.ui.ReproductorMusica;
-import consumption.ui.Tipografia;
-import consumption.ui.VentanaPrincipal;
-import consumption.ui.Tema;
+import consumption.ui.*;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -38,7 +34,7 @@ public class App extends Application {
         reproductor.volumenProperty().set(preferencias.getVolumen());
 
         ventana = new VentanaPrincipal(items, repositorio, this::elegirTema, reproductor, preferencias);
-        scena = new Scene(ventana, 1295, 720);
+        scena = new Scene(Efectos.capa(ventana), 1295, 720);
         aplicarTema();
 
         stage.setTitle("THE MAW");

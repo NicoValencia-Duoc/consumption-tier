@@ -15,7 +15,7 @@ public class CursorTerminal extends Label {
 
     public CursorTerminal() {
         super("▌");
-        getStyleClass().add("titulo-terminal");
+        getStyleClass().add("titulo-prompt");
         parpadeo.setCycleCount(Animation.INDEFINITE);
         sceneProperty().addListener((obs, antes, escena) -> {
             if (escena == null) parpadeo.stop();

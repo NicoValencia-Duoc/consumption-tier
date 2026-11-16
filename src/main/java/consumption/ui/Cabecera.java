@@ -7,6 +7,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -67,7 +68,7 @@ public class Cabecera extends HBox {
         pestanaDetalle.getStyleClass().add("pestana-barra");
         contenedorPestanas.getChildren().add(pestanaDetalle);
 
-        Button botonTema = new Button("TEMA ▾");
+        Button botonTema = Terminal.corchetes(new Button("TEMA ▾"));
         botonTema.getStyleClass().add("pestana-barra");
         ContextMenu menuTema = new ContextMenu();
         botonTema.setOnAction(e -> {
@@ -114,7 +115,13 @@ public class Cabecera extends HBox {
     public void setContadores(Map<String, Integer> cantidades) {
         cantidades.forEach((nombrePestana, cantidad) -> {
             Button b = pestanas.get(nombrePestana);
-            if (b != null) b.setText(nombrePestana + " · " + cantidad);
+            if (b == null) return;
+            Label numero = new Label(String.format("%02d", cantidad));
+            numero.getStyleClass().add("contador-pestana");
+            b.setText(nombrePestana);
+            b.setGraphic(numero);
+            b.setContentDisplay(ContentDisplay.RIGHT);
+            b.setGraphicTextGap(8);
         });
     }
 

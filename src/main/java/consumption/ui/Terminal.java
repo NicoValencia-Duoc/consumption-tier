@@ -7,10 +7,37 @@ import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
+import javafx.scene.control.Label;
+import javafx.geometry.Pos;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
 public final class Terminal {
 
     private Terminal() {
+    }
+
+    public static HBox titulo(String texto, Label subtitulo) {
+        Label prompt = new Label(">");
+        prompt.getStyleClass().add("titulo-prompt");
+        Label nombre = new Label(texto);
+        nombre.getStyleClass().add("titulo-pagina");
+        HBox caja = new HBox(10, prompt, nombre, new CursorTerminal());
+        caja.setAlignment(Pos.BASELINE_LEFT);
+        if (subtitulo != null) {
+            subtitulo.getStyleClass().add("subtitulo");
+            caja.getChildren().add(subtitulo);
+        }
+        Efectos.glitchAlPasar(nombre);
+        return caja;
+    }
+
+    public static VBox panel(String titulo, Node contenido) {
+        Label etiqueta = new Label("┤ " + titulo + " ├");
+        etiqueta.getStyleClass().add("panel-titulo");
+        VBox caja = new VBox(8, etiqueta, contenido);
+        caja.getStyleClass().add("panel-ficha");
+        return caja;
     }
 
     public static <B extends ButtonBase> B corchetes(B boton) {

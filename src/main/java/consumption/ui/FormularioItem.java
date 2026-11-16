@@ -192,7 +192,9 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         mensaje.getStyleClass().add("mensaje-error");
         mensaje.setWrapText(true);
         mensaje.setMaxWidth(680);
-        VBox raiz = new VBox(8, scroll, mensaje);
+        Label atajos = new Label("ESC CANCELAR · ENTER GUARDAR");
+        atajos.getStyleClass().add("subtitulo");
+        VBox raiz = new VBox(8, scroll, mensaje, atajos);
 
         dialogo = new Dialog<>();
         dialogo.setTitle((existente == null ? "AGREGAR " : "EDITAR ") + nombreTipo());

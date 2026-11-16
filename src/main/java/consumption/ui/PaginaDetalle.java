@@ -51,7 +51,7 @@ public class PaginaDetalle extends VBox{
 
         String conQuien = item.getConQuien();
         Label tituloComentario = new Label(conQuien.isEmpty()
-                ? "COMENTARIO" : "COMENTARIO · CON " + conQuien.toUpperCase());
+                ? "COMENTARIO.LOG" : "COMENTARIO.LOG · CON " + conQuien.toUpperCase());
         tituloComentario.getStyleClass().add("subtitulo");
 
         TextArea comentario = new TextArea(item.getComentario());
@@ -135,8 +135,11 @@ public class PaginaDetalle extends VBox{
             });
             datos.getChildren().add(new HBox(10, etiquetaAvance, avance, avisoAvance));
         }
-        datos.getChildren().addAll(filaNota, criterios);
+        datos.getChildren().addAll(filaNota, Terminal.panel("CRITERIOS", criterios));
         HBox cabeza = new HBox(24, portada, datos);
-        getChildren().addAll(cabeza, tituloComentario, comentario, botones);
+        getChildren().addAll(
+                Terminal.panel("FICHA · " + item.getTipo(), cabeza),
+                Terminal.panel(tituloComentario.getText(), comentario),
+                botones);
     }
 }

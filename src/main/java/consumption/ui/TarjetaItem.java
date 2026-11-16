@@ -4,6 +4,7 @@ import consumption.data.GestorImagenes;
 import consumption.model.ItemConsumption;
 import consumption.model.Estado;
 import consumption.model.Formato;
+import consumption.model.Numeracion;
 import consumption.model.ReglasInicio;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -40,7 +41,7 @@ public class TarjetaItem extends VBox {
             miniatura.getChildren().add(letra);
         }
 
-        Label tipo = new Label(item.getTipo());
+        Label tipo = new Label(Numeracion.etiqueta(item.getNumero()) + " · " + item.getTipo());
         tipo.getStyleClass().add("tipo");
         StackPane.setAlignment(tipo, Pos.BOTTOM_LEFT);
         miniatura.getChildren().add(tipo);
@@ -63,7 +64,7 @@ public class TarjetaItem extends VBox {
         Label titulo = new Label(item.getTitulo());
         titulo.getStyleClass().add("titulo-item");
 
-        Label estado = new Label(pendiente ? "SIN DEVORAR" : item.getEstado().getEtiqueta());
+        Label estado = new Label((pendiente ? "▒ " : "● ") + item.getEstado().getEtiqueta());
         estado.getStyleClass().addAll("estado", item.getEstado().getClaseCss());
 
         HBox fila;

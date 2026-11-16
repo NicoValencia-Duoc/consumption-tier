@@ -67,7 +67,7 @@ public class PaginaEstadisticas extends VBox {
     }
 
     private VBox panel(Estadisticas.Resumen r, String etiquetaExtra, String valorExtra) {
-        Label nombre = new Label(r.nombre());
+        Label nombre = new Label("> " + r.nombre());
         nombre.getStyleClass().add("titulo-item");
 
         String[][] filas = {
@@ -75,7 +75,7 @@ public class PaginaEstadisticas extends VBox {
                 {"TERMINADOS", String.valueOf(r.terminados())},
                 {"EN PROGRESO", String.valueOf(r.enProgreso())},
                 {"ABANDONADOS", String.valueOf(r.abandonados())},
-                {"PENDIENTES", String.valueOf(r.pendientes())},
+                {"SIN DEVORAR", String.valueOf(r.pendientes())},
                 {"NOTA PROMEDIO", r.notaPromedio() > 0 ? Formato.decimal(r.notaPromedio()) : "-"},
                 {"MEJOR VALORADO", r.mejor()},
                 {etiquetaExtra, valorExtra}};

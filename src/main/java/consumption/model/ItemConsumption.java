@@ -26,6 +26,7 @@ public abstract class ItemConsumption {
     private Integer vecesConsumido;
     private boolean sinFechaInicio;
     private boolean sinFechaTermino;
+    private int numero;
 
     public ItemConsumption(String titulo, double nota, Estado estado){
 
@@ -37,6 +38,14 @@ public abstract class ItemConsumption {
     public abstract String getTipo();
     public abstract String getLetra();
     public abstract String getGenero();
+
+    public int getNumero() {
+        return numero;
+    }
+
+    public void setNumero(int numero) {
+        this.numero = Math.max(0, numero);
+    }
 
     public String getTitulo(){
         return titulo;

@@ -54,15 +54,17 @@ public class PaginaInicio extends VBox {
         VBox.setVgrow(zona, Priority.ALWAYS);
 
         subtitulo.getStyleClass().add("subtitulo");
-        getChildren().addAll(crearBarraHerramientas(), crearFilaTier(), crearFilaOrden(), zona);
+        getChildren().addAll(Terminal.titulo("BIBLIOTECA", null), crearBarraHerramientas(),
+                crearFilaTier(), crearFilaOrden(), zona);
         actualizar();
     }
 
     private VBox crearBienvenida() {
-        Label titulo = new Label("THE MAW TIENE HAMBRE");
-        titulo.getStyleClass().add("titulo-detalle");
-        Label texto = new Label("AUN NO HAS DEVORADO NADA. SACIALA CON TU PRIMER REGISTRO.");
+        Label titulo = new Label("( ◉ )");
+        titulo.getStyleClass().add("ojo-maw");
+        Label texto = new Label("ALGO RESPIRA AQUI.\nAUN NO HAS ALIMENTADO A THE MAW.");
         texto.getStyleClass().add("subtitulo");
+        texto.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
 
         HBox botones = new HBox(8);
         botones.setAlignment(Pos.CENTER);
@@ -79,13 +81,15 @@ public class PaginaInicio extends VBox {
     }
 
     private HBox crearBarraHerramientas() {
-        buscador.setPromptText("BUSCAR POR TITULO, CREADOR, GENERO...");        buscador.getStyleClass().add("buscador");
+        buscador.setPromptText("$ buscar --titulo --autor --genero");       buscador.getStyleClass().add("buscador");
         buscador.textProperty().addListener((obs, antes, ahora) -> actualizar());
         HBox.setHgrow(buscador, Priority.ALWAYS);
 
         HBox filtros = new HBox(6);
         for (String nombre : FILTROS) {
             Button b = new Button(nombre);
+            b.setUserData(nombre);
+            Terminal.corchetes(b);
             b.getStyleClass().add("filtro");
             b.setOnAction(e -> {
                 filtroActual = nombre;
@@ -137,7 +141,7 @@ public class PaginaInicio extends VBox {
     private void actualizar() {
         for (Button b : botonesFiltro) {
             b.getStyleClass().remove("filtro-activo");
-            if (b.getText().equals(filtroActual)) b.getStyleClass().add("filtro-activo");
+            if (filtroActual.equals(b.getUserData())) b.getStyleClass().add("filtro-activo");
         }
         for (Map.Entry<Tier, Button> e : chipsTier.entrySet()) {
             e.getValue().getStyleClass().remove("chip-activo");

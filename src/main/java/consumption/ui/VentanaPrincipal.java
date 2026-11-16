@@ -32,7 +32,7 @@ public class VentanaPrincipal extends VBox {
     private final StackPane contenido = new StackPane();
     private String pestanaActual = "INICIO";
     private final Aviso aviso = new Aviso();
-    private final javafx.scene.control.Label pie = new javafx.scene.control.Label();
+    private final PieMaw pie = new PieMaw();
 
     public VentanaPrincipal(List<ItemConsumption> items, RepositorioJson repositorio,
                             Consumer<Tema> alElegirTema, ReproductorMusica reproductor,
@@ -40,6 +40,7 @@ public class VentanaPrincipal extends VBox {
         this.items = items;
         this.repositorio = repositorio;
         this.preferencias = preferencias;
+        if (Numeracion.asignar(items)) repositorio.guardar(items);
         setSpacing(14);
         setPadding(new Insets(20, 28, 20, 28));
 
@@ -89,8 +90,7 @@ public class VentanaPrincipal extends VBox {
 
         int sinDevorar = cantidades.get("PENDIENTES");
         int devorados = items.size() - sinDevorar;
-        pie.setText("THE MAW TE OBSERVA · " + devorados + (devorados == 1 ? " DEVORADO" : " DEVORADOS")
-                + " · " + sinDevorar + " SIN DEVORAR");
+        pie.actualizar(devorados, sinDevorar);
     }
 
     private int contar(Class<? extends ItemConsumption> tipo) {
@@ -195,6 +195,7 @@ public class VentanaPrincipal extends VBox {
 
     private <T extends ItemConsumption> void agregarCon(FormularioItem<T> formulario) {
         abrir(formulario, null).ifPresent(nuevo -> {
+            nuevo.setNumero(Numeracion.siguiente(items));
             items.add(nuevo);
             guardarYRefrescar();
             avisarGuardado(nuevo);
@@ -287,6 +288,7 @@ public class VentanaPrincipal extends VBox {
             GestorImagenes.limpiarCache();
             items.clear();
             items.addAll(repositorio.cargar());
+            if (Numeracion.asignar(items)) repositorio.guardar(items);
             mostrar(pestanaActual);
             avisar(Alert.AlertType.INFORMATION, "Respaldo restaurado: " + items.size() + " items.");
         } catch (IOException ex) {
