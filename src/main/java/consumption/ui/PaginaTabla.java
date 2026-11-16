@@ -2,6 +2,7 @@ package consumption.ui;
 
 import consumption.data.EstadoTabla;
 import consumption.data.ExportadorCsv;
+import consumption.data.GestorImagenes;
 import consumption.data.Preferencias;
 import consumption.model.Estado;
 import consumption.model.Formato;
@@ -21,6 +22,7 @@ import javafx.collections.transformation.SortedList;
 import consumption.model.Numeracion;
 import javafx.css.PseudoClass;
 import javafx.geometry.Pos;
+import javafx.scene.image.ImageView;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -50,6 +52,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
     private static final String ID_CASILLAS = "casillas";
     private static final String ID_FAVORITO = "fav";
     private static final String ID_NUMERO = "id";
+    private static final String ID_PORTADA = "portada";
     private static final String ID_TITULO = "titulo";
     private static final String ID_NOTA = "nota";
     private static final int COMUNES = 5;
@@ -82,6 +85,8 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
     private final Button empezar = new Button(Transicion.EMPEZAR.getEtiqueta());
     private final Button terminar = new Button(Transicion.TERMINAR.getEtiqueta());
     private final Button abandonar = new Button(Transicion.ABANDONAR.getEtiqueta());
+
+    private ContextMenu menuAbierto;
 
     private Runnable alAgregar = () -> {};
     private Consumer<T> alEditar = t -> {};
@@ -279,6 +284,8 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         columnaCasillas.setCellValueFactory(d -> new ReadOnlyObjectWrapper<>(Boolean.TRUE));
         columnaCasillas.setCellFactory(col -> new CeldaCasilla());
         tabla.getColumns().add(0, columnaCasillas);
+        tabla.getColumns().add(1, crearColumnaPortada());
+        tabla.setFixedCellSize(48);
 
 
         tabla.setRowFactory(tv -> new FilaTabla());
@@ -307,8 +314,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         List<String> guardadas = recordado.getColumnas();
         for (TableColumn<T, ?> c : tabla.getColumns()) {
             String id = c.getId();
-            if (id == null || ID_FAVORITO.equals(id) || ID_TITULO.equals(id) || ID_NUMERO.equals(id)
-                    || ID_CASILLAS.equals(id)) continue;
+            if (id == null || esFija(id)) continue;
             c.setVisible(guardadas == null ? !ocultasPorDefecto.contains(id) : guardadas.contains(id));
         }
 
@@ -346,7 +352,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
 
         for (TableColumn<T, ?> c : tabla.getColumns()) {
             String id = c.getId();
-            if (id == null || ID_FAVORITO.equals(id) || ID_TITULO.equals(id) || ID_CASILLAS.equals(id)) continue;
+            if (id == null || esFija(id)) continue;
             CheckBox casilla = new CheckBox(c.getText());
             casilla.setSelected(c.isVisible());
             casilla.selectedProperty().addListener((obs, antes, ahora) -> alternarColumna(c, ahora));
@@ -372,7 +378,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         List<String> ids = new ArrayList<>();
         for (TableColumn<T, ?> c : tabla.getColumns()) {
             String id = c.getId();
-            if (id == null || ID_FAVORITO.equals(id) || ID_TITULO.equals(id) || ID_CASILLAS.equals(id)) continue;
+            if (id == null || esFija(id)) continue;
             if (c.isVisible()) ids.add(id);
         }
         recordado.setColumnas(ids);
@@ -416,12 +422,39 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         else marcados.addAll(filtrada);
     }
 
+    private static boolean esFija(String id) {
+        return ID_FAVORITO.equals(id) || ID_TITULO.equals(id) || ID_NUMERO.equals(id)
+                || ID_CASILLAS.equals(id) || ID_PORTADA.equals(id);
+    }
+
+    private void abrirMenu(T item, TableRow<T> fila, double x, double y) {
+        if (menuAbierto != null) menuAbierto.hide();
+        List<T> objetivo = marcados.contains(item) ? new ArrayList<>(marcados) : List.of(item);
+        menuAbierto = new MenuAcciones<>(objetivo, alEditar, this::favoritoEn, alCambiarEstado, alEliminar);
+        menuAbierto.show(fila, x, y);
+    }
+
+    private TableColumn<T, Object> crearColumnaPortada() {
+        TableColumn<T, Object> c = columna(ID_PORTADA, "", i -> i);
+        c.setSortable(false);
+        c.setResizable(false);
+        c.setReorderable(false);
+        c.setMinWidth(52);
+        c.setPrefWidth(52);
+        c.setMaxWidth(52);
+        c.setCellFactory(col -> new CeldaMiniatura());
+        return c;
+    }
+
     private T unico() {
         return marcados.size() == 1 ? marcados.iterator().next() : null;
     }
 
     private void favoritoEnLote() {
-        List<T> lista = new ArrayList<>(marcados);
+        favoritoEn(new ArrayList<>(marcados));
+    }
+
+    private void favoritoEn(List<T> lista) {
         boolean todas = lista.stream().allMatch(ItemConsumption::isFavorito);
         for (T i : lista) {
             if (ReglasTabla.debeAlternarFavorito(i.isFavorito(), todas)) alFavorito.accept(i);
@@ -481,6 +514,34 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         }
     }
 
+    private class CeldaMiniatura extends TableCell<T, Object> {
+        private final ImageView vista = new ImageView();
+        private final StackPane marco = new StackPane(vista);
+
+        CeldaMiniatura() {
+            marco.getStyleClass().add("miniatura-fila");
+            marco.setMinSize(32, 42);
+            marco.setPrefSize(32, 42);
+            marco.setMaxSize(32, 42);
+            vista.setFitWidth(28);
+            vista.setFitHeight(38);
+            vista.setPreserveRatio(true);
+            setAlignment(Pos.CENTER);
+        }
+
+        @Override
+        protected void updateItem(Object valor, boolean vacio) {
+            super.updateItem(valor, vacio);
+            T item = (getTableRow() == null) ? null : getTableRow().getItem();
+            if (vacio || item == null) {
+                setGraphic(null);
+                return;
+            }
+            vista.setImage(GestorImagenes.imagenDe(item, 28, 38));
+            setGraphic(marco);
+        }
+    }
+
     private class FilaTabla extends TableRow<T> {
 
         FilaTabla() {
@@ -495,6 +556,11 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
                 }
             });
             marcados.addListener((SetChangeListener<T>) cambio -> pintar());
+            setOnContextMenuRequested(e -> {
+                if (isEmpty() || getItem() == null) return;
+                abrirMenu(getItem(), this, e.getScreenX(), e.getScreenY());
+                e.consume();
+            });
         }
 
         @Override

@@ -72,7 +72,7 @@ public class VentanaPrincipal extends VBox {
             case "SERIES" -> paginaSeries();
             case "PENDIENTES" -> paginaPendientes();
             case "ESTADISTICAS" -> new PaginaEstadisticas(items, this::crearRespaldo, this::restaurarRespaldo);
-            default -> new PaginaInicio(items, this::verDetalle, this::agregarDeTipo);
+            default -> paginaInicio();
         };
         contenido.getChildren().setAll(pagina);
         actualizarContadores();
@@ -232,6 +232,15 @@ public class VentanaPrincipal extends VBox {
             guardarYRefrescar();
             aviso.mostrar("REGISTRO ACTUALIZADO");
         });
+    }
+
+    private PaginaInicio paginaInicio() {
+        PaginaInicio inicio = new PaginaInicio(items, this::verDetalle, this::agregarDeTipo);
+        inicio.setAlEditar(item -> editarCon(formularioPara(item), item));
+        inicio.setAlFavorito(this::alternarFavorito);
+        inicio.setAlEliminar(this::eliminarLote);
+        inicio.setAlCambiarEstado((item, transicion) -> cambiarEstado(item, transicion, false));
+        return inicio;
     }
 
     private void verDetalle(ItemConsumption item) {

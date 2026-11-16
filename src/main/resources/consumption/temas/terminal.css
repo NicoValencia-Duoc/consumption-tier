@@ -5,3 +5,39 @@
     -c-r: #ff5f56;   -c-g: #8dffa8;   -c-gr: #4f7a5a;
     -c-acento: #33ff66;
 }
+
+/* =====================================================================
+   PARTE 6 - capsula 25 (menu de clic derecho y miniaturas)
+   ===================================================================== */
+
+.miniatura-fila {
+    -fx-background-color: #08080a;
+    -fx-border-color: -c-ln;
+    -fx-border-width: 1;
+}
+
+/* Menu emergente del mockup E (tambien lo usan TEMA y el menu de columnas) */
+.context-menu { -fx-padding: 2 0 2 0; }
+.context-menu .menu-item {
+    -fx-background-color: transparent;
+    -fx-padding: 7 36 7 10;
+}
+.context-menu .menu-item .label {
+    -fx-font-size: 14px;
+    -fx-font-weight: normal;
+    -fx-text-fill: -c-mt;
+}
+.context-menu .menu-item:focused { -fx-background-color: -c-ln; }
+.context-menu .menu-item:focused .label { -fx-text-fill: -c-tx; }
+.context-menu .menu-item:disabled .label { -fx-text-fill: -c-mt; -fx-opacity: 0.45; }
+
+.context-menu .menu-item .menu-icono { -fx-text-fill: -c-mt; }
+.context-menu .menu-item:focused .menu-icono { -fx-opacity: 0; }
+.context-menu .menu-item .menu-flecha { -fx-text-fill: -c-tx; -fx-opacity: 0; }
+.context-menu .menu-item:focused .menu-flecha { -fx-opacity: 1; }
+
+.context-menu .menu .arrow { -fx-background-color: -c-mt; }
+.context-menu .menu:focused .arrow { -fx-background-color: -c-tx; }
+
+.context-menu .menu-item.menu-peligro .label { -fx-text-fill: -c-r; }
+.context-menu .menu-item.menu-peligro:focused .label { -fx-text-fill: -c-r; }

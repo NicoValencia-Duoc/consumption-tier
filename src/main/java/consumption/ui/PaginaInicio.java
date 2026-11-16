@@ -4,9 +4,11 @@ import consumption.model.Estado;
 import consumption.model.ItemConsumption;
 import consumption.model.ReglasInicio;
 import consumption.model.Tier;
+import consumption.model.Transicion;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 
 import java.util.ArrayList;
@@ -14,6 +16,7 @@ import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class PaginaInicio extends VBox {
@@ -29,6 +32,12 @@ public class PaginaInicio extends VBox {
     private final List<Button> botonesFiltro = new ArrayList<>();
     private final Map<Tier, Button> chipsTier = new EnumMap<>(Tier.class);
     private final Consumer<String> alAgregarTipo;
+
+    private ContextMenu menuAbierto;
+    private Consumer<ItemConsumption> alEditar = i -> {};
+    private Consumer<ItemConsumption> alFavorito = i -> {};
+    private Consumer<List<ItemConsumption>> alEliminar = lote -> {};
+    private BiConsumer<ItemConsumption, Transicion> alCambiarEstado = (i, transicion) -> {};
     private final ScrollPane scroll;
     private final VBox bienvenida;
     private final Label sinResultados = new Label("( ◉ ) NADA RESPONDE A ESE FILTRO");
@@ -155,7 +164,20 @@ public class PaginaInicio extends VBox {
         for (ItemConsumption i : visibles) {
             TarjetaItem tarjeta = new TarjetaItem(i);
             tarjeta.setCursor(Cursor.HAND);
-            tarjeta.setOnMouseClicked(e -> alAbrir.accept(i));
+            tarjeta.setOnMouseClicked(e -> {
+                if (e.getButton() == MouseButton.PRIMARY) alAbrir.accept(i);
+            });
+            tarjeta.setOnContextMenuRequested(e -> {
+                if (menuAbierto != null) menuAbierto.hide();
+                menuAbierto = new MenuAcciones<>(List.of(i), alEditar,
+                        lote -> {
+                            lote.forEach(alFavorito);
+                            actualizar();
+                        },
+                        alCambiarEstado, alEliminar);
+                menuAbierto.show(tarjeta, e.getScreenX(), e.getScreenY());
+                e.consume();
+            });
             galeria.getChildren().add(tarjeta);
         }
 
@@ -177,6 +199,22 @@ public class PaginaInicio extends VBox {
             case "SIN DEVORAR" -> i.getEstado() == Estado.PENDIENTE;
             default -> true;
         };
+    }
+
+    public void setAlEditar(Consumer<ItemConsumption> accion) {
+        this.alEditar = accion;
+    }
+
+    public void setAlFavorito(Consumer<ItemConsumption> accion) {
+        this.alFavorito = accion;
+    }
+
+    public void setAlEliminar(Consumer<List<ItemConsumption>> accion) {
+        this.alEliminar = accion;
+    }
+
+    public void setAlCambiarEstado(BiConsumer<ItemConsumption, Transicion> accion) {
+        this.alCambiarEstado = accion;
     }
 
     private Comparator<ItemConsumption> comparador() {
