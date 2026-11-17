@@ -9,6 +9,7 @@ public class Rutas {
     public static final Path IMAGENES = BASE.resolve("imagenes");
     public static final Path PREFERENCIAS = BASE.resolve("preferencias.json");
     public static final Path RESPALDOS = BASE.resolve("respaldos");
+    public static final Path PAPELERA = BASE.resolve("papelera.json");
 
     private Rutas() {}
 }

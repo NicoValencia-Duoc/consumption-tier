@@ -5,6 +5,9 @@ import consumption.model.*;
 import consumption.data.GestorImagenes;
 import consumption.data.RespaldoZip;
 import consumption.data.Preferencias;
+import consumption.data.Papelera;
+import java.util.Set;
+import java.util.HashSet;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -32,6 +35,7 @@ public class VentanaPrincipal extends VBox {
     private final StackPane contenido = new StackPane();
     private String pestanaActual = "INICIO";
     private final Aviso aviso = new Aviso();
+    private final Papelera papelera = new Papelera();
     private final PieMaw pie;
 
     public VentanaPrincipal(List<ItemConsumption> items, RepositorioJson repositorio,
@@ -71,7 +75,8 @@ public class VentanaPrincipal extends VBox {
             case "PELICULAS" -> paginaPeliculas();
             case "SERIES" -> paginaSeries();
             case "PENDIENTES" -> paginaPendientes();
-            case "ESTADISTICAS" -> new PaginaEstadisticas(items, this::crearRespaldo, this::restaurarRespaldo);
+            case "ESTADISTICAS" -> new PaginaEstadisticas(items,
+                    this::crearRespaldo, this::restaurarRespaldo, this::abrirPapelera);
             default -> paginaInicio();
         };
         contenido.getChildren().setAll(pagina);
@@ -339,21 +344,119 @@ public class VentanaPrincipal extends VBox {
         List<ItemConsumption> lote = new ArrayList<>(seleccion);
         if (lote.isEmpty() || !confirmarEliminar(lote)) return;
 
-        items.removeAll(lote);
-        repositorio.guardar(items);
-        mostrar(pestanaActual);
+        Set<String> idsAntes = new HashSet<>();
+        for (Papelera.Entrada e : papelera.listar()) idsAntes.add(e.id());
+        try {
+            papelera.enviar(lote);
+        } catch (RuntimeException ex) {
+            avisar(Alert.AlertType.ERROR, "No se pudo guardar la papelera: " + ex.getMessage());
+            return;
+        }
+        Set<String> nuevosIds = new HashSet<>();
+        for (Papelera.Entrada e : papelera.listar()) {
+            if (!idsAntes.contains(e.id())) nuevosIds.add(e.id());
+        }
 
+        items.removeAll(lote);
+        try {
+            repositorio.guardar(items);
+        } catch (RuntimeException ex) {
+            items.addAll(lote);
+
+            avisar(Alert.AlertType.ERROR,
+                    "No se pudo guardar la biblioteca. Los registros siguen "
+                            + "disponibles y existe una copia en la papelera. " + ex.getMessage());
+            mostrar(pestanaActual);
+            return;
+        }
+        mostrar(pestanaActual);
         aviso.mostrarConDeshacer(
                 ReglasAcciones.textoEliminado(lote.size()),
                 () -> {
                     items.addAll(lote);
-                    guardarYRefrescar();
-                    aviso.mostrar(ReglasAcciones.textoRestaurado(lote.size()));
+                    try {
+                        repositorio.guardar(items);
+                        papelera.retirar(nuevosIds);
+                        mostrar(pestanaActual);
+                        aviso.mostrar(ReglasAcciones.textoRestaurado(lote.size()));
+                    } catch (RuntimeException ex) {
+                        avisar(Alert.AlertType.ERROR,
+                                "No se completo DESHACER: " + ex.getMessage()
+                                        + ". Revisa la biblioteca y la papelera.");
+                        mostrar(pestanaActual);
+                    }
                 },
-                () -> lote.forEach(i -> GestorImagenes.eliminar(i.getRutaImagen())));
+                null);
     }
 
-    private void cambiarEstado(ItemConsumption item, Transicion transicion, boolean desdeDetalle) {
+    private void abrirPapelera() {
+        aviso.confirmarPendiente();
+        try {
+            papelera.depurarVencidas();
+        } catch (RuntimeException ex) {
+            avisar(Alert.AlertType.ERROR,
+                    "No se pudo revisar la papelera: " + ex.getMessage());
+            return;
+        }
+        List<Papelera.Entrada> disponibles = papelera.listar();
+        if (disponibles.isEmpty()) {
+            avisar(Alert.AlertType.INFORMATION, "LA PAPELERA ESTA VACIA");
+            return;
+        }
+
+        ChoiceDialog<Papelera.Entrada> selector =
+                new ChoiceDialog<>(disponibles.get(0), disponibles);
+        selector.setTitle("THE MAW — PAPELERA");
+        selector.setHeaderText("RESTAURAR REGISTRO · 15 DIAS");
+        selector.setContentText("Selecciona un registro:");
+        selector.getDialogPane().getStylesheets().setAll(hojas());
+        Terminal.dialogo(selector, "PAPELERA", "boton-accion", null);
+
+        javafx.scene.control.ComboBox<Papelera.Entrada> combo =
+                (javafx.scene.control.ComboBox<Papelera.Entrada>)
+                        selector.getDialogPane().lookup(".combo-box");
+
+        if (combo != null) {
+            combo.setMinWidth(420);
+            combo.setPrefWidth(420);
+            combo.setMaxWidth(Double.MAX_VALUE);
+        }
+
+        selector.getDialogPane().setMinWidth(600);
+        selector.getDialogPane().setPrefWidth(600);
+
+        Optional<Papelera.Entrada> elegido = selector.showAndWait();
+        if (elegido.isEmpty()) return;
+
+        Papelera.Entrada entrada = elegido.get();
+        ItemConsumption item = entrada.item();
+        boolean ocupado = items.stream().anyMatch(i -> i.getNumero() == item.getNumero());
+        if (ocupado || item.getNumero() <= 0)
+            item.setNumero(Numeracion.siguiente(items));
+
+        items.add(item);
+        try {
+            repositorio.guardar(items);
+        } catch (RuntimeException ex) {
+            items.remove(item);
+            avisar(Alert.AlertType.ERROR,
+                    "No se pudo restaurar el registro: " + ex.getMessage());
+            return;
+        }
+        try {
+            papelera.retirar(Set.of(entrada.id()));
+        } catch (RuntimeException ex) {
+            avisar(Alert.AlertType.ERROR,
+                    "Registro restaurado en la biblioteca, pero no se pudo "
+                            + "retirar su copia de papelera: " + ex.getMessage());
+        }
+        mostrar(pestanaActual);
+        aviso.mostrar("REGISTRO RESTAURADO");
+    }
+
+    private void cambiarEstado(ItemConsumption item,
+                               Transicion transicion,
+                               boolean desdeDetalle) {
         try {
             transicion.aplicar(item, LocalDate.now());
         } catch (IllegalArgumentException ex) {

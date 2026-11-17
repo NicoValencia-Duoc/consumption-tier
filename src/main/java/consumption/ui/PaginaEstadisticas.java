@@ -12,7 +12,8 @@ import java.util.List;
 
 public class PaginaEstadisticas extends VBox {
 
-    public PaginaEstadisticas(List<ItemConsumption> items, Runnable alRespaldar, Runnable alRestaurar) {
+    public PaginaEstadisticas(List<ItemConsumption> items, Runnable alRespaldar,
+                              Runnable alRestaurar, Runnable alPapelera) {
         setSpacing(18);
 
         List<Juego> juegos = items.stream().filter(Juego.class::isInstance).map(Juego.class::cast).toList();
@@ -54,7 +55,11 @@ public class PaginaEstadisticas extends VBox {
         restaurar.getStyleClass().addAll("pestana", "boton-peligro");
         restaurar.setOnAction(e -> alRestaurar.run());
 
-        HBox botones = new HBox(8, respaldar, restaurar);
+        Button papelera = Terminal.corchetes(new Button("PAPELERA"));
+        papelera.getStyleClass().addAll("pestana", "boton-accion");
+        papelera.setOnAction(e -> alPapelera.run());
+
+        HBox botones = new HBox(8, respaldar, restaurar, papelera);
         botones.setAlignment(Pos.CENTER_LEFT);
 
         VBox cuerpo = new VBox(18, general, paneles, herramientas, botones);

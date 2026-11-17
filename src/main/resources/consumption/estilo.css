@@ -607,3 +607,7 @@
 .table-view .table-cell {
     -fx-alignment: CENTER;
 }
+/* Fondo negro para la vista previa de portadas en formularios */
+.vista-previa {
+    -fx-background-color: #08080a;
+}

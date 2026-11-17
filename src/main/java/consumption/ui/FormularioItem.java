@@ -5,7 +5,10 @@ import consumption.model.Estado;
 import consumption.model.Formato;
 import consumption.model.ItemConsumption;
 import consumption.model.Tier;
+import consumption.data.BorradorFormulario;
 
+import javafx.scene.Parent;
+import java.util.HashMap;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Bounds;
@@ -91,6 +94,8 @@ public abstract class FormularioItem<T extends ItemConsumption> {
 
     private boolean modificado;
     private boolean descarteConfirmado;
+    private boolean restaurandoBorrador;
+    private boolean capturarBorrador;
     private ComprobadorDuplicado comprobador;
     private Dialog<ButtonType> dialogo;
     private List<String> hojas;
@@ -232,6 +237,11 @@ public abstract class FormularioItem<T extends ItemConsumption> {
                     ev.consume();
                 } else {
                     resultado = construido;
+                    try {
+                        borrarBorradorSiNuevo();
+                    } catch (RuntimeException ex) {
+                        System.err.println("No se pudo borrar el borrador: " + ex.getMessage());
+                    }
                 }
             } catch (ErrorCampo ex) {
                 mostrarError(ex.getCampo(), ex.getMessage());
@@ -253,8 +263,172 @@ public abstract class FormularioItem<T extends ItemConsumption> {
 
         Platform.runLater(titulo::requestFocus);
         if (irACriterios) Platform.runLater(() -> Platform.runLater(this::desplazarACriterios));
+
+        dialogo.setOnShown(ev -> {
+            dialogo.getDialogPane().getScene().getWindow()
+                    .addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, cierre -> {
+                        if (!puedeDescartar()) cierre.consume();
+                    });
+            instalarBorrador();
+        });
+
+        Terminal.prepararCentrado(dialogo);
         Optional<ButtonType> respuesta = dialogo.showAndWait();
         return respuesta.filter(b -> b == guardar).map(b -> resultado);
+    }
+
+    private void instalarBorrador() {
+        if (original != null) return;
+
+        for (Fila fila : filas) {
+            vigilarNodo(fila.campo());
+        }
+        inicio.valorProperty().addListener((o, a, b) -> guardarBorradorActual());
+        termino.valorProperty().addListener((o, a, b) -> guardarBorradorActual());
+        sinInicio.selectedProperty().addListener((o, a, b) -> guardarBorradorActual());
+        sinTermino.selectedProperty().addListener((o, a, b) -> guardarBorradorActual());
+        avance.valorProperty().addListener((o, a, b) -> guardarBorradorActual());
+        grupoEstado.selectedToggleProperty().addListener((o, a, b) -> guardarBorradorActual());
+        criterios.values().forEach(f ->
+                f.valorProperty().addListener((o, a, b) -> guardarBorradorActual()));
+
+        try {
+            Optional<BorradorFormulario.Datos> previo = BorradorFormulario.leer(nombreTipo());
+            if (previo.isPresent()) {
+                boolean recuperar = preguntar(
+                        "Hay un borrador de " + nombreTipo()
+                                + " sin guardar. ¿Quieres recuperar lo escrito?",
+                        "RECUPERAR", "EMPEZAR DE CERO");
+                if (recuperar) {
+                    restaurandoBorrador = true;
+                    try {
+                        aplicarBorrador(previo.get().campos);
+                    } finally {
+                        restaurandoBorrador = false;
+                    }
+                    modificado = true;
+                } else {
+                    BorradorFormulario.borrar(nombreTipo());
+                }
+            }
+        } catch (RuntimeException ex) {
+            Alert alerta = new Alert(Alert.AlertType.WARNING,
+                    "No se pudo recuperar el borrador: " + ex.getMessage()
+                            + "\nEl archivo se conserva para revisarlo.",
+                    ButtonType.OK);
+            alerta.setHeaderText(null);
+            alerta.getDialogPane().getStylesheets().setAll(hojas);
+            alerta.showAndWait();
+        }
+
+        capturarBorrador = true;
+    }
+
+    private void vigilarNodo(Node nodo) {
+        if (nodo instanceof TextInputControl entrada) {
+            entrada.textProperty().addListener((o, a, b) -> guardarBorradorActual());
+        } else if (nodo instanceof CheckBox casilla) {
+            casilla.selectedProperty().addListener((o, a, b) -> guardarBorradorActual());
+        }
+        if (nodo instanceof Parent padre) {
+            for (Node hijo : padre.getChildrenUnmodifiable()) {
+                vigilarNodo(hijo);
+            }
+        }
+    }
+
+    private void guardarBorradorActual() {
+        if (!capturarBorrador || restaurandoBorrador || original != null) return;
+        try {
+            BorradorFormulario.guardar(nombreTipo(), capturarCampos());
+        } catch (RuntimeException ex) {
+            mensaje.setText("!! BORRADOR NO GUARDADO: " + ex.getMessage());
+        }
+    }
+
+    private Map<String, String> capturarCampos() {
+        Map<String, String> datos = new LinkedHashMap<>();
+        for (Fila fila : filas) {
+            List<TextInputControl> entradas = new ArrayList<>();
+            List<CheckBox> casillas = new ArrayList<>();
+            buscarControles(fila.campo(), entradas, casillas);
+            for (int i = 0; i < entradas.size(); i++) {
+                datos.put(fila.etiqueta() + "#T" + i, entradas.get(i).getText());
+            }
+            for (int i = 0; i < casillas.size(); i++) {
+                datos.put(fila.etiqueta() + "#C" + i,
+                        Boolean.toString(casillas.get(i).isSelected()));
+            }
+        }
+        datos.put("@ESTADO", estadoActual().name());
+        datos.put("@AVANCE", Double.toString(avance.getValor()));
+        for (Map.Entry<String, FilaCriterio> e : criterios.entrySet()) {
+            Double valor = e.getValue().getValor();
+            datos.put("@CRITERIO:" + e.getKey(),
+                    valor == null ? "N/A" : Double.toString(valor));
+        }
+        return datos;
+    }
+
+    private void buscarControles(Node nodo, List<TextInputControl> textos,
+                                 List<CheckBox> casillas) {
+        if (nodo instanceof TextInputControl texto) textos.add(texto);
+        if (nodo instanceof CheckBox casilla) casillas.add(casilla);
+        if (nodo instanceof Parent padre) {
+            for (Node hijo : padre.getChildrenUnmodifiable()) {
+                buscarControles(hijo, textos, casillas);
+            }
+        }
+    }
+
+    private void aplicarBorrador(Map<String, String> datos) {
+        String estado = datos.get("@ESTADO");
+        if (estado != null) {
+            try {
+                chips.get(Estado.valueOf(estado)).setSelected(true);
+            } catch (IllegalArgumentException ignorado) {
+            }
+        }
+
+        for (Fila fila : filas) {
+            List<TextInputControl> entradas = new ArrayList<>();
+            List<CheckBox> casillas = new ArrayList<>();
+            buscarControles(fila.campo(), entradas, casillas);
+            for (int i = 0; i < entradas.size(); i++) {
+                String valor = datos.get(fila.etiqueta() + "#T" + i);
+                if (valor != null) entradas.get(i).setText(valor);
+            }
+            for (int i = 0; i < casillas.size(); i++) {
+                String valor = datos.get(fila.etiqueta() + "#C" + i);
+                if (valor != null) casillas.get(i).setSelected(Boolean.parseBoolean(valor));
+            }
+        }
+
+        String porcentaje = datos.get("@AVANCE");
+        if (porcentaje != null) {
+            try {
+                avance.setValor(Double.parseDouble(porcentaje));
+            } catch (NumberFormatException ignorado) {
+            }
+        }
+
+        for (Map.Entry<String, FilaCriterio> e : criterios.entrySet()) {
+            String valor = datos.get("@CRITERIO:" + e.getKey());
+            if (valor == null) continue;
+            try {
+                e.getValue().setValor("N/A".equals(valor)
+                        ? null : Double.parseDouble(valor));
+            } catch (NumberFormatException ignorado) {
+            }
+        }
+        aplicarVisibilidad();
+        actualizarNota();
+    }
+
+    private void borrarBorradorSiNuevo() {
+        if (original == null) {
+            BorradorFormulario.borrar(nombreTipo());
+        }
     }
 
     private VBox nuevaSeccion(String nombre) {
@@ -582,8 +756,26 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     }
 
     private boolean puedeDescartar() {
-        if (!modificado || descarteConfirmado) return true;
-        if (preguntar("Hay cambios sin guardar. ¿Descartarlos?", "DESCARTAR", "SEGUIR EDITANDO")) {
+        if (descarteConfirmado) return true;
+
+        if (!modificado) {
+            try {
+                borrarBorradorSiNuevo();
+            } catch (RuntimeException ex) {
+                mensaje.setText("!! No se pudo borrar el borrador: " + ex.getMessage());
+                return false;
+            }
+            return true;
+        }
+
+        if (preguntar("Hay cambios sin guardar. ¿Descartarlos?",
+                "DESCARTAR", "SEGUIR EDITANDO")) {
+            try {
+                borrarBorradorSiNuevo();
+            } catch (RuntimeException ex) {
+                mensaje.setText("!! No se pudo borrar el borrador: " + ex.getMessage());
+                return false;
+            }
             descarteConfirmado = true;
             return true;
         }
