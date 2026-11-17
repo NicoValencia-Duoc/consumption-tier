@@ -1,37 +1,27 @@
+/* INDUSTRIAL DIURNO — paleta aprobada de THE MAW. */
 .root, .cal-panel, .context-menu {
-    -c-bg: #f2efdc;  -c-pn: #fffdf0;  -c-ln: #000000;
-    -c-tx: #000000;  -c-mt: #484536;
-    -c-y: #ffe600;   -c-yt: #000000;   -c-yl: #806c00;
-    -c-r: #e0002a;   -c-g: #006b39;   -c-gr: #666052;
-    -c-acento: #e0002a;
-    -c-cian: #000000; -c-seleccion: #ffe600; -c-franja: #e0002a;
-    -c-cabecera: #000000; -c-cabecera-tx: #ffe600;
-    -c-borde: #000000; -c-foco: #e0002a;
+    -c-bg: #ede8d9; -c-pn: #f9f6eb; -c-ln: #645e4e;
+    -c-tx: #252525; -c-mt: #595548;
+    -c-y: #e8d900; -c-yt: #252525; -c-yl: #8a5900;
+    -c-r: #9c2936; -c-g: #176b46; -c-gr: #8b8272;
+    -c-acento: #9c2936;
 }
-
-.root .cabecera { -fx-background-color: -c-cabecera; -fx-border-color: transparent transparent -c-r transparent; }
-.root .cabecera .label { -fx-text-fill: -c-cabecera-tx; }
-.root .cabecera .pestana-barra { -fx-text-fill: -c-cabecera-tx; }
-.root .cabecera .pestana-barra-activa { -fx-background-color: -c-y; -fx-text-fill: -c-yt; }
-.root .table-view .column-header-background,
-.root .table-view .column-header,
-.root .table-view .filler { -fx-background-color: -c-cabecera; }
-.root .table-view .column-header .label { -fx-text-fill: -c-cabecera-tx; }
-.root .table-view { -fx-border-color: -c-borde; -fx-border-width: 2; }
-.root .table-row-cell:marcada {
-    -fx-background-color: -c-franja, -c-seleccion;
-    -fx-background-insets: 0, 0 0 0 4;
-    -fx-effect: null;
-}
-.root .table-row-cell:marcada .table-cell { -fx-text-fill: -c-tx; }
-.root .table-row-cell:marcada .table-cell.estado-terminado { -fx-text-fill: -c-g; }
-.root .table-row-cell:marcada .table-cell.estado-abandonado { -fx-text-fill: -c-r; }
-.root .context-menu { -fx-border-color: -c-borde; -fx-border-width: 2;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.75), 0, 0, 4, 4); }
-.root .context-menu .menu-item:focused { -fx-background-color: -c-y; }
-.root .context-menu .menu-item:focused .label { -fx-text-fill: -c-yt; }
-.root .combo-box, .root .text-field { -fx-border-color: -c-borde; -fx-border-width: 2; }
-.context-menu { -fx-border-color: -c-borde; -fx-border-width: 2;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.75), 0, 0, 4, 4); }
-.context-menu .menu-item:focused { -fx-background-color: -c-y; }
-.context-menu .menu-item:focused .label { -fx-text-fill: -c-yt; }
+/* Selecciones claras: evitar el fondo negro heredado de Modena. */
+.table-view .table-row-cell,
+.table-view .table-row-cell:selected,
+.table-view:focused .table-row-cell:selected { -fx-background-color: -c-pn; }
+.table-view .table-row-cell:destello,
+.table-view .table-row-cell:destello:selected { -fx-background-color: -c-acento, #f8edac; -fx-background-insets: 0, 0 0 0 2; }
+.table-view .table-row-cell:marcada,
+.table-view .table-row-cell:marcada:selected,
+.table-view:focused .table-row-cell:marcada:selected { -fx-background-color: -c-r, #f7e9a2; -fx-background-insets: 0, 0 0 0 4; -fx-effect: none; }
+.table-view .table-row-cell .table-cell,
+.table-view .table-row-cell:selected .table-cell,
+.table-view .table-row-cell:marcada .table-cell,
+.table-view .table-row-cell:marcada:selected .table-cell { -fx-text-fill: -c-tx; }
+.table-view .table-row-cell:marcada .table-cell.estado-terminado { -fx-text-fill: -c-g; }
+.table-view .table-row-cell:marcada .table-cell.estado-progreso { -fx-text-fill: -c-yl; }
+.table-view .table-row-cell:marcada .table-cell.estado-abandonado { -fx-text-fill: -c-r; }
+.table-view .table-row-cell:marcada .table-cell.estado-pendiente { -fx-text-fill: -c-mt; }
+.table-view .column-header-background, .table-view .column-header, .table-view .filler { -fx-background-color: -c-ln; }
+.table-view .column-header .label { -fx-text-fill: -c-pn; }

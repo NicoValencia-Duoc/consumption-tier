@@ -1,10 +1,12 @@
+/* TERMINAL ESPECTRAL — paleta aprobada de THE MAW. */
 .root, .cal-panel, .context-menu {
-    -c-bg: #020a04;  -c-pn: #07140a;  -c-ln: #14391d;
-    -c-tx: #c8ffd4;  -c-mt: #6fb383;
-    -c-y: #33ff66;   -c-yt: #020a04;
-    -c-r: #ff5f56;   -c-g: #8dffa8;   -c-gr: #4f7a5a;
-    -c-acento: #33ff66;
+    -c-bg: #080d16; -c-pn: #111d2d; -c-ln: #37546e;
+    -c-tx: #d4e9ff; -c-mt: #9dbed5;
+    -c-y: #78caff; -c-yt: #080d16; -c-yl: #e9c36f;
+    -c-r: #f092ba; -c-g: #80e6bb; -c-gr: #6d8ba4;
+    -c-acento: #d786c9;
 }
+/* Se conserva el mismo efecto CRT, sin cambios en su intensidad ni geometría. */
 .efecto-lineas {
     -fx-background-color: linear-gradient(from 0px 0px to 0px 4px, repeat,
     rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.05) 50%, transparent 50%, transparent 100%);

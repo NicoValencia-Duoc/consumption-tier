@@ -1,10 +1,12 @@
+/* MAQUINA ABISAL — paleta aprobada de THE MAW. */
 .root, .cal-panel, .context-menu {
-    -c-bg: #040b14;  -c-pn: #0a1624;  -c-ln: #17324f;
-    -c-tx: #e3f2ff;  -c-mt: #84a9c9;
-    -c-y: #2ee6d6;   -c-yt: #040b14;
-    -c-r: #ff4d6d;   -c-g: #3dffa0;   -c-gr: #587691;
-    -c-acento: #2ee6d6;
+    -c-bg: #071713; -c-pn: #10251f; -c-ln: #356454;
+    -c-tx: #dcece0; -c-mt: #a2c3b3;
+    -c-y: #5de4ac; -c-yt: #071713; -c-yl: #d49a58;
+    -c-r: #ff777e; -c-g: #5de4ac; -c-gr: #67897b;
+    -c-acento: #d49a58;
 }
+/* Se conserva el mismo efecto CRT, sin cambios en su intensidad ni geometría. */
 .efecto-lineas {
     -fx-background-color: linear-gradient(from 0px 0px to 0px 4px, repeat,
     rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.05) 50%, transparent 50%, transparent 100%);

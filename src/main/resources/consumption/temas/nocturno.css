@@ -1,35 +1,12 @@
+/* INDUSTRIAL NOCTURNO — paleta aprobada de THE MAW. */
 .root, .cal-panel, .context-menu {
-    -c-bg: #07070c;  -c-pn: #100f18;  -c-ln: #38304d;
-    -c-tx: #f2f2ff;  -c-mt: #aaa5c3;
-    -c-y: #fcee0a;   -c-yt: #07070c;
-    -c-r: #ff2a6d;   -c-g: #39ff88;   -c-gr: #817c9a;
-    -c-acento: #fcee0a;
-    -c-cian: #00f0ff; -c-seleccion: #30280a; -c-franja: #fcee0a;
-    -c-cabecera: #100f18; -c-cabecera-tx: #fcee0a;
-    -c-borde: #38304d; -c-foco: #00f0ff;
+    -c-bg: #0c0c0e; -c-pn: #171719; -c-ln: #47443a;
+    -c-tx: #e7e3d8; -c-mt: #b6b0a1;
+    -c-y: #f3dd16; -c-yt: #0c0c0e; -c-yl: #f3dd16;
+    -c-r: #f06b70; -c-g: #57e4a0; -c-gr: #78756b;
+    -c-acento: #b73c40;
 }
-
-.root .cabecera { -fx-background-color: -c-cabecera; -fx-border-color: transparent transparent -c-y transparent; }
-.root .table-view .column-header-background,
-.root .table-view .column-header,
-.root .table-view .filler { -fx-background-color: -c-cabecera; }
-.root .table-view .column-header .label { -fx-text-fill: -c-cabecera-tx; }
-.root .table-view { -fx-border-color: -c-borde; -fx-border-width: 1; }
-.root .table-row-cell:marcada {
-    -fx-background-color: -c-franja, -c-seleccion;
-    -fx-background-insets: 0, 0 0 0 4;
-    -fx-effect: null;
-}
-.root .table-row-cell:marcada .table-cell { -fx-text-fill: -c-tx; }
-.root .table-row-cell:marcada .table-cell.estado-terminado { -fx-text-fill: -c-g; }
-.root .table-row-cell:marcada .table-cell.estado-abandonado { -fx-text-fill: -c-r; }
-.root .context-menu { -fx-border-color: -c-cian; }
-.root .context-menu .menu-item:focused { -fx-background-color: -c-seleccion; }
-.root .context-menu .menu-item:focused .label { -fx-text-fill: -c-y; }
-.root .buscador:focused { -fx-border-color: -c-cian; }
-.context-menu { -fx-border-color: -c-cian; }
-.context-menu .menu-item:focused { -fx-background-color: -c-seleccion; }
-.context-menu .menu-item:focused .label { -fx-text-fill: -c-y; }
+/* Se conserva el mismo efecto CRT, sin cambios en su intensidad ni geometría. */
 .efecto-lineas {
     -fx-background-color: linear-gradient(from 0px 0px to 0px 4px, repeat,
     rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.05) 50%, transparent 50%, transparent 100%);

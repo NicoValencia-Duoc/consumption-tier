@@ -1,10 +1,12 @@
+/* UMBRAL NOCTURNO — paleta aprobada de THE MAW. */
 .root, .cal-panel, .context-menu {
-    -c-bg: #0b0614;  -c-pn: #150c24;  -c-ln: #3a2358;
-    -c-tx: #f4eaff;  -c-mt: #a58cc4;
-    -c-y: #b36bff;   -c-yt: #0b0614;
-    -c-r: #ff4d5e;   -c-g: #00ffb3;   -c-gr: #7b6a99;
-    -c-acento: #00e5ff;
+    -c-bg: #10111d; -c-pn: #1a1b2d; -c-ln: #514a72;
+    -c-tx: #e7e5f6; -c-mt: #b5adcf;
+    -c-y: #b49aff; -c-yt: #10111d; -c-yl: #f0b66d;
+    -c-r: #f07d64; -c-g: #68dbbd; -c-gr: #7e789a;
+    -c-acento: #f07d64;
 }
+/* Se conserva el mismo efecto CRT, sin cambios en su intensidad ni geometría. */
 .efecto-lineas {
     -fx-background-color: linear-gradient(from 0px 0px to 0px 4px, repeat,
     rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.05) 50%, transparent 50%, transparent 100%);
