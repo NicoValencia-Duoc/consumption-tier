@@ -20,10 +20,69 @@ import javafx.stage.Window;
 import javafx.stage.Screen;
 import javafx.geometry.Rectangle2D;
 import javafx.stage.Screen;
+import javafx.stage.Stage;
 
 public final class Terminal {
 
     private Terminal() {
+    }
+
+    private static Stage ventanaPrincipal;
+
+    public static void registrarVentanaPrincipal(Stage stage) {
+        ventanaPrincipal = stage;
+    }
+
+    public static void prepararCentrado(Dialog<?> dialogo) {
+        if (ventanaPrincipal == null) return;
+
+        if (dialogo.getOwner() == null) {
+            dialogo.initOwner(ventanaPrincipal);
+        }
+
+        String clave = "the-maw.centrado-instalado";
+        if (Boolean.TRUE.equals(dialogo.getDialogPane().getProperties().get(clave))) {
+            return;
+        }
+        dialogo.getDialogPane().getProperties().put(clave, Boolean.TRUE);
+
+        dialogo.addEventHandler(
+                javafx.scene.control.DialogEvent.DIALOG_SHOWN,
+                evento -> {
+                    Window ventana = dialogo.getDialogPane().getScene() == null
+                            ? null
+                            : dialogo.getDialogPane().getScene().getWindow();
+
+                    if (!(ventana instanceof Stage emergente)) return;
+                    if (!ventanaPrincipal.isShowing()) return;
+
+                    double ancho = emergente.getWidth();
+                    double alto = emergente.getHeight();
+                    if (ancho <= 0 || alto <= 0) return;
+
+                    double centroX = ventanaPrincipal.getX()
+                            + ventanaPrincipal.getWidth() / 2.0;
+                    double centroY = ventanaPrincipal.getY()
+                            + ventanaPrincipal.getHeight() / 2.0;
+
+                    Rectangle2D visible = Screen.getScreensForRectangle(
+                                    centroX, centroY, 1, 1)
+                            .stream()
+                            .findFirst()
+                            .orElse(Screen.getPrimary())
+                            .getVisualBounds();
+
+                    double x = centroX - ancho / 2.0;
+                    double y = centroY - alto / 2.0;
+
+                    double maxX = visible.getMaxX() - ancho;
+                    double maxY = visible.getMaxY() - alto;
+
+                    emergente.setX(Math.max(visible.getMinX(),
+                            Math.min(x, maxX)));
+                    emergente.setY(Math.max(visible.getMinY(),
+                            Math.min(y, maxY)));
+                });
     }
 
     public static HBox titulo(String texto, Label subtitulo) {
@@ -127,5 +186,6 @@ public final class Terminal {
                 }
             }
         });
+        prepararCentrado(dialogo);
     }
 }
