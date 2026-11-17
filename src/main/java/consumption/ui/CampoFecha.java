@@ -39,7 +39,9 @@ public class CampoFecha extends HBox {
         setAlignment(Pos.CENTER_LEFT);
 
         campo.setPromptText("dd/mm/aaaa");
-        campo.setPrefColumnCount(9);
+        campo.setPrefColumnCount(12);
+        campo.setMinWidth(125);
+        campo.setPrefWidth(125);
         campo.setTextFormatter(new TextFormatter<String>(
                 cambio -> cambio.getControlNewText().matches("[0-9/]{0,10}") ? cambio : null));
         campo.textProperty().addListener((obs, antes, ahora) -> valor.set(leerONull(ahora)));

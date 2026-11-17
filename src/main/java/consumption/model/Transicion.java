@@ -48,24 +48,28 @@ public enum Transicion {
             }
             case TERMINAR -> {
                 comprobarInicio(item, hoy);
+
+                int veces = item.getVecesConsumido();
+
+                if (veces >= ItemConsumption.MAX_VECES) {
+                    throw new IllegalArgumentException(
+                            "Ya llegaste al maximo de "
+                                    + ItemConsumption.MAX_VECES
+                                    + " veces consumido.");
+                }
+
                 item.setEstado(Estado.TERMINADO);
                 item.setFechaTermino(hoy);
                 item.setPorcentaje(Math.max(100, item.getPorcentaje()));
-                if (item.getVecesConsumido() < 1) item.setVecesConsumido(1);
+                item.setVecesConsumido(veces + 1);
             }
             case REPETIR -> {
-                int veces = item.getVecesConsumido();
-                if (veces >= ItemConsumption.MAX_VECES) {
-                    throw new IllegalArgumentException(
-                            "Ya llegaste al maximo de " + ItemConsumption.MAX_VECES + " veces consumido.");
-                }
                 item.setEstado(Estado.EN_PROGRESO);
                 item.setPorcentaje(0);
                 item.setFechaTermino(null);
                 item.setFechaInicio(null);
                 item.setSinFechaInicio(false);
                 item.setSinFechaTermino(false);
-                item.setVecesConsumido(veces + 1);
             }
             case ABANDONAR -> {
                 comprobarInicio(item, hoy);
