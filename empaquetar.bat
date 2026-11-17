@@ -2,7 +2,7 @@
 setlocal
 
 set NOMBRE=ConsumptionTier
-set VERSION=0.8.8
+set VERSION=0.9.3
 set MODULOS=java.desktop,java.logging,java.net.http,java.xml,jdk.unsupported
 set ICONO=
 if exist portable\icono.ico (

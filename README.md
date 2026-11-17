@@ -1,15 +1,32 @@
 # THE MAW
-THE MAW (el proyecto se llama consumption-tier) es una biblioteca personal que reúne en un solo lugar tus juegos, libros, películas y series, hecha con **JavaFX + Maven** (Java 21). Estética cyberpunk con tema día/noche y música de fondo.
 
-## Qué hace
+**Versión 0.9.3**
 
-- Tablas por tipo (juegos, libros, películas y series) con nota por criterios, comentarios e imagen de portada.
-- Búsqueda, filtros, orden, favoritos y lista de pendientes.
-- Pestaña de estadísticas por tipo.
-- Exportar cualquier tabla a CSV (listo para Excel).
-- Respaldo y restauración de tus datos e imágenes en un `.zip`.
-- Música de fondo en orden aleatorio, con pausa, siguiente, volumen y lista de pistas.
-- Recuerda el tema (día o noche) y el volumen entre sesiones.
+THE MAW es una aplicación de escritorio desarrollada con **Java 21, JavaFX y Maven** para organizar y registrar juegos, libros, películas y series.
+
+Cuenta con una interfaz de estética terminal cyberpunk, efectos CRT, reproductor musical integrado y seis temas visuales personalizables.
+
+## Temas disponibles
+
+- **SOLAR** — Industrial diurno.
+- **ECLIPSE** — Industrial nocturno.
+- **ARCANO** — Umbral nocturno.
+- **ABISAL** — Máquina abisal.
+- **ACERO** — Acero fantasma.
+- **VECTOR** — Terminal espectral.
+
+## Características principales
+
+- Biblioteca de juegos, libros, películas y series.
+- Registro de estados, progreso, valoraciones y comentarios.
+- Búsqueda, filtros, ordenamiento y favoritos.
+- Lista de pendientes y estadísticas.
+- Tablas con encabezados y datos centrados.
+- Exportación a CSV.
+- Respaldo y restauración de datos.
+- Reproductor musical integrado.
+- Preferencias persistentes y seis temas visuales.
+- Interfaz con efectos CRT y ventanas adaptables.
 
 ## Requisitos
 
