@@ -6,8 +6,8 @@
 
     <groupId>consumption</groupId>
     <artifactId>ProyectoConsumption</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <name>ProyectoConsumption</name>
+    <version>0.9.3</version>
+    <name>THE MAW</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
