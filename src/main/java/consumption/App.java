@@ -16,7 +16,7 @@ import java.util.List;
 public class App extends Application {
 
     private Scene scena;
-    private Tema tema = Tema.NOCTURNO;
+    private Tema tema = Tema.INDUSTRIAL_DIURNO;
     private Preferencias preferencias;
     private ReproductorMusica reproductor;
     private VentanaPrincipal ventana;

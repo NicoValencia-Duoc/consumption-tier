@@ -30,7 +30,7 @@ public class Preferencias {
     public double getVolumen() { return volumen; }
     public String getTema() {
         if (tema != null && !tema.isBlank()) return tema;
-        return noche ? "NOCTURNO" : "SOLAR";
+        return noche ? "INDUSTRIAL_NOCTURNO" : "INDUSTRIAL_DIURNO";
     }
     public String getNombreUsuario() { return nombreUsuario; }
     public boolean isBienvenidaVista() { return bienvenidaVista; }
@@ -44,7 +44,7 @@ public class Preferencias {
     public void setVolumen(double v) { this.volumen = Math.max(0, Math.min(1, v)); }
     public void setTema(String t) {
         this.tema = t;
-        this.noche = !"SOLAR".equals(t);
+        this.noche = !"INDUSTRIAL_DIURNO".equals(t) && !"SOLAR".equals(t);
     }
     public void setNombreUsuario(String n) { this.nombreUsuario = limpiarNombre(n); }
     public void setBienvenidaVista(boolean v) { this.bienvenidaVista = v; }

@@ -11,19 +11,20 @@ import java.util.List;
 
 public final class GeometriaVentana {
 
-    public static final double MIN_ANCHO = 1400;
-    public static final double MIN_ALTO = 720;
+    public static final double MIN_ANCHO = 960;
+    public static final double MIN_ALTO = 540;
 
     private GeometriaVentana() {
     }
 
     public static void aplicar(Stage stage, Preferencias prefs) {
-        stage.setMinWidth(MIN_ANCHO);
-        stage.setMinHeight(MIN_ALTO);
+        Rectangle2D visible = Screen.getPrimary().getVisualBounds();
+        stage.setMinWidth(Math.min(MIN_ANCHO, visible.getWidth()));
+        stage.setMinHeight(Math.min(MIN_ALTO, visible.getHeight()));
 
         if (prefs.isVentanaGuardada()) {
-            double ancho = Math.max(MIN_ANCHO, prefs.getVentanaAncho());
-            double alto = Math.max(MIN_ALTO, prefs.getVentanaAlto());
+            double ancho = Math.min(visible.getWidth(), Math.max(stage.getMinWidth(), prefs.getVentanaAncho()));
+            double alto = Math.min(visible.getHeight(), Math.max(stage.getMinHeight(), prefs.getVentanaAlto()));
             stage.setWidth(ancho);
             stage.setHeight(alto);
             if (ReglasVentana.tituloVisible(prefs.getVentanaX(), prefs.getVentanaY(), ancho, pantallas())) {

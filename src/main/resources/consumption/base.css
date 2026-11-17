@@ -88,7 +88,7 @@
 .tarjeta { -fx-background-color: -c-pn; -fx-border-color: -c-ln; -fx-padding: 10; }
 .miniatura {
     -fx-background-color: #08080a;
-    -fx-border-color: #2a2a33;
+    -fx-border-color: -c-ln;
     -fx-border-style: dashed;
     -fx-pref-height: 104;
     -fx-min-height: 104;
@@ -97,15 +97,15 @@
     -fx-font-family: "Orbitron", "Segoe UI";
     -fx-font-size: 40px;
     -fx-font-weight: bold;
-    -fx-text-fill: #fcee0a;
+    -fx-text-fill: -c-y;
 }
 .tipo {
-    -fx-text-fill: #9a9aa6;
+    -fx-text-fill: -c-mt;
     -fx-font-size: 10px;
-    -fx-background-color: #14141a;
+    -fx-background-color: -c-pn;
     -fx-padding: 0 4 0 4;
 }
-.estrella { -fx-text-fill: #fcee0a; -fx-font-size: 18px; }
+.estrella { -fx-text-fill: -c-y; -fx-font-size: 18px; }
 .titulo-item {
     -fx-font-family: "Orbitron", "Segoe UI";
     -fx-font-size: 14px;
@@ -168,7 +168,7 @@
 }
 .chip-s { -fx-border-color: #ff2fa0; -fx-text-fill: #ff2fa0; }
 .chip-a { -fx-border-color: #ff8a1f; -fx-text-fill: #ff8a1f; }
-.chip-b { -fx-border-color: #fcee0a; -fx-text-fill: #fcee0a; }
+.chip-b { -fx-border-color: #fcee0a; -fx-text-fill: -c-y; }
 .chip-c { -fx-border-color: #39ff88; -fx-text-fill: #39ff88; }
 .chip-d { -fx-border-color: #2fd8ff; -fx-text-fill: #2fd8ff; }
 .chip-f { -fx-border-color: #9b6bff; -fx-text-fill: #9b6bff; }
@@ -341,8 +341,8 @@
 .chip-pendiente:selected { -fx-text-fill: -c-gr; -fx-border-color: -c-gr; -fx-effect: dropshadow(gaussian, rgba(154,154,166,0.4), 8, 0.2, 0, 0); }
 /* Vista previa de la portada (colores fijos, como la miniatura) */
 .vista-previa {
-    -fx-background-color: #08080a;
-    -fx-border-color: #2a2a33;
+    -fx-background-color: -c-bg;
+    -fx-border-color: -c-ln;
     -fx-border-style: dashed;
 }
 /* ===== Calendario ===== */
@@ -475,7 +475,7 @@
 .context-menu .separator .line { -fx-border-color: -c-ln; -fx-border-width: 1 0 0 0; }
 /* Globo del comentario (siempre oscuro: la ventana del globo no hereda las variables de tema) */
 .tooltip {
-    -fx-background-color: #14141a;
+    -fx-background-color: -c-pn;
     -fx-text-fill: #f2f2f2;
     -fx-border-color: #fcee0a;
     -fx-border-width: 1;
@@ -500,33 +500,14 @@
     -fx-cursor: hand;
 }
 .aviso-boton:hover { -fx-background-color: -c-ln; }
-
-/* ===== V3: variables de componentes con fallback para los otros cuatro temas ===== */
-.root, .cal-panel, .context-menu {
-    -c-cian: -c-acento;
-    -c-seleccion: -c-ln;
-    -c-franja: -c-acento;
-    -c-cabecera: -c-bg;
-    -c-cabecera-tx: -c-tx;
-    -c-borde: -c-ln;
-    -c-foco: -c-acento;
-}
-/* Estas variables por defecto son sobrescritas por las hojas de cada tema,
-   porque se cargan despues de base.css. */
-.combo-box-popup .list-cell:filled:hover,
+/* Ajustes globales de dimensionamiento y contraste para los seis temas. */
+.dialog-pane { -fx-min-width: 420px; -fx-padding: 12px; }
+.dialog-pane .button-bar { -fx-padding: 10px 0 2px 0; }
+.dialog-pane .button-bar .button { -fx-min-width: 110px; -fx-min-height: 32px; -fx-padding: 7px 13px; }
+.dialog-pane .content.label { -fx-wrap-text: true; -fx-text-fill: -c-tx; }
+.dialog-pane .header-panel .label { -fx-wrap-text: true; }
+.context-menu .menu-item { -fx-padding: 6px 12px; }
+.context-menu .menu-item:disabled .label { -fx-opacity: 0.8; }
 .combo-box-popup .list-cell:filled:selected,
-.list-view .list-cell:filled:hover,
-.list-view .list-cell:filled:selected {
-    -fx-background-color: -c-seleccion;
-    -fx-text-fill: -c-tx;
-}
-.combo-box-popup .list-cell:filled:hover .text,
-.combo-box-popup .list-cell:filled:selected .text,
-.list-view .list-cell:filled:hover .text,
-.list-view .list-cell:filled:selected .text {
-    -fx-fill: -c-tx;
-}
-.text-field:focused, .text-area:focused, .combo-box:focused,
-.table-view:focused, .list-view:focused {
-    -fx-border-color: -c-foco;
-}
+.combo-box-popup .list-cell:filled:hover { -fx-background-color: -c-y; -fx-text-fill: -c-yt; }
+.table-view .column-header .label { -fx-text-overrun: ellipsis; }

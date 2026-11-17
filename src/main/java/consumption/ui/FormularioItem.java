@@ -187,7 +187,10 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setPrefViewportWidth(700);
+        scroll.setMinWidth(0);
+        scroll.setMinHeight(0);
         scroll.setPrefViewportHeight(480);
+        VBox.setVgrow(scroll, Priority.ALWAYS);
 
         mensaje.getStyleClass().add("mensaje-error");
         mensaje.setWrapText(true);
@@ -201,6 +204,15 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         dialogo.setHeaderText((existente == null ? TITULO_NUEVO : TITULO_EDICION) + " · " + nombreTipo());
         dialogo.getDialogPane().getStylesheets().setAll(hojas);
         dialogo.getDialogPane().setContent(raiz);
+        dialogo.setOnShowing(ev -> {
+            javafx.stage.Screen pantalla = javafx.stage.Screen.getScreensForRectangle(
+                            dialogo.getOwner() == null ? 0 : dialogo.getOwner().getX(),
+                            dialogo.getOwner() == null ? 0 : dialogo.getOwner().getY(), 1, 1)
+                    .stream().findFirst().orElse(javafx.stage.Screen.getPrimary());
+            javafx.geometry.Rectangle2D visible = pantalla.getVisualBounds();
+            scroll.setPrefViewportWidth(Math.min(700, Math.max(320, visible.getWidth() - 110)));
+            scroll.setPrefViewportHeight(Math.min(480, Math.max(180, visible.getHeight() - 240)));
+        });
         ButtonType guardar = new ButtonType("GUARDAR", ButtonBar.ButtonData.OK_DONE);
         ButtonType cancelar = new ButtonType("CANCELAR", ButtonBar.ButtonData.CANCEL_CLOSE);
         dialogo.getDialogPane().getButtonTypes().addAll(guardar, cancelar);
@@ -564,6 +576,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         alerta.setHeaderText("CONFIRMAR");
         b1.setDefaultButton(false);
         b2.setDefaultButton(true);
+        Terminal.dialogo(alerta, "CONFIRMAR", null, null);
 
         return alerta.showAndWait().filter(b -> b == botonSi).isPresent();
     }

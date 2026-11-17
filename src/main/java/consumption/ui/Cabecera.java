@@ -50,16 +50,19 @@ public class Cabecera extends HBox {
         nombre.getStyleClass().addAll("logo", "nombre-usuario");
         nombre.setOnMouseClicked(e -> editarNombre());
         logo.setAlignment(Pos.CENTER_LEFT);
+        logo.setMinWidth(Region.USE_PREF_SIZE);
         logo.getChildren().addAll(marca, sesion, nombre);
         prepararGlobo();
 
         HBox contenedorPestanas = new HBox(2);
         contenedorPestanas.setAlignment(Pos.CENTER_LEFT);
+        contenedorPestanas.setMinWidth(Region.USE_PREF_SIZE);
         for (int g = 0; g < GRUPOS.length; g++) {
             if (g > 0) contenedorPestanas.getChildren().add(crearSeparador());
             for (String nombrePestana : GRUPOS[g]) {
                 Button b = new Button(nombrePestana);
                 b.getStyleClass().add("pestana-barra");
+                fijarAnchoNavegacion(b);
                 b.setOnAction(e -> {
                     marcarActiva(nombrePestana);
                     alElegirPestana.accept(nombrePestana);
@@ -69,10 +72,12 @@ public class Cabecera extends HBox {
             }
         }
         pestanaDetalle.getStyleClass().add("pestana-barra");
+        fijarAnchoNavegacion(pestanaDetalle);
         contenedorPestanas.getChildren().add(pestanaDetalle);
 
         Button botonTema = Terminal.corchetes(new Button("TEMA ▾"));
         botonTema.getStyleClass().add("pestana-barra");
+        fijarAnchoNavegacion(botonTema);
         ContextMenu menuTema = new ContextMenu();
         botonTema.setOnAction(e -> {
             if (menuTema.isShowing()) {
@@ -95,6 +100,12 @@ public class Cabecera extends HBox {
         marcarActiva("INICIO");
     }
 
+    private static void fijarAnchoNavegacion(Button boton) {
+        boton.setMinWidth(Region.USE_PREF_SIZE);
+        boton.setMinHeight(Region.USE_PREF_SIZE);
+        boton.setMaxWidth(Region.USE_PREF_SIZE);
+    }
+
     private Region crearSeparador() {
         Region linea = new Region();
         linea.getStyleClass().add("separador-pestanas");
@@ -105,15 +116,21 @@ public class Cabecera extends HBox {
         return linea;
     }
 
+
     private void llenarMenuTema(ContextMenu menu, Consumer<Tema> alElegirTema) {
         Tema actual = Tema.de(preferencias.getTema());
         menu.getItems().clear();
+
         for (Tema t : Tema.values()) {
-            MenuItem item = new MenuItem((t == actual ? "● " : "   ") + t.name());
+            MenuItem item = new MenuItem(
+                    (t == actual ? "● " : "   ") + t.getNombre()
+            );
+
             item.setOnAction(e -> alElegirTema.accept(t));
             menu.getItems().add(item);
         }
     }
+
 
     public void setContadores(Map<String, Integer> cantidades) {
         cantidades.forEach((nombrePestana, cantidad) -> {
@@ -125,6 +142,7 @@ public class Cabecera extends HBox {
             b.setGraphic(numero);
             b.setContentDisplay(ContentDisplay.RIGHT);
             b.setGraphicTextGap(8);
+            b.setMinWidth(Region.USE_PREF_SIZE);
         });
     }
 

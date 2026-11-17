@@ -43,7 +43,6 @@
     -fx-text-fill: -c-yt;
     -fx-border-color: transparent;
 }
-.pestana-barra-activa:hover { -fx-text-fill: -c-yt; }
 .cabecera { -fx-border-color: transparent transparent -c-ln transparent; }
 
 /* ----- Botones con caja ----- */
@@ -140,7 +139,6 @@
 .cal-sel { -fx-font-weight: bold; }
 
 /* Botones de dialogo destructivos */
-.dialog-pane .button.boton-dialogo.boton-peligro { -fx-text-fill: -c-r; -fx-border-color: -c-r; }
 .dialog-pane .button.boton-dialogo.boton-peligro:hover { -fx-background-color: -c-r; -fx-text-fill: -c-bg; }
 .dialog-pane .button.boton-dialogo.boton-accion:hover { -fx-background-color: -c-y; -fx-text-fill: -c-yt; }
 
@@ -151,7 +149,6 @@
 .esquina-ii { -fx-border-width: 0 0 2 2; }
 .esquina-id { -fx-border-width: 0 2 2 0; }
 .tarjeta:hover .esquina { -fx-border-color: -c-acento; }
-.tarjeta-pendiente .esquina { -fx-border-color: -c-gr; }
 
 /* Barras de avance con segmentos tipo LED */
 .avance-pista, .barrita-pista {
@@ -173,7 +170,7 @@
     -fx-padding: 6 0 0 0;
 }
 
-.chip-tier { -fx-background-color: #08080a; }
+.chip-tier { -fx-background-color: -c-bg; }
 
 
 /* =====================================================================
@@ -262,7 +259,6 @@
 }
 
 /* Tarjetas: esquinas de color, estado sin caja, nota blanca */
-.esquina { -fx-border-color: -c-acento; }
 .estado { -fx-border-width: 0; -fx-padding: 0; }
 .nota { -fx-text-fill: -c-tx; }
 
@@ -462,5 +458,152 @@
 .context-menu .menu .arrow { -fx-background-color: -c-mt; }
 .context-menu .menu:focused .arrow { -fx-background-color: -c-tx; }
 
-.context-menu .menu-item.menu-peligro .label { -fx-text-fill: -c-r; }
 .context-menu .menu-item.menu-peligro:focused .label { -fx-text-fill: -c-r; }
+
+
+/* ================================================================
+   REVISION APROBADA A+B+C+D+E — COMPARTIDA POR LOS SEIS TEMAS
+   Se carga despues de base.css, antes de la paleta elegida.
+   Sin colores de tema fijos; conserva el CRT y los 6 CSS originales.
+   ================================================================ */
+/* A: controles de una misma familia, rectangulares y legibles */
+.button, .toggle-button, .menu-button, .combo-box, .text-field,
+.text-area, .check-box .box, .chip, .filtro, .pestana, .cal-nav {
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+.button, .toggle-button, .menu-button, .chip, .filtro, .pestana {
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+.pestana, .filtro, .chip, .menu-button {
+    -fx-text-fill: -c-tx;
+    -fx-border-color: -c-mt;
+}
+.boton-accion { -fx-border-color: -c-yl; -fx-text-fill: -c-yl; }
+.boton-peligro { -fx-border-color: -c-r; -fx-text-fill: -c-r; }
+.text-field, .text-area, .combo-box, .campo-busqueda {
+    -fx-border-color: -c-mt;
+    -fx-border-width: 1;
+}
+.text-field, .text-area, .combo-box { -fx-text-fill: -c-tx; }
+.text-field { -fx-prompt-text-fill: -c-mt; }
+.combo-box .arrow, .menu-button .arrow { -fx-background-color: -c-yl; }
+.check-box .box { -fx-border-color: -c-mt; }
+/* B: jerarquia: datos principales / etiquetas secundarias / metadatos */
+.titulo-item, .titulo-detalle, .titulo-pagina, .vacio-titulo {
+    -fx-text-fill: -c-tx;
+    -fx-font-weight: bold;
+}
+.subtitulo, .etiqueta-sesion, .etiqueta-form, .nombre-criterio,
+.tiempo, .pie-texto, .pie-maw, .barrita-texto, .col-id,
+.col-inicio, .col-termino, .col-avance {
+    -fx-text-fill: -c-mt;
+}
+.table-view .column-header .label { -fx-text-fill: -c-acento; }
+/* C: estados con texto y fondo de contraste pareado */
+.pestana:hover, .filtro:hover, .chip:hover, .boton-musica:hover,
+.cal-nav:hover { -fx-border-color: -c-y; -fx-text-fill: -c-yl; }
+.text-field:focused, .text-area:focused, .combo-box:focused,
+.campo-busqueda-foco, .button:focused, .menu-button:focused,
+.check-box:focused .box, .cal-dia:focused {
+    -fx-border-color: -c-y;
+    /* No alterar grosor del borde al recibir foco: evita relayout. */
+}
+.pestana-barra-activa, .pestana-barra-activa:hover {
+    -fx-background-color: -c-y;
+    -fx-text-fill: -c-yt;
+}
+.list-cell:filled:hover, .list-cell:filled:selected {
+    -fx-background-color: -c-y;
+    -fx-text-fill: -c-yt;
+}
+/* D: popups JavaFX y menus contextuales, tambien los submenus */
+.context-menu, .combo-box-popup .list-view {
+    -fx-background-color: -c-pn;
+    -fx-border-color: -c-y;
+    -fx-border-width: 1;
+    -fx-background-radius: 0;
+}
+.context-menu .menu-item, .context-menu .check-menu-item,
+.context-menu .radio-menu-item { -fx-background-color: transparent; }
+.context-menu .menu-item .label,
+.context-menu .check-menu-item .label,
+.context-menu .radio-menu-item .label {
+    -fx-text-fill: -c-tx;
+    -fx-opacity: 1;
+}
+.context-menu .menu-item:focused,
+.context-menu .check-menu-item:focused,
+.context-menu .radio-menu-item:focused {
+    -fx-background-color: -c-y;
+}
+.context-menu .menu-item:focused .label,
+.context-menu .check-menu-item:focused .label,
+.context-menu .radio-menu-item:focused .label {
+    -fx-text-fill: -c-yt;
+}
+.context-menu .menu-item:disabled .label {
+    -fx-text-fill: -c-mt;
+    -fx-opacity: 0.75;
+}
+.context-menu .menu-item .menu-icono { -fx-text-fill: -c-tx; }
+.context-menu .menu-item:focused .menu-icono { -fx-text-fill: -c-yt; }
+.context-menu .menu-item .menu-flecha { -fx-text-fill: -c-tx; }
+.context-menu .menu-item:focused .menu-flecha { -fx-text-fill: -c-yt; }
+.context-menu .menu .arrow { -fx-background-color: -c-tx; }
+.context-menu .menu:focused .arrow { -fx-background-color: -c-yt; }
+.context-menu .check-menu-item .check, .context-menu .radio-menu-item .radio {
+    -fx-background-color: -c-tx;
+}
+.context-menu .check-menu-item:focused .check,
+.context-menu .radio-menu-item:focused .radio {
+    -fx-background-color: -c-yt;
+}
+.context-menu .menu-item.menu-peligro .label { -fx-text-fill: -c-r; }
+.context-menu .menu-item.menu-peligro:focused .label { -fx-text-fill: -c-yt; }
+.combo-box-popup .list-cell, .combo-box-popup .list-cell:filled {
+    -fx-background-color: -c-pn;
+    -fx-text-fill: -c-tx;
+}
+.combo-box-popup .list-cell:filled:hover,
+.combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: -c-y;
+    -fx-text-fill: -c-yt;
+}
+.dialog-pane { -fx-background-color: -c-bg; -fx-border-color: -c-y; -fx-border-width: 1; }
+.dialog-pane > .header-panel { -fx-background-color: -c-y; }
+.dialog-pane > .header-panel .label { -fx-text-fill: -c-yt; }
+.dialog-pane .button { -fx-text-fill: -c-tx; -fx-border-color: -c-mt; }
+.dialog-pane .button:hover { -fx-border-color: -c-y; -fx-text-fill: -c-yl; }
+.cal-panel { -fx-background-color: -c-pn; -fx-border-color: -c-y; }
+.cal-sel, .cal-sel:hover { -fx-background-color: -c-y; -fx-text-fill: -c-yt; }
+/* E: tarjetas con las cuatro esquinas existentes; tablas con marco entero */
+.tarjeta { -fx-border-color: transparent; -fx-border-width: 1; }
+.tarjeta:hover { -fx-border-color: transparent; }
+.esquina { -fx-border-color: -c-acento; }
+.tarjeta:hover .esquina { -fx-border-color: -c-y; }
+.tarjeta-pendiente { -fx-border-color: -c-mt; -fx-border-style: segments(6,4); }
+.tarjeta-pendiente .esquina { -fx-border-color: -c-gr; }
+.table-view { -fx-border-color: -c-y; -fx-border-width: 1; }
+.table-row-cell { -fx-border-width: 0 0 1 0; }
+.panel-ficha { -fx-border-color: -c-mt; -fx-border-width: 1; }
+/* El filtro CRT pertenece a cada paleta: no se toca .efecto-lineas */
+
+/* Barra superior: geometría idéntica para estado normal, hover, foco y activo. */
+.pestana-barra, .pestana-barra:hover, .pestana-barra:focused,
+.pestana-barra-activa, .pestana-barra-activa:hover, .pestana-barra-activa:focused {
+    -fx-border-width: 0;
+    -fx-padding: 6 12 6 12;
+}
+
+
+/* Centrar los encabezados de las tablas */
+.table-view .column-header .label {
+    -fx-alignment: CENTER;
+}
+
+/* Centrar los datos de todas las columnas */
+.table-view .table-cell {
+    -fx-alignment: CENTER;
+}

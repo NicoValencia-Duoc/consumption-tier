@@ -6,6 +6,11 @@
     -c-r: #9c2936; -c-g: #176b46; -c-gr: #8b8272;
     -c-acento: #9c2936;
 }
+/* CRT diurno: líneas oscuras sutiles para mantener visibilidad sobre crema; geometría intacta. */
+.efecto-lineas {
+    -fx-background-color: linear-gradient(from 0px 0px to 0px 4px, repeat,
+    rgba(0,0,0,0.075) 0%, rgba(0,0,0,0.075) 50%, transparent 50%, transparent 100%);
+}
 /* Selecciones claras: evitar el fondo negro heredado de Modena. */
 .table-view .table-row-cell,
 .table-view .table-row-cell:selected,

@@ -1,18 +1,25 @@
 package consumption.ui;
 
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonBase;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.DialogPane;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.Alert;
+import javafx.scene.layout.Region;
+import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.stage.Window;
+import javafx.stage.Screen;
+import javafx.geometry.Rectangle2D;
+import javafx.stage.Window;
+import javafx.stage.Screen;
+import javafx.geometry.Rectangle2D;
+import javafx.stage.Screen;
 
 public final class Terminal {
 
@@ -81,6 +88,44 @@ public final class Terminal {
                 if (claseOk != null) boton.getStyleClass().add(claseOk);
             }
             corchetes(boton);
+            boton.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
+            boton.setMaxWidth(Double.MAX_VALUE);
         }
+        panel.setMinWidth(420);
+        panel.setPrefWidth(Math.max(panel.getPrefWidth(), 470));
+        panel.setMinHeight(Region.USE_COMPUTED_SIZE);
+        panel.setPrefHeight(Region.USE_COMPUTED_SIZE);
+        dialogo.addEventHandler(javafx.scene.control.DialogEvent.DIALOG_SHOWN, e -> {
+            panel.applyCss();
+            panel.layout();
+            Window ventana = panel.getScene() == null ? null : panel.getScene().getWindow();
+            if (ventana instanceof javafx.stage.Stage stage) {
+                Rectangle2D limites = Screen.getScreensForRectangle(
+                                stage.getX(), stage.getY(), Math.max(1,stage.getWidth()), Math.max(1,stage.getHeight()))
+                        .stream().findFirst().orElse(Screen.getPrimary()).getVisualBounds();
+                double ancho = Math.min(limites.getWidth(), Math.max(470, panel.prefWidth(-1)));
+                if (dialogo instanceof Alert alerta) {
+                    String mensaje = alerta.getContentText() == null ? "" : alerta.getContentText();
+                    String cabecera = alerta.getHeaderText() == null ? "" : alerta.getHeaderText();
+                    int lineas = 0;
+                    for (String linea : mensaje.split("\\n", -1)) {
+                        lineas += Math.max(1, (linea.length() + 53) / 54);
+                    }
+                    int lineasCabecera = Math.max(1, (cabecera.length() + 39) / 40);
+                    double altoContenido = 150 + 22 * lineas + 23 * Math.max(0, lineasCabecera - 1);
+                    double alto = Math.min(limites.getHeight(), Math.max(230, altoContenido));
+                    stage.setMinHeight(0);
+                    stage.setMinWidth(Math.min(420, limites.getWidth()));
+                    stage.setWidth(ancho);
+                    stage.setHeight(alto);
+                } else {
+                    stage.sizeToScene();
+                    stage.setWidth(ancho);
+                    stage.setHeight(Math.min(limites.getHeight(), stage.getHeight()));
+                    stage.setMinWidth(Math.min(420, limites.getWidth()));
+                    stage.setMinHeight(0);
+                }
+            }
+        });
     }
 }
