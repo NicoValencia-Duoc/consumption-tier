@@ -1,6 +1,7 @@
 package consumption.ui;
 
 import consumption.data.RepositorioJson;
+import consumption.data.Rutas;
 import consumption.model.*;
 import consumption.data.GestorImagenes;
 import consumption.data.RespaldoZip;
@@ -25,6 +26,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.awt.Desktop;
+import java.nio.file.Files;
 
 public class VentanaPrincipal extends VBox {
 
@@ -75,8 +78,12 @@ public class VentanaPrincipal extends VBox {
             case "PELICULAS" -> paginaPeliculas();
             case "SERIES" -> paginaSeries();
             case "PENDIENTES" -> paginaPendientes();
-            case "ESTADISTICAS" -> new PaginaEstadisticas(items,
-                    this::crearRespaldo, this::restaurarRespaldo, this::abrirPapelera);
+            case "ESTADISTICAS" -> new PaginaEstadisticas(
+                    items,
+                    this::crearRespaldo,
+                    this::restaurarRespaldo,
+                    this::abrirPapelera,
+                    this::abrirCarpetaDatos);
             default -> paginaInicio();
         };
         contenido.getChildren().setAll(pagina);
@@ -268,6 +275,22 @@ public class VentanaPrincipal extends VBox {
     private void alternarFavorito(ItemConsumption item) {
         item.setFavorito(!item.isFavorito());
         repositorio.guardar(items);
+    }
+    private void abrirCarpetaDatos() {
+        try {
+            Files.createDirectories(Rutas.BASE);
+            if (!Desktop.isDesktopSupported()
+                    || !Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
+                avisar(Alert.AlertType.ERROR,
+                        "No se puede abrir la carpeta automaticamente. Ruta: " + Rutas.BASE);
+                return;
+            }
+            Desktop.getDesktop().open(Rutas.BASE.toFile());
+        } catch (IOException | SecurityException | UnsupportedOperationException ex) {
+            avisar(Alert.AlertType.ERROR,
+                    "No se pudo abrir la carpeta: " + ex.getMessage()
+                            + "\nRuta: " + Rutas.BASE);
+        }
     }
     private void crearRespaldo() {
         FileChooser selector = new FileChooser();

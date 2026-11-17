@@ -1,4 +1,5 @@
 module consumption {
+    requires java.desktop;
     requires javafx.controls;
     requires javafx.media;
     requires com.google.gson;

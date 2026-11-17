@@ -7,6 +7,7 @@ import consumption.model.Formato;
 import consumption.model.Numeracion;
 import consumption.model.ReglasInicio;
 import consumption.model.Transicion;
+import consumption.model.ReglasTermino;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -14,7 +15,8 @@ import javafx.scene.layout.*;
 import consumption.data.GestorImagenes;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import java.time.LocalDate;
 import java.util.function.Consumer;
 
@@ -88,8 +90,15 @@ public class PaginaDetalle extends VBox{
         Button editar = Terminal.corchetes(new Button("EDITAR"));
         editar.getStyleClass().add("pestana");
         editar.setOnAction(e -> alEditar.run());
-
-        HBox botones = new HBox(10, volver, editar, guardar, contador, aviso);
+        Button copiar = Terminal.corchetes(new Button("COPIAR DETALLES"));
+        copiar.getStyleClass().add("pestana");
+        copiar.setOnAction(e -> {
+            ClipboardContent portapapeles = new ClipboardContent();
+            portapapeles.putString(textoParaCopiar(item));
+            boolean correcto = Clipboard.getSystemClipboard().setContent(portapapeles);
+            aviso.setText(correcto ? "DETALLES COPIADOS" : "NO SE PUDO COPIAR");
+        });
+        HBox botones = new HBox(10, volver, editar, guardar, copiar, contador, aviso);
         botones.setAlignment(Pos.CENTER_LEFT);
 
         ImageView portada = new ImageView();
@@ -102,6 +111,12 @@ public class PaginaDetalle extends VBox{
             Label dias = new Label(textoDias);
             dias.getStyleClass().add("dias-en-curso");
             datos.getChildren().add(dias);
+        }
+        String textoTermino = ReglasTermino.textoDias(item, LocalDate.now());
+        if (textoTermino != null) {
+            Label tiempoTerminado = new Label(textoTermino);
+            tiempoTerminado.getStyleClass().add("subtitulo");
+            datos.getChildren().add(tiempoTerminado);
         }
         int veces = item.getVecesConsumido();
         if (veces > 0) {
@@ -157,5 +172,37 @@ public class PaginaDetalle extends VBox{
                 Terminal.panel("FICHA " + Numeracion.etiqueta(item.getNumero()).replace("#", ""), cabeza),
                 Terminal.panel(tituloComentario.getText(), comentario),
                 botones);
+    }
+
+    private static String textoParaCopiar(ItemConsumption item) {
+        StringBuilder texto = new StringBuilder();
+        texto.append("THE MAW · ").append(item.getTipo()).append('\n');
+        texto.append("TITULO: ").append(item.getTitulo()).append('\n');
+        texto.append("ESTADO: ").append(item.getEstado().getEtiqueta()).append('\n');
+        texto.append("NOTA: ").append(Formato.decimal(item.getNota())).append('\n');
+        if (item.getTier() != null) {
+            texto.append("TIER: ").append(item.getTier().getLetra()).append('\n');
+        }
+        texto.append("AVANCE: ").append(Formato.decimal(item.getPorcentaje())).append("%\n");
+        texto.append("VECES CONSUMIDO: ").append(item.getVecesConsumido()).append('\n');
+        if (item.getFechaInicio() != null) {
+            texto.append("INICIO: ").append(item.getFechaInicio()).append('\n');
+        }
+        if (item.getFechaTermino() != null) {
+            texto.append("TERMINO: ").append(item.getFechaTermino()).append('\n');
+        }
+        if (item.getConQuien() != null && !item.getConQuien().isBlank()) {
+            texto.append("CON QUIEN: ").append(item.getConQuien()).append('\n');
+        }
+        texto.append("\nCRITERIOS\n");
+        for (String nombre : item.getNombresCriterios()) {
+            Double valor = item.getCriterios().get(nombre);
+            texto.append("- ").append(nombre).append(": ")
+                    .append(valor == null ? "N/A" : Formato.decimal(valor)).append('\n');
+        }
+        if (item.getComentario() != null && !item.getComentario().isBlank()) {
+            texto.append("\nCOMENTARIO\n").append(item.getComentario()).append('\n');
+        }
+        return texto.toString();
     }
 }
