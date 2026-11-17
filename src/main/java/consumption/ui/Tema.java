@@ -1,8 +1,8 @@
 package consumption.ui;
 
 public enum Tema {
-    NOCTURNO("nocturno", "#08080a"),
-    SOLAR("solar", "#f1ecd2"),
+    NOCTURNO("nocturno", "#07070c"),
+    SOLAR("solar", "#f2efdc"),
     NEON("neon", "#0b0614"),
     TERMINAL("terminal", "#020a04"),
     OXIDO("oxido", "#120a06"),

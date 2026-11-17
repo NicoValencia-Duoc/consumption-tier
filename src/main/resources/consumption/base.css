@@ -500,3 +500,33 @@
     -fx-cursor: hand;
 }
 .aviso-boton:hover { -fx-background-color: -c-ln; }
+
+/* ===== V3: variables de componentes con fallback para los otros cuatro temas ===== */
+.root, .cal-panel, .context-menu {
+    -c-cian: -c-acento;
+    -c-seleccion: -c-ln;
+    -c-franja: -c-acento;
+    -c-cabecera: -c-bg;
+    -c-cabecera-tx: -c-tx;
+    -c-borde: -c-ln;
+    -c-foco: -c-acento;
+}
+/* Estas variables por defecto son sobrescritas por las hojas de cada tema,
+   porque se cargan despues de base.css. */
+.combo-box-popup .list-cell:filled:hover,
+.combo-box-popup .list-cell:filled:selected,
+.list-view .list-cell:filled:hover,
+.list-view .list-cell:filled:selected {
+    -fx-background-color: -c-seleccion;
+    -fx-text-fill: -c-tx;
+}
+.combo-box-popup .list-cell:filled:hover .text,
+.combo-box-popup .list-cell:filled:selected .text,
+.list-view .list-cell:filled:hover .text,
+.list-view .list-cell:filled:selected .text {
+    -fx-fill: -c-tx;
+}
+.text-field:focused, .text-area:focused, .combo-box:focused,
+.table-view:focused, .list-view:focused {
+    -fx-border-color: -c-foco;
+}
