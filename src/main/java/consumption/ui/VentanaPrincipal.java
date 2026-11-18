@@ -7,6 +7,7 @@ import consumption.data.GestorImagenes;
 import consumption.data.RespaldoZip;
 import consumption.data.Preferencias;
 import consumption.data.Papelera;
+import consumption.data.LimpiezaImagenes;
 import java.util.Set;
 import java.util.HashSet;
 import javafx.geometry.Insets;
@@ -83,7 +84,8 @@ public class VentanaPrincipal extends VBox {
                     this::crearRespaldo,
                     this::restaurarRespaldo,
                     this::abrirPapelera,
-                    this::abrirCarpetaDatos);
+                    this::abrirCarpetaDatos,
+                    this::revisarPortadasHuerfanas);
             default -> paginaInicio();
         };
         contenido.getChildren().setAll(pagina);
@@ -177,11 +179,14 @@ public class VentanaPrincipal extends VBox {
     private <T extends ItemConsumption> void conectar(PaginaTabla<T> pagina, Supplier<FormularioItem<T>> formulario) {
         conectarComunes(pagina);
         pagina.setAlAgregar(() -> agregarCon(formulario.get()));
-        pagina.setAlEditar(seleccionado ->
-                abrir(formulario.get(), seleccionado).ifPresent(editado -> {
-                    guardarYRefrescar();
+        pagina.setAlEditar(seleccionado -> {
+            FormularioItem<T> editor = formulario.get();
+            abrir(editor, seleccionado).ifPresent(editado -> {
+                if (guardarFormulario(editor, seleccionado, editado)) {
                     aviso.mostrar("REGISTRO ACTUALIZADO");
-                }));
+                }
+            });
+        });
     }
 
     private void agregarPendiente() {
@@ -207,10 +212,9 @@ public class VentanaPrincipal extends VBox {
 
     private <T extends ItemConsumption> void agregarCon(FormularioItem<T> formulario) {
         abrir(formulario, null).ifPresent(nuevo -> {
-            nuevo.setNumero(Numeracion.siguiente(items));
-            items.add(nuevo);
-            guardarYRefrescar();
-            avisarGuardado(nuevo);
+            if (guardarFormulario(formulario, null, nuevo)) {
+                avisarGuardado(nuevo);
+            }
         });
     }
 
@@ -240,9 +244,11 @@ public class VentanaPrincipal extends VBox {
 
     @SuppressWarnings("unchecked")
     private <T extends ItemConsumption> void editarCon(FormularioItem<T> formulario, ItemConsumption item) {
-        abrir(formulario, (T) item).ifPresent(editado -> {
-            guardarYRefrescar();
-            aviso.mostrar("REGISTRO ACTUALIZADO");
+        T anterior = (T) item;
+        abrir(formulario, anterior).ifPresent(editado -> {
+            if (guardarFormulario(formulario, anterior, editado)) {
+                aviso.mostrar("REGISTRO ACTUALIZADO");
+            }
         });
     }
 
@@ -268,14 +274,69 @@ public class VentanaPrincipal extends VBox {
     }
 
     private void editarDesdeDetalle(ItemConsumption item) {
+        int numero = item.getNumero();
         editarCon(formularioPara(item), item);
-        verDetalle(item);
+        ItemConsumption actual = items.stream()
+                .filter(i -> i.getNumero() == numero)
+                .findFirst().orElse(item);
+        verDetalle(actual);
     }
-
     private void alternarFavorito(ItemConsumption item) {
         item.setFavorito(!item.isFavorito());
         repositorio.guardar(items);
     }
+
+    private void revisarPortadasHuerfanas() {
+        final LimpiezaImagenes.Informe informe;
+        try {
+            informe = LimpiezaImagenes.analizar();
+        } catch (RuntimeException ex) {
+            avisar(Alert.AlertType.ERROR, ex.getMessage());
+            return;
+        }
+
+        if (informe.candidatas().isEmpty()) {
+            avisar(Alert.AlertType.INFORMATION,
+                    "No se encontraron portadas huerfanas con nombre administrado por THE MAW.");
+            return;
+        }
+
+        StringBuilder detalle = new StringBuilder();
+        int limite = Math.min(15, informe.candidatas().size());
+        for (int i = 0; i < limite; i++) {
+            var candidata = informe.candidatas().get(i);
+            detalle.append("\n- ").append(candidata.nombre());
+        }
+        if (informe.candidatas().size() > limite) {
+            detalle.append("\n... y ").append(informe.candidatas().size() - limite)
+                    .append(" mas.");
+        }
+
+        double mib = informe.bytes() / 1024.0 / 1024.0;
+        Alert confirmar = new Alert(Alert.AlertType.CONFIRMATION,
+                "Candidatas: " + informe.candidatas().size()
+                        + " | Espacio: " + String.format(java.util.Locale.ROOT, "%.2f MiB", mib)
+                        + "\n\nSe moveran a imagenes-cuarentena/; NO se borraran."
+                        + "\nCrea primero un respaldo ZIP."
+                        + "\n\nVista previa:" + detalle,
+                ButtonType.OK, ButtonType.CANCEL);
+        confirmar.setTitle("REVISAR PORTADAS HUERFANAS");
+        confirmar.setHeaderText("MOVER A CUARENTENA");
+        confirmar.getDialogPane().getStylesheets().setAll(hojas());
+        Terminal.dialogo(confirmar, "PORTADAS HUERFANAS", "boton-peligro", "MOVER");
+        if (confirmar.showAndWait().filter(b -> b == ButtonType.OK).isEmpty()) return;
+
+        try {
+            int movidas = LimpiezaImagenes.ponerEnCuarentena(informe);
+            avisar(Alert.AlertType.INFORMATION,
+                    "Portadas movidas: " + movidas
+                            + "\nCarpeta: " + LimpiezaImagenes.carpetaCuarentena()
+                            + "\nPuedes restaurarlas manualmente con THE MAW cerrado.");
+        } catch (RuntimeException ex) {
+            avisar(Alert.AlertType.ERROR, ex.getMessage());
+        }
+    }
+
     private void abrirCarpetaDatos() {
         try {
             Files.createDirectories(Rutas.BASE);
@@ -345,6 +406,52 @@ public class VentanaPrincipal extends VBox {
         alerta.getDialogPane().getStylesheets().setAll(hojas());
         Terminal.dialogo(alerta, tipo == Alert.AlertType.ERROR ? "!! ERROR" : "AVISO", "boton-accion", null);
         alerta.showAndWait();
+    }
+
+    private <T extends ItemConsumption> boolean guardarFormulario(
+            FormularioItem<T> formulario, T anterior, T nuevo) {
+        int indice = anterior == null ? -1 : items.indexOf(anterior);
+        if (anterior != null && indice < 0) {
+            formulario.revertirPortadaNoGuardada();
+            avisar(Alert.AlertType.ERROR, "No se encontro el registro original.");
+            return false;
+        }
+
+        if (anterior == null) {
+            nuevo.setNumero(Numeracion.siguiente(items));
+            items.add(nuevo);
+        } else {
+            items.set(indice, nuevo);
+        }
+
+        try {
+            repositorio.guardar(items);
+        } catch (RuntimeException ex) {
+            if (anterior == null) {
+                items.remove(nuevo);
+            } else {
+                items.set(indice, anterior);
+            }
+
+            formulario.revertirPortadaNoGuardada();
+
+            avisar(Alert.AlertType.ERROR,
+                    "No se pudo guardar el registro. Se conservaron los datos anteriores: "
+                            + ex.getMessage());
+            return false;
+        }
+
+        formulario.confirmarPortadaGuardada();
+        formulario.confirmarBorradorGuardado();
+        try {
+            mostrar(pestanaActual);
+        } catch (RuntimeException ex) {
+            avisar(Alert.AlertType.WARNING,
+                    "El registro se guardo correctamente, pero no se pudo "
+                            + "actualizar la pantalla: " + ex.getMessage());
+        }
+
+        return true;
     }
 
     private void guardarYRefrescar() {
@@ -504,7 +611,9 @@ public class VentanaPrincipal extends VBox {
     private <T extends ItemConsumption> void editarParaCalificar(ItemConsumption item) {
         FormularioItem<T> formulario = (FormularioItem<T>) formularioPara(item);
         formulario.setIrACriterios(true);
-        abrir(formulario, (T) item);
+        T anterior = (T) item;
+        abrir(formulario, anterior).ifPresent(editado ->
+                guardarFormulario(formulario, anterior, editado));
     }
 
     public void alCerrar() {

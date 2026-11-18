@@ -14,7 +14,7 @@ public class PaginaEstadisticas extends VBox {
 
     public PaginaEstadisticas(List<ItemConsumption> items, Runnable alRespaldar,
                               Runnable alRestaurar, Runnable alPapelera,
-                              Runnable alAbrirDatos) {
+                              Runnable alAbrirDatos, Runnable alLimpiarImagenes) {
         setSpacing(18);
 
         List<Juego> juegos = items.stream().filter(Juego.class::isInstance).map(Juego.class::cast).toList();
@@ -63,7 +63,12 @@ public class PaginaEstadisticas extends VBox {
         Button abrirDatos = Terminal.corchetes(new Button("ABRIR CARPETA DE DATOS"));
         abrirDatos.getStyleClass().addAll("pestana", "boton-accion");
         abrirDatos.setOnAction(e -> alAbrirDatos.run());
-        HBox botones = new HBox(8, respaldar, restaurar, papelera, abrirDatos);
+        Button limpiarImagenes = Terminal.corchetes(new Button("REVISAR PORTADAS HUERFANAS"));
+        limpiarImagenes.getStyleClass().addAll("pestana", "boton-accion");
+        limpiarImagenes.setOnAction(e -> alLimpiarImagenes.run());
+
+        FlowPane botones = new FlowPane(8, 8, respaldar, restaurar, papelera,
+                abrirDatos, limpiarImagenes);
         botones.setAlignment(Pos.CENTER_LEFT);
 
         VBox cuerpo = new VBox(18, general, paneles, herramientas, botones);

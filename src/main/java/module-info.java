@@ -2,6 +2,7 @@ module consumption {
     requires java.desktop;
     requires javafx.controls;
     requires javafx.media;
+    requires javafx.swing;
     requires com.google.gson;
     exports consumption;
     exports consumption.model;

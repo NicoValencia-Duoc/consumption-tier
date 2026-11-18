@@ -6,6 +6,7 @@ import consumption.model.Formato;
 import consumption.model.ItemConsumption;
 import consumption.model.Tier;
 import consumption.data.BorradorFormulario;
+import consumption.data.Rutas;
 
 import javafx.scene.Parent;
 import java.util.HashMap;
@@ -25,7 +26,10 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.scene.layout.Priority;
 import javafx.stage.WindowEvent;
-
+import javafx.geometry.Rectangle2D;
+import javafx.scene.image.WritableImage;
+import javafx.scene.input.MouseEvent;
+import javafx.embed.swing.SwingFXUtils;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -37,6 +41,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public abstract class FormularioItem<T extends ItemConsumption> {
 
@@ -101,7 +113,9 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     private List<String> hojas;
 
     private File archivoNuevo;
+    private Path imagenTemporalPortapapeles;
     private boolean quitarImagen;
+    private String portadaNuevaPendiente;
     private final Label nombreImagen = new Label("SIN IMAGEN");
     private final ImageView vistaPrevia = new ImageView();
     private HBox filaPortada;
@@ -237,11 +251,6 @@ public abstract class FormularioItem<T extends ItemConsumption> {
                     ev.consume();
                 } else {
                     resultado = construido;
-                    try {
-                        borrarBorradorSiNuevo();
-                    } catch (RuntimeException ex) {
-                        System.err.println("No se pudo borrar el borrador: " + ex.getMessage());
-                    }
                 }
             } catch (ErrorCampo ex) {
                 mostrarError(ex.getCampo(), ex.getMessage());
@@ -273,8 +282,36 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         });
 
         Terminal.prepararCentrado(dialogo);
-        Optional<ButtonType> respuesta = dialogo.showAndWait();
+        Optional<ButtonType> respuesta;
+        try {
+            respuesta = dialogo.showAndWait();
+        } finally {
+            limpiarTemporalPortada();
+            if (resultado == null) revertirPortadaNoGuardada();
+        }
         return respuesta.filter(b -> b == guardar).map(b -> resultado);
+    }
+
+    public void confirmarPortadaGuardada() {
+        portadaNuevaPendiente = null;
+    }
+
+    public void confirmarBorradorGuardado() {
+        if (original == null) {
+            try {
+                BorradorFormulario.borrar(nombreTipo());
+            } catch (RuntimeException ex) {
+                System.err.println("No se pudo borrar el borrador ya guardado: "
+                        + ex.getMessage());
+            }
+        }
+    }
+
+    public void revertirPortadaNoGuardada() {
+        if (portadaNuevaPendiente != null) {
+            GestorImagenes.eliminar(portadaNuevaPendiente);
+            portadaNuevaPendiente = null;
+        }
     }
 
     private void instalarBorrador() {
@@ -554,6 +591,206 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         return caja;
     }
 
+    private void limpiarTemporalPortada() {
+        if (imagenTemporalPortapapeles == null) return;
+        try {
+            Files.deleteIfExists(imagenTemporalPortapapeles);
+        } catch (IOException ex) {
+            System.err.println("No se pudo eliminar portada temporal: " + ex.getMessage());
+        }
+        imagenTemporalPortapapeles = null;
+    }
+
+    private void pegarImagenDelPortapapeles(Image imagen) {
+        if (imagen == null || imagen.isError()
+                || imagen.getWidth() <= 0 || imagen.getHeight() <= 0) {
+            throw new IllegalArgumentException("La imagen copiada no es valida.");
+        }
+        if (imagen.getWidth() > 6000 || imagen.getHeight() > 6000) {
+            throw new IllegalArgumentException("La imagen supera 6000 pixeles por lado.");
+        }
+
+        Path temporal = null;
+        try {
+            BufferedImage buffered = SwingFXUtils.fromFXImage(imagen, null);
+            if (buffered == null) {
+                throw new IllegalArgumentException("No se pudo convertir la imagen copiada.");
+            }
+            temporal = Files.createTempFile("the-maw-portada-", ".png");
+            if (!ImageIO.write(buffered, "png", temporal.toFile())) {
+                throw new IOException("No se pudo codificar el PNG.");
+            }
+
+            GestorImagenes.validar(temporal.toFile());
+            Path anterior = imagenTemporalPortapapeles;
+            imagenTemporalPortapapeles = temporal;
+            archivoNuevo = temporal.toFile();
+            quitarImagen = false;
+            nombreImagen.setText("IMAGEN PEGADA");
+            refrescarVistaPrevia();
+            modificado = true;
+
+            if (anterior != null && !anterior.equals(temporal)) {
+                try {
+                    Files.deleteIfExists(anterior);
+                } catch (IOException ex) {
+                    System.err.println("No se pudo eliminar temporal anterior: " + ex.getMessage());
+                }
+            }
+        } catch (IOException | IllegalArgumentException ex) {
+            if (temporal != null && !temporal.equals(imagenTemporalPortapapeles)) {
+                try {
+                    Files.deleteIfExists(temporal);
+                } catch (IOException ignorado) {}
+            }
+            throw new IllegalArgumentException("No se pudo pegar la imagen: " + ex.getMessage(), ex);
+        }
+    }
+
+    private void usarArchivoPortada(File archivo) {
+        GestorImagenes.validar(archivo);
+
+        Image imagen = new Image(archivo.toURI().toString(), false);
+        if (imagen.isError() || imagen.getWidth() <= 0 || imagen.getHeight() <= 0) {
+            throw new IllegalArgumentException("El archivo no es una imagen valida.");
+        }
+
+        limpiarTemporalPortada();
+        archivoNuevo = archivo;
+        quitarImagen = false;
+        nombreImagen.setText(archivo.getName());
+        refrescarVistaPrevia();
+        modificado = true;
+    }
+
+    private void abrirEditorEncuadre() {
+        File archivo;
+        if (archivoNuevo != null) {
+            archivo = archivoNuevo;
+        } else if (!quitarImagen && original != null
+                && original.getRutaImagen() != null) {
+            archivo = Rutas.IMAGENES.resolve(original.getRutaImagen()).toFile();
+        } else {
+            mostrarError(filaPortada, "Primero elige o pega una portada.");
+            return;
+        }
+
+        if (!archivo.isFile()) {
+            mostrarError(filaPortada, "No se encontro el archivo de portada.");
+            return;
+        }
+        if (archivo.getName().toLowerCase(java.util.Locale.ROOT).endsWith(".gif")) {
+            mostrarError(filaPortada, "El encuadre de GIF animados no esta disponible.");
+            return;
+        }
+
+        Image fuente = new Image(archivo.toURI().toString(), false);
+        if (fuente.isError() || fuente.getPixelReader() == null
+                || fuente.getWidth() <= 0 || fuente.getHeight() <= 0) {
+            mostrarError(filaPortada, "No se pudo abrir la portada para encuadrarla.");
+            return;
+        }
+
+        final double proporcion = 104.0 / 134.0;
+        final double anchoFuente = fuente.getWidth();
+        final double altoFuente = fuente.getHeight();
+        final double anchoBase = Math.min(anchoFuente, altoFuente * proporcion);
+        final double altoBase = anchoBase / proporcion;
+
+        ImageView vista = new ImageView(fuente);
+        vista.setFitWidth(260);
+        vista.setFitHeight(335);
+        vista.setPreserveRatio(false);
+
+        Slider zoom = new Slider(1, 3, 1);
+        zoom.setShowTickLabels(true);
+        zoom.setShowTickMarks(true);
+        zoom.setMajorTickUnit(1);
+        zoom.setBlockIncrement(0.1);
+        zoom.setPrefWidth(260);
+
+        final double[] posicion = {0.5, 0.5};
+        final double[] ultimoRaton = {0, 0};
+        final Runnable actualizar = () -> {
+            double anchoRecorte = anchoBase / zoom.getValue();
+            double altoRecorte = altoBase / zoom.getValue();
+            double x = (anchoFuente - anchoRecorte) * posicion[0];
+            double y = (altoFuente - altoRecorte) * posicion[1];
+            vista.setViewport(new Rectangle2D(x, y, anchoRecorte, altoRecorte));
+        };
+        zoom.valueProperty().addListener((obs, antes, ahora) -> actualizar.run());
+        vista.setOnMousePressed(e -> {
+            ultimoRaton[0] = e.getX();
+            ultimoRaton[1] = e.getY();
+        });
+        vista.setOnMouseDragged(e -> {
+            double anchoRecorte = anchoBase / zoom.getValue();
+            double altoRecorte = altoBase / zoom.getValue();
+            double recorridoX = anchoFuente - anchoRecorte;
+            double recorridoY = altoFuente - altoRecorte;
+            if (recorridoX > 0) {
+                posicion[0] = Math.max(0, Math.min(1,
+                        posicion[0] - (e.getX() - ultimoRaton[0])
+                                * anchoRecorte / 260.0 / recorridoX));
+            }
+            if (recorridoY > 0) {
+                posicion[1] = Math.max(0, Math.min(1,
+                        posicion[1] - (e.getY() - ultimoRaton[1])
+                                * altoRecorte / 335.0 / recorridoY));
+            }
+            ultimoRaton[0] = e.getX();
+            ultimoRaton[1] = e.getY();
+            actualizar.run();
+        });
+        vista.setOnScroll(e -> {
+            zoom.setValue(Math.max(zoom.getMin(),
+                    Math.min(zoom.getMax(), zoom.getValue() + Math.signum(e.getDeltaY()) * 0.1)));
+            e.consume();
+        });
+        actualizar.run();
+
+        Button restablecer = Terminal.corchetes(new Button("RESTABLECER"));
+        restablecer.getStyleClass().add("pestana");
+        restablecer.setOnAction(e -> {
+            posicion[0] = 0.5;
+            posicion[1] = 0.5;
+            zoom.setValue(1);
+            actualizar.run();
+        });
+
+        VBox contenido = new VBox(12, vista, new Label("ZOOM"), zoom, restablecer);
+        contenido.setAlignment(Pos.CENTER);
+        contenido.setPadding(new Insets(12));
+
+        ButtonType aplicar = new ButtonType("APLICAR", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelar = new ButtonType("CANCELAR", ButtonBar.ButtonData.CANCEL_CLOSE);
+        Dialog<ButtonType> editor = new Dialog<>();
+        editor.setTitle("ENCUADRAR PORTADA");
+        editor.setHeaderText("ARRASTRA LA IMAGEN O AJUSTA EL ZOOM");
+        editor.getDialogPane().getStylesheets().setAll(hojas);
+        editor.getDialogPane().setContent(contenido);
+        editor.getDialogPane().getButtonTypes().addAll(aplicar, cancelar);
+        Terminal.dialogo(editor, "ENCUADRAR PORTADA", "boton-accion", "APLICAR");
+
+        if (editor.showAndWait().filter(b -> b == aplicar).isEmpty()) return;
+
+        Rectangle2D recorte = vista.getViewport();
+        int x = (int) Math.floor(recorte.getMinX());
+        int y = (int) Math.floor(recorte.getMinY());
+        int ancho = Math.max(1, Math.min((int) fuente.getWidth() - x,
+                (int) Math.floor(recorte.getWidth())));
+        int alto = Math.max(1, Math.min((int) fuente.getHeight() - y,
+                (int) Math.floor(recorte.getHeight())));
+        try {
+            WritableImage resultadoEncuadre = new WritableImage(
+                    fuente.getPixelReader(), x, y, ancho, alto);
+            pegarImagenDelPortapapeles(resultadoEncuadre);
+            nombreImagen.setText("PORTADA ENCUADRADA");
+        } catch (RuntimeException ex) {
+            mostrarError(filaPortada, "No se pudo aplicar el encuadre: " + ex.getMessage());
+        }
+    }
+
     private HBox crearPortada() {
         StackPane marco = new StackPane(vistaPrevia);
         marco.getStyleClass().add("vista-previa");
@@ -566,6 +803,27 @@ public abstract class FormularioItem<T extends ItemConsumption> {
 
         Button elegir = new Button("ELEGIR...");
         elegir.getStyleClass().add("pestana");
+        Button pegar = new Button("PEGAR");
+        pegar.getStyleClass().add("pestana");
+        pegar.setOnAction(e -> {
+            Clipboard portapapeles = Clipboard.getSystemClipboard();
+            try {
+                if (portapapeles.hasImage()) {
+                    pegarImagenDelPortapapeles(portapapeles.getImage());
+                } else if (portapapeles.hasFiles()
+                        && portapapeles.getFiles().size() == 1) {
+                    usarArchivoPortada(portapapeles.getFiles().get(0));
+                } else {
+                    throw new IllegalArgumentException(
+                            "Copia una imagen o un unico archivo de imagen.");
+                }
+            } catch (IllegalArgumentException ex) {
+                mostrarError(filaPortada, ex.getMessage());
+            }
+        });
+        Button encuadrar = new Button("ENCUADRAR");
+        encuadrar.getStyleClass().add("pestana");
+        encuadrar.setOnAction(e -> abrirEditorEncuadre());
         Button quitar = new Button("QUITAR");
         quitar.getStyleClass().add("pestana");
         nombreImagen.getStyleClass().add("subtitulo");
@@ -579,18 +837,13 @@ public abstract class FormularioItem<T extends ItemConsumption> {
             File archivo = selector.showOpenDialog(cuerpo.getScene().getWindow());
             if (archivo == null) return;
             try {
-                GestorImagenes.validar(archivo);
+                usarArchivoPortada(archivo);
             } catch (IllegalArgumentException ex) {
                 mostrarError(filaPortada, ex.getMessage());
-                return;
             }
-            archivoNuevo = archivo;
-            quitarImagen = false;
-            nombreImagen.setText(archivo.getName());
-            refrescarVistaPrevia();
-            modificado = true;
         });
         quitar.setOnAction(e -> {
+            limpiarTemporalPortada();
             archivoNuevo = null;
             quitarImagen = true;
             nombreImagen.setText("SIN IMAGEN");
@@ -598,7 +851,32 @@ public abstract class FormularioItem<T extends ItemConsumption> {
             modificado = true;
         });
 
-        VBox lado = new VBox(8, new HBox(8, elegir, quitar), nombreImagen);
+        marco.setOnDragOver(evento -> {
+            Dragboard arrastre = evento.getDragboard();
+            if (evento.getGestureSource() != marco
+                    && arrastre.hasFiles()
+                    && arrastre.getFiles().size() == 1) {
+                evento.acceptTransferModes(TransferMode.COPY);
+            }
+            evento.consume();
+        });
+
+        marco.setOnDragDropped(evento -> {
+            Dragboard arrastre = evento.getDragboard();
+            boolean aceptado = false;
+            if (arrastre.hasFiles() && arrastre.getFiles().size() == 1) {
+                try {
+                    usarArchivoPortada(arrastre.getFiles().get(0));
+                    aceptado = true;
+                } catch (IllegalArgumentException ex) {
+                    mostrarError(filaPortada, ex.getMessage());
+                }
+            }
+            evento.setDropCompleted(aceptado);
+            evento.consume();
+        });
+
+        VBox lado = new VBox(8, new HBox(8, elegir, pegar, quitar), encuadrar, nombreImagen);
         refrescarVistaPrevia();
         return new HBox(14, marco, lado);
     }
@@ -821,19 +1099,17 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         String ruta = rutaAnterior;
         if (archivoNuevo != null) {
             ruta = GestorImagenes.copiar(archivoNuevo);
+            portadaNuevaPendiente = ruta;
         } else if (quitarImagen) {
             ruta = null;
         }
 
-        T item = prueba;
         if (existente != null) {
-            aplicarComunes(existente, t, e, p, ini, fin, sinIni, sinFin, notas, veces, textoComentario);
-            aplicarPropios(existente);
-            item = existente;
+            prueba.setNumero(existente.getNumero());
+            prueba.setFavorito(existente.isFavorito());
         }
-        item.setRutaImagen(ruta);
-        if (!Objects.equals(ruta, rutaAnterior)) GestorImagenes.eliminar(rutaAnterior);
-        return item;
+        prueba.setRutaImagen(ruta);
+        return prueba;
     }
 
     private void aplicarComunes(T item, String t, Estado e, double p,
