@@ -11,6 +11,9 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ScrollBar;
+import javafx.geometry.Orientation;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.input.KeyCode;
@@ -38,7 +41,7 @@ public class Cabecera extends HBox {
     private final Label globo = new Label("▲ HAZ CLIC EN TU NOMBRE PARA CAMBIARLO");
     private final PauseTransition cierreGlobo = new PauseTransition(Duration.seconds(12));
 
-    public Cabecera(Consumer<String> alElegirPestana, Consumer<Tema> alElegirTema, Preferencias preferencias) {
+    public Cabecera(Consumer<String> alElegirPestana, Consumer<Tema> alElegirTema, Preferencias preferencias, Runnable alOpciones) {
         this.preferencias = preferencias;
 
         Label marca = new Label("THE MAW// ");
@@ -88,13 +91,67 @@ public class Cabecera extends HBox {
             menuTema.show(botonTema, Side.BOTTOM, 0, 4);
         });
 
-        Region izq = new Region();
-        Region der = new Region();
-        HBox.setHgrow(izq, Priority.ALWAYS);
-        HBox.setHgrow(der, Priority.ALWAYS);
+        Button engranaje = new Button("⚙");
+        engranaje.getStyleClass().addAll("pestana-barra", "boton-opciones");
+        engranaje.setTooltip(new javafx.scene.control.Tooltip("OPCIONES"));
+        engranaje.setMinSize(36, 32);
+        engranaje.setPrefSize(36, 32);
+        engranaje.setMaxSize(36, 32);
+        engranaje.setOnAction(e -> alOpciones.run());
+        HBox grupoOpciones = new HBox(6, engranaje, botonTema);
+        grupoOpciones.setAlignment(Pos.CENTER_LEFT);
 
-        getChildren().addAll(logo, izq, contenedorPestanas, der, botonTema);
-        setSpacing(20);
+        Region margenIzquierdo = new Region();
+        Region margenDerecho = new Region();
+        HBox.setHgrow(margenIzquierdo, Priority.ALWAYS);
+        HBox.setHgrow(margenDerecho, Priority.ALWAYS);
+        HBox pestanasCentradas = new HBox(margenIzquierdo, contenedorPestanas, margenDerecho);
+        pestanasCentradas.setAlignment(Pos.CENTER);
+        pestanasCentradas.setMinWidth(Region.USE_PREF_SIZE);
+
+        ScrollPane desplazamiento = new ScrollPane(pestanasCentradas);
+        desplazamiento.setFitToWidth(true);
+        desplazamiento.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        desplazamiento.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        desplazamiento.setFitToHeight(true);
+        desplazamiento.setPrefHeight(34);
+        desplazamiento.setPannable(true);
+        desplazamiento.setMinWidth(0);
+        desplazamiento.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(desplazamiento, Priority.ALWAYS);
+        desplazamiento.getStyleClass().add("desplazamiento-cabecera");
+
+        logo.setMaxWidth(Region.USE_PREF_SIZE);
+        grupoOpciones.setMinWidth(Region.USE_PREF_SIZE);
+        grupoOpciones.setMaxWidth(Region.USE_PREF_SIZE);
+
+        ScrollBar barraSuperior = new ScrollBar();
+        barraSuperior.setOrientation(Orientation.HORIZONTAL);
+        barraSuperior.setMin(0);
+        barraSuperior.setMax(1);
+        barraSuperior.setBlockIncrement(0.15);
+        barraSuperior.setUnitIncrement(0.05);
+        barraSuperior.getStyleClass().add("barra-superior-pestanas");
+
+        barraSuperior.visibleAmountProperty().bind(javafx.beans.binding.Bindings.createDoubleBinding(
+                () -> {
+                    double total = pestanasCentradas.getWidth();
+                    double visible = desplazamiento.getViewportBounds().getWidth();
+                    if (total <= 0 || visible <= 0) return 1.0;
+                    return Math.max(0.01, Math.min(1.0, visible / total));
+                },
+                pestanasCentradas.widthProperty(), desplazamiento.viewportBoundsProperty()));
+        barraSuperior.valueProperty().bindBidirectional(desplazamiento.hvalueProperty());
+        barraSuperior.visibleProperty().bind(javafx.beans.binding.Bindings.createBooleanBinding(
+                () -> pestanasCentradas.getWidth() > desplazamiento.getViewportBounds().getWidth() + 2,
+                pestanasCentradas.widthProperty(), desplazamiento.viewportBoundsProperty()));
+
+        barraSuperior.setManaged(true);
+        VBox zonaNavegacion = new VBox(0, barraSuperior, desplazamiento);
+        zonaNavegacion.setMinWidth(0);
+        HBox.setHgrow(zonaNavegacion, Priority.ALWAYS);
+        getChildren().addAll(logo, zonaNavegacion, grupoOpciones);
+        setSpacing(12);
         setAlignment(Pos.CENTER_LEFT);
         getStyleClass().add("cabecera");
         marcarActiva("INICIO");

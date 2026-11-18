@@ -165,16 +165,45 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
             Terminal.corchetes(b);
         }
 
-        Region espacioSeleccion = new Region();
-        HBox.setHgrow(espacioSeleccion, Priority.ALWAYS);
-        barraSeleccion = new HBox(8, cerrar, contador, espacioSeleccion,
+        barraSeleccion = new HBox(8, cerrar, contador,
                 botonTodo, editar, empezar, terminar, abandonar, favorito, detalle, eliminar);
         barraSeleccion.getStyleClass().add("barra-seleccion");
-        barraSeleccion.setAlignment(Pos.CENTER_LEFT);
-        barraSeleccion.setMaxWidth(Double.MAX_VALUE);
-        barraSeleccion.setVisible(false);
 
-        StackPane zonaAcciones = new StackPane(acciones, barraSeleccion);
+        barraSeleccion.setPadding(new javafx.geometry.Insets(0, 0, 0, 10));
+        barraSeleccion.setAlignment(Pos.CENTER_LEFT);
+        barraSeleccion.setMinWidth(Region.USE_PREF_SIZE);
+        for (Button b : new Button[] {cerrar, botonTodo, editar, empezar, terminar,
+                abandonar, favorito, detalle, eliminar}) {
+            b.setMinWidth(Region.USE_PREF_SIZE);
+        }
+        Region separadorBarra = new Region();
+        separadorBarra.setMinHeight(16);
+        separadorBarra.setPrefHeight(16);
+        separadorBarra.setMaxHeight(16);
+        VBox contenidoSeleccion = new VBox(0, barraSeleccion, separadorBarra);
+        contenidoSeleccion.setMinWidth(Region.USE_PREF_SIZE);
+        ScrollPane desplazamientoSeleccion = new ScrollPane(contenidoSeleccion);
+        desplazamientoSeleccion.setFitToHeight(false);
+        desplazamientoSeleccion.setFitToWidth(false);
+        desplazamientoSeleccion.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        desplazamientoSeleccion.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        desplazamientoSeleccion.setPannable(true);
+        desplazamientoSeleccion.setMinWidth(0);
+        desplazamientoSeleccion.setMaxWidth(Double.MAX_VALUE);
+        desplazamientoSeleccion.setVisible(false);
+
+        desplazamientoSeleccion.setPrefHeight(62);
+        desplazamientoSeleccion.setMinHeight(62);
+        desplazamientoSeleccion.setMaxHeight(62);
+        StackPane zonaAcciones = new StackPane(acciones, desplazamientoSeleccion);
+        zonaAcciones.setAlignment(Pos.TOP_LEFT);
+        zonaAcciones.setMinHeight(62);
+        zonaAcciones.setPrefHeight(62);
+        zonaAcciones.setMaxHeight(62);
+        StackPane.setAlignment(acciones, Pos.TOP_LEFT);
+        StackPane.setAlignment(desplazamientoSeleccion, Pos.TOP_LEFT);
+        barraSeleccion.visibleProperty().addListener((obs, antes, activo) ->
+                desplazamientoSeleccion.setVisible(activo));
 
         buscador.setPromptText("buscar --titulo");
         HBox.setHgrow(buscador, Priority.ALWAYS);
@@ -211,7 +240,10 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         colNumero.setMaxWidth(90);
         tabla.getColumns().add(colNumero);
         tabla.getColumns().add(columna(ID_FAVORITO, "★", i -> i.isFavorito() ? "★" : ""));
-        tabla.getColumns().add(columna(ID_TITULO, "TITULO", ItemConsumption::getTitulo));
+        TableColumn<T, Object> columnaTitulo = columna(ID_TITULO, "TITULO", ItemConsumption::getTitulo);
+        columnaTitulo.setMinWidth(180);
+        columnaTitulo.setPrefWidth(230);
+        tabla.getColumns().add(columnaTitulo);
 
         TableColumn<T, Object> nota = columna(ID_NOTA, "NOTA", ItemConsumption::getNota);
         nota.setCellFactory(col -> new TableCell<>() {
@@ -285,11 +317,28 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         columnaCasillas.setCellFactory(col -> new CeldaCasilla());
         tabla.getColumns().add(0, columnaCasillas);
         tabla.getColumns().add(1, crearColumnaPortada());
-        tabla.setFixedCellSize(48);
+        tabla.setFixedCellSize(preferencias.isTablaCompacta()
+                ? Math.max(36, Math.ceil(36 * preferencias.getEscalaTexto() / 100.0))
+                : Math.max(48, Math.ceil(48 * preferencias.getEscalaTexto() / 100.0)));
 
 
         tabla.setRowFactory(tv -> new FilaTabla());
-        tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        tabla.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+
+        final double anchoTituloBase = 230;
+        tabla.widthProperty().addListener((obs, antes, ahora) -> {
+            double disponible = ahora.doubleValue() - 20;
+            if (disponible <= 0) return;
+
+            double otros = 0;
+            for (TableColumn<T, ?> c : tabla.getColumns()) {
+                if (c != columnaTitulo && c.isVisible()) {
+                    otros += c.getWidth() > 0 ? c.getWidth() : c.getPrefWidth();
+                }
+            }
+
+            columnaTitulo.setPrefWidth(Math.max(anchoTituloBase, disponible - otros));
+        });
 
         tabla.getSelectionModel().selectedItemProperty().addListener((obs, antes, ahora) -> {
             if (ahora != null) Platform.runLater(() -> tabla.getSelectionModel().clearSelection());
@@ -520,7 +569,13 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
 
         CeldaMiniatura() {
             marco.getStyleClass().add("miniatura-fila");
-            marco.setMinSize(32, 42);
+            int ancho = preferencias.isTablaCompacta() ? 24 : 32;
+            int alto = preferencias.isTablaCompacta() ? 30 : 42;
+            marco.setMinSize(ancho, alto);
+            marco.setPrefSize(ancho, alto);
+            marco.setMaxSize(ancho, alto);
+            vista.setFitWidth(ancho - 4);
+            vista.setFitHeight(alto - 4);
             marco.setPrefSize(32, 42);
             marco.setMaxSize(32, 42);
             vista.setFitWidth(28);
@@ -537,7 +592,9 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
                 setGraphic(null);
                 return;
             }
-            vista.setImage(GestorImagenes.imagenDe(item, 28, 38));
+            vista.setImage(GestorImagenes.imagenDe(item,
+                    preferencias.isTablaCompacta() ? 20 : 28,
+                    preferencias.isTablaCompacta() ? 26 : 38));
             setGraphic(marco);
         }
     }

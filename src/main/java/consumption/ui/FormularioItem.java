@@ -19,6 +19,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
@@ -214,14 +215,40 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         mensaje.getStyleClass().add("mensaje-error");
         mensaje.setWrapText(true);
         mensaje.setMaxWidth(680);
-        Label atajos = new Label("ESC CANCELAR · ENTER GUARDAR");
-        atajos.getStyleClass().addAll("subtitulo", "barra-atajos");
-        VBox raiz = new VBox(8, scroll, mensaje, atajos);
+        VBox raiz = new VBox(8, scroll, mensaje);
+
+        Label atajoGuardar = new Label("GUARDAR : ENTER");
+        Label atajoCancelar = new Label("CANCELAR : ESC");
+
+        atajoGuardar.getStyleClass().add("subtitulo");
+        atajoCancelar.getStyleClass().add("subtitulo");
+
+        atajoGuardar.setAlignment(Pos.CENTER);
+        atajoCancelar.setAlignment(Pos.CENTER);
+
+        HBox indicaciones = new HBox(10, atajoGuardar, atajoCancelar);
+        indicaciones.setAlignment(Pos.CENTER_RIGHT);
+        indicaciones.setMaxWidth(Double.MAX_VALUE);
 
         dialogo = new Dialog<>();
+        dialogo.setDialogPane(new DialogPane() {
+            @Override
+            protected Node createButtonBar() {
+                Node barraNativa = super.createButtonBar();
+
+                barraNativa.setStyle("-fx-padding: 0 0 0 0;");
+                indicaciones.setPadding(Insets.EMPTY);
+
+                VBox pie = new VBox(0, indicaciones, barraNativa);
+                pie.setFillWidth(true);
+
+                return pie;
+            }
+        });
         dialogo.setTitle((existente == null ? "AGREGAR " : "EDITAR ") + nombreTipo());
         dialogo.setHeaderText((existente == null ? TITULO_NUEVO : TITULO_EDICION) + " · " + nombreTipo());
         dialogo.getDialogPane().getStylesheets().setAll(hojas);
+        dialogo.getDialogPane().getStyleClass().add("formulario-item-dialogo");
         dialogo.getDialogPane().setContent(raiz);
         dialogo.setOnShowing(ev -> {
             javafx.stage.Screen pantalla = javafx.stage.Screen.getScreensForRectangle(
@@ -242,6 +269,8 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         botonCancelar.getStyleClass().add("boton-dialogo");
         Terminal.corchetes(botonGuardar);
         Terminal.corchetes(botonCancelar);
+        atajoGuardar.prefWidthProperty().bind(botonGuardar.widthProperty());
+        atajoCancelar.prefWidthProperty().bind(botonCancelar.widthProperty());
 
         botonGuardar.addEventFilter(ActionEvent.ACTION, ev -> {
             limpiarErrores();
@@ -529,7 +558,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     }
 
     private Node crearChipsEstado() {
-        HBox caja = new HBox(6);
+        FlowPane caja = new FlowPane(6, 6);
         for (Estado e : Estado.values()) {
             ToggleButton chip = new ToggleButton(e.getEtiqueta());
             chip.setToggleGroup(grupoEstado);

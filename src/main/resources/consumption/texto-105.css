@@ -1,0 +1,59 @@
+/* THE MAW: escala tipografica de prueba; sin cambios de color ni efectos. */
+.root { -fx-font-size: 15.75px; }
+.logo { -fx-font-size: 21.00px; }
+.cancion { -fx-font-size: 12.60px; }
+.subtitulo { -fx-font-size: 12.60px; }
+.letra { -fx-font-size: 42.00px; }
+.tipo { -fx-font-size: 10.50px; }
+.estrella { -fx-font-size: 18.90px; }
+.titulo-item { -fx-font-size: 14.70px; }
+.nota { -fx-font-size: 21.00px; }
+.estado { -fx-font-size: 11.55px; }
+.dias-en-curso { -fx-font-size: 11.55px; }
+.tier { -fx-font-size: 14.70px; }
+.tier-chico { -fx-font-size: 12.60px; }
+.tier-grande { -fx-font-size: 23.10px; }
+.chip-tier { -fx-font-size: 12.60px; }
+.barrita-texto { -fx-font-size: 11.55px; }
+.titulo-detalle { -fx-font-size: 27.30px; }
+.dialog-pane > .header-panel .label { -fx-font-size: 14.70px; }
+.seccion-form { -fx-font-size: 12.60px; }
+.etiqueta-form { -fx-font-size: 13.65px; }
+.error-campo { -fx-font-size: 12.60px; }
+.chip { -fx-font-size: 12.60px; }
+.cal-titulo { -fx-font-size: 13.65px; }
+.cal-dia-nombre { -fx-font-size: 11.55px; }
+.tiempo { -fx-font-size: 12.60px; }
+.nombre-usuario { -fx-font-size: 16.80px; }
+.campo-nombre { -fx-font-size: 16.80px; }
+.globo { -fx-font-size: 12.60px; }
+.aviso-maw { -fx-font-size: 12.60px; }
+.tooltip { -fx-font-size: 14.70px; }
+.aviso-boton { -fx-font-size: 12.60px; }
+.pestana, .filtro { -fx-font-size: 13.65px; }
+.table-cell { -fx-font-size: 14.70px; }
+.text-field, .text-area, .buscador { -fx-font-size: 14.70px; }
+.pestana-barra { -fx-font-size: 14.70px; }
+.nota-vacia { -fx-font-size: 21.00px; }
+.titulo-terminal { -fx-font-size: 18.90px; }
+.seccion-form { -fx-font-size: 13.65px; }
+.pie-maw { -fx-font-size: 12.60px; }
+.valor-criterio { -fx-font-size: 15.75px; }
+.panel-titulo { -fx-font-size: 12.60px; }
+.titulo-prompt { -fx-font-size: 29.40px; }
+.titulo-pagina { -fx-font-size: 29.40px; }
+.contador-pestana { -fx-font-size: 14.70px; }
+.ojo-maw { -fx-font-size: 50.40px; }
+.pie-texto { -fx-font-size: 12.60px; }
+.pie-nivel { -fx-font-size: 12.60px; }
+.pie-punto { -fx-font-size: 10.50px; }
+.etiqueta-sesion { -fx-font-size: 14.70px; }
+.campo-busqueda-signo { -fx-font-size: 14.70px; }
+.campo-busqueda .campo-busqueda-texto,
+.campo-busqueda .campo-busqueda-texto:focused { -fx-font-size: 14.70px; }
+.chip-tier { -fx-font-size: 12.60px; }
+.vacio-titulo { -fx-font-size: 18.90px; }
+.table-view .column-header .label { -fx-font-size: 12.60px; }
+.nombre-criterio { -fx-font-size: 13.65px; }
+.context-menu .menu-item .label { -fx-font-size: 14.70px; }
+.root { -fx-font-size: 15.75px; }

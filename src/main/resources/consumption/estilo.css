@@ -414,7 +414,7 @@
 .barra-atajos {
     -fx-border-color: -c-ln transparent transparent transparent;
     -fx-border-width: 1 0 0 0;
-    -fx-padding: 6 0 0 0;
+    -fx-padding: 3 0 0 0;
 }
 
 /* Pie con reproductor: la linea de progreso hace de borde superior */
@@ -611,3 +611,79 @@
 .vista-previa {
     -fx-background-color: #08080a;
 }
+/* THE MAW / capsula 29: opciones y tarjetas compactas. */
+.boton-opciones {
+    -fx-text-fill: -c-acento;
+    -fx-font-size: 20px;
+    -fx-padding: 2 8 2 8;
+}
+.boton-opciones:hover { -fx-text-fill: -c-y; }
+.tarjeta-compacta { -fx-padding: 8; }
+.tarjeta-compacta .miniatura { -fx-min-height: 87; -fx-pref-height: 87; }
+.tarjeta-compacta .titulo-item { -fx-wrap-text: true; }
+.opciones-seccion { -fx-text-fill: -c-acento; -fx-font-family: "Share Tech Mono", "Consolas"; -fx-font-size: 14px; }
+.opciones-valor { -fx-text-fill: -c-y; -fx-font-family: "Share Tech Mono", "Consolas"; }
+
+/* THE MAW v1: engranaje con geometria estable, sin cambios al resto de la barra. */
+.boton-opciones, .boton-opciones:hover, .boton-opciones:focused,
+.boton-opciones:pressed {
+    -fx-padding: 0;
+    -fx-border-width: 0;
+    -fx-background-insets: 0;
+    -fx-font-size: 20px;
+}
+
+/* THE MAW v1.2 — Placeholders legibles en los seis temas.
+   Mantiene los colores de texto introducido, dimensiones y distribucion. */
+.text-field,
+.text-area,
+.buscador,
+.campo-busqueda .campo-busqueda-texto {
+    -fx-prompt-text-fill: -c-mt;
+}
+
+/* THE MAW v1.3.6: barra horizontal nativa de la cabecera. */
+.desplazamiento-cabecera { -fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0; -fx-border-width: 0; }
+.desplazamiento-cabecera > .viewport { -fx-background-color: transparent; }
+
+/* THE MAW v1.3.8: barra superior con pista y deslizador distinguibles. */
+.barra-superior-pestanas {
+    -fx-pref-height: 10px;
+    -fx-min-height: 10px;
+    -fx-max-height: 10px;
+}
+.barra-superior-pestanas .thumb {
+    -fx-background-color: -c-acento;
+    -fx-background-insets: 1;
+}
+
+/* THE MAW v1.3.9: ancho estable del cierre de OPCIONES al reescalar. */
+.dialog-pane .button.opciones-cerrar-fijo {
+    -fx-min-width: 140px;
+    -fx-pref-width: 140px;
+    -fx-max-width: 140px;
+}
+/* Indicadores de desplazamiento en los extremos de barras horizontales.
+   Se mantienen las barras nativas y su comportamiento de arrastre. */
+.scroll-bar:horizontal .increment-button,
+.scroll-bar:horizontal .decrement-button {
+    -fx-padding: 0 5px 0 5px;
+    -fx-background-color: transparent;
+}
+.scroll-bar:horizontal .decrement-arrow {
+    -fx-shape: "M 6 0 L 0 4 L 6 8 Z";
+    -fx-background-color: -c-mt;
+    -fx-padding: 3px 3px 3px 3px;
+}
+.scroll-bar:horizontal .increment-arrow {
+    -fx-shape: "M 0 0 L 6 4 L 0 8 Z";
+    -fx-background-color: -c-mt;
+    -fx-padding: 3px 3px 3px 3px;
+}
+.scroll-bar:horizontal .increment-button:hover .increment-arrow,
+.scroll-bar:horizontal .decrement-button:hover .decrement-arrow {
+    -fx-background-color: -c-acento;
+}
+
+/* THE MAW 0.4: acercar los atajos del formulario a sus botones sin alterar otros dialogos. */
+.dialog-pane.formulario-item-dialogo .button-bar { -fx-padding: 1px 0 2px 0; }
