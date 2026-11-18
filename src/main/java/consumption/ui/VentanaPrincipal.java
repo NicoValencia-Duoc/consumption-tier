@@ -4,6 +4,7 @@ import consumption.data.RepositorioJson;
 import consumption.data.Rutas;
 import consumption.model.*;
 import consumption.data.GestorImagenes;
+import consumption.data.RecuperacionDatos;
 import consumption.data.RespaldoZip;
 import consumption.data.Preferencias;
 import consumption.data.Papelera;
@@ -29,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.awt.Desktop;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class VentanaPrincipal extends VBox {
 
@@ -383,7 +385,7 @@ public class VentanaPrincipal extends VBox {
 
     private void restaurarRespaldo() {
         Alert aviso = new Alert(Alert.AlertType.CONFIRMATION,
-                "Restaurar reemplaza TODOS tus datos e imagenes actuales por los del respaldo. ¿Continuar?",
+                "Restaurar reemplaza tus datos actuales por los del respaldo. Antes se guarda una copia de emergencia de tus datos en la carpeta consumption-personal. Las portadas del respaldo se agregan; las que ya tienes no se borran. ¿Continuar?",
                 ButtonType.OK, ButtonType.CANCEL);
         aviso.setHeaderText(null);
         aviso.setTitle("RESTAURAR RESPALDO");
@@ -399,16 +401,38 @@ public class VentanaPrincipal extends VBox {
 
         try {
             this.aviso.confirmarPendiente();
-            RespaldoZip.restaurar(archivo.toPath());
+            Path copiaEmergencia = RespaldoZip.restaurar(archivo.toPath());
+            final List<ItemConsumption> cargados;
+            try {
+                cargados = repositorio.cargar();
+            } catch (RuntimeException ex) {
+                revertirRestauracion(copiaEmergencia, ex);
+                return;
+            }
             GestorImagenes.limpiarCache();
             items.clear();
-            items.addAll(repositorio.cargar());
+            items.addAll(cargados);
             if (Numeracion.asignar(items)) repositorio.guardar(items);
             mostrar(pestanaActual);
             avisar(Alert.AlertType.INFORMATION, "Respaldo restaurado: " + items.size() + " items.");
-        } catch (IOException ex) {
-            avisar(Alert.AlertType.ERROR, "No se pudo restaurar: " + ex.getMessage());
+        } catch (IOException | RuntimeException ex) {
+            avisar(Alert.AlertType.ERROR, "No se pudo restaurar (tus datos actuales no se tocaron): " + ex.getMessage());
         }
+    }
+
+    private void revertirRestauracion(Path copiaEmergencia, RuntimeException causa) {
+        String texto = "El respaldo no se pudo cargar (" + causa.getMessage()
+                + "). Se volvieron a poner tus datos anteriores.";
+        try {
+            RecuperacionDatos.revertir(copiaEmergencia);
+            repositorio.cargar();
+        } catch (IOException | RuntimeException ex) {
+            texto = "El respaldo no se pudo cargar y tampoco se pudo volver al estado anterior ("
+                    + ex.getMessage() + "). Tu copia de emergencia es "
+                    + (copiaEmergencia == null ? "(no habia datos previos)" : copiaEmergencia.getFileName())
+                    + " en la carpeta consumption-personal. Cierra la app y no la abras hasta revisarla.";
+        }
+        avisar(Alert.AlertType.ERROR, texto);
     }
 
     private void avisar(Alert.AlertType tipo, String texto) {
@@ -598,6 +622,7 @@ public class VentanaPrincipal extends VBox {
     private void cambiarEstado(ItemConsumption item,
                                Transicion transicion,
                                boolean desdeDetalle) {
+        int numero = item.getNumero();
         try {
             transicion.aplicar(item, LocalDate.now());
         } catch (IllegalArgumentException ex) {
@@ -609,13 +634,20 @@ public class VentanaPrincipal extends VBox {
         if (transicion == Transicion.TERMINAR) {
             editarParaCalificar(item);
             repositorio.guardar(items);
-            avisarGuardado(item);
+            avisarGuardado(vigente(item, numero));
         } else {
             aviso.mostrar(ReglasAcciones.textoAviso(transicion));
         }
 
-        if (desdeDetalle) verDetalle(item);
+        if (desdeDetalle) verDetalle(vigente(item, numero));
         else mostrar(pestanaActual);
+    }
+
+    private ItemConsumption vigente(ItemConsumption item, int numero) {
+        if (items.contains(item)) return item;
+        return items.stream()
+                .filter(i -> i.getNumero() == numero)
+                .findFirst().orElse(item);
     }
 
     @SuppressWarnings("unchecked")

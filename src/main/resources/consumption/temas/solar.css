@@ -30,3 +30,11 @@
 .table-view .table-row-cell:marcada .table-cell.estado-pendiente { -fx-text-fill: -c-mt; }
 .table-view .column-header-background, .table-view .column-header, .table-view .filler { -fx-background-color: -c-ln; }
 .table-view .column-header .label { -fx-text-fill: -c-pn; }
+/* Contraste: el amarillo -c-y sobre crema no se lee; texto e icono usan el ambar oscuro -c-yl. */
+.opciones-valor { -fx-text-fill: -c-yl; }
+.icono-musica { -fx-fill: -c-yl; }
+
+.boton-accion, .dialog-pane .button.boton-dialogo.boton-accion,
+.estado-progreso, .chip-progreso:selected { -fx-text-fill: -c-yl; -fx-border-color: -c-yl; }
+.dias-en-curso, .estrella, .letra, .boton-musica,
+.pestana-barra:hover, .boton-opciones:hover, .dialog-pane .button:hover { -fx-text-fill: -c-yl; }

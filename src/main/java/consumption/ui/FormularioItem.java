@@ -377,17 +377,17 @@ public abstract class FormularioItem<T extends ItemConsumption> {
                     BorradorFormulario.borrar(nombreTipo());
                 }
             }
+            capturarBorrador = true;
         } catch (RuntimeException ex) {
             Alert alerta = new Alert(Alert.AlertType.WARNING,
                     "No se pudo recuperar el borrador: " + ex.getMessage()
-                            + "\nEl archivo se conserva para revisarlo.",
+                            + "\nEl archivo se conserva para revisarlo; en esta sesion este formulario "
+                            + "no guardara borradores para no pisarlo.",
                     ButtonType.OK);
             alerta.setHeaderText(null);
             alerta.getDialogPane().getStylesheets().setAll(hojas);
             alerta.showAndWait();
         }
-
-        capturarBorrador = true;
     }
 
     private void vigilarNodo(Node nodo) {

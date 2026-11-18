@@ -163,20 +163,16 @@ public final class Terminal {
                                 stage.getX(), stage.getY(), Math.max(1,stage.getWidth()), Math.max(1,stage.getHeight()))
                         .stream().findFirst().orElse(Screen.getPrimary()).getVisualBounds();
                 double ancho = Math.min(limites.getWidth(), Math.max(470, panel.prefWidth(-1)));
-                if (dialogo instanceof Alert alerta) {
-                    String mensaje = alerta.getContentText() == null ? "" : alerta.getContentText();
-                    String cabecera = alerta.getHeaderText() == null ? "" : alerta.getHeaderText();
-                    int lineas = 0;
-                    for (String linea : mensaje.split("\\n", -1)) {
-                        lineas += Math.max(1, (linea.length() + 53) / 54);
-                    }
-                    int lineasCabecera = Math.max(1, (cabecera.length() + 39) / 40);
-                    double altoContenido = 150 + 22 * lineas + 23 * Math.max(0, lineasCabecera - 1);
-                    double alto = Math.min(limites.getHeight(), Math.max(230, altoContenido));
+                if (dialogo instanceof Alert) {
+                    double sobraAncho = Math.max(0, stage.getWidth() - panel.getScene().getWidth());
+                    double sobraAlto = Math.max(0, stage.getHeight() - panel.getScene().getHeight());
                     stage.setMinHeight(0);
                     stage.setMinWidth(Math.min(420, limites.getWidth()));
                     stage.setWidth(ancho);
-                    stage.setHeight(alto);
+                    panel.applyCss();
+                    panel.layout();
+                    double alto = panel.prefHeight(Math.max(1, ancho - sobraAncho)) + sobraAlto;
+                    stage.setHeight(Math.min(limites.getHeight(), alto));
                 } else {
                     stage.sizeToScene();
                     stage.setWidth(ancho);
