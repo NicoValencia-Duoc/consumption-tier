@@ -41,6 +41,9 @@ public class VentanaPrincipal extends VBox {
     private final Aviso aviso = new Aviso();
     private final Papelera papelera = new Papelera();
     private final PieMaw pie;
+    private Runnable alCambiarEscala = () -> {};
+
+    public void setAlCambiarEscala(Runnable accion) { alCambiarEscala = accion; }
 
     public VentanaPrincipal(List<ItemConsumption> items, RepositorioJson repositorio,
                             Consumer<Tema> alElegirTema, ReproductorMusica reproductor,
@@ -52,7 +55,8 @@ public class VentanaPrincipal extends VBox {
         setSpacing(14);
         setPadding(new Insets(20, 28, 20, 28));
 
-        cabecera = new Cabecera(this::mostrar, alElegirTema, preferencias);        cabecera.setViewOrder(-1);
+        cabecera = new Cabecera(this::mostrar, alElegirTema, preferencias, this::abrirOpciones);
+        cabecera.setViewOrder(-1);
 
         StackPane zona = new StackPane(contenido, aviso);
         VBox.setVgrow(zona, Priority.ALWAYS);
@@ -63,6 +67,12 @@ public class VentanaPrincipal extends VBox {
         String inicial = preferencias.getUltimaPestana();
         cabecera.marcarActiva(inicial);
         mostrar(inicial);
+    }
+
+    private void abrirOpciones() {
+        DialogoOpciones.mostrar(getScene().getWindow(), getScene().getStylesheets(),
+                preferencias, () -> mostrar(pestanaActual), alCambiarEscala,
+                this::abrirPapelera, this::abrirCarpetaDatos, this::revisarPortadasHuerfanas);
     }
 
     private void mostrar(String pestana) {
@@ -126,7 +136,8 @@ public class VentanaPrincipal extends VBox {
     private Node paginaLibros() {
         List<Libro> libros = items.stream().filter(Libro.class::isInstance).map(Libro.class::cast).toList();
         PaginaTabla<Libro> p = new PaginaTabla<>("LIBROS", libros, preferencias);
-        p.agregarColumna("autor", "AUTORIA", Libro::getAutor, true);        p.agregarColumna("genero", "GENERO", Libro::getGenero, true);
+        p.agregarColumna("autor", "AUTORIA", Libro::getAutor, true);
+        p.agregarColumna("genero", "GENERO", Libro::getGenero, true);
         p.agregarColumna("paginas", "PAGINAS", Libro::getPaginas, false);
         p.agregarColumna("anio", "AÑO", Libro::getAnio, false);
         conectar(p, FormularioLibro::new);
@@ -253,7 +264,7 @@ public class VentanaPrincipal extends VBox {
     }
 
     private PaginaInicio paginaInicio() {
-        PaginaInicio inicio = new PaginaInicio(items, this::verDetalle, this::agregarDeTipo);
+        PaginaInicio inicio = new PaginaInicio(items, this::verDetalle, this::agregarDeTipo, preferencias.isTarjetasCompactas());
         inicio.setAlEditar(item -> editarCon(formularioPara(item), item));
         inicio.setAlFavorito(this::alternarFavorito);
         inicio.setAlEliminar(this::eliminarLote);

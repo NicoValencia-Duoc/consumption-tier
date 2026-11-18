@@ -24,6 +24,7 @@ public class PaginaInicio extends VBox {
     private static final String[] FILTROS =
             {"TODO", "JUEGOS", "LIBROS", "PELICULAS", "SERIES", "FAVORITOS", "SIN DEVORAR"};
 
+    private final boolean tarjetasCompactas;
     private final List<ItemConsumption> items;
     private final Consumer<ItemConsumption> alAbrir;
     private final TilePane galeria = new TilePane(14, 14);
@@ -46,8 +47,9 @@ public class PaginaInicio extends VBox {
     private Tier tierActual = null;
 
     public PaginaInicio(List<ItemConsumption> items, Consumer<ItemConsumption> alAbrir,
-                        Consumer<String> alAgregarTipo) {
+                        Consumer<String> alAgregarTipo, boolean tarjetasCompactas) {
         this.items = items;
+        this.tarjetasCompactas = tarjetasCompactas;
         this.alAbrir = alAbrir;
         this.alAgregarTipo = alAgregarTipo;
         setSpacing(14);
@@ -92,7 +94,7 @@ public class PaginaInicio extends VBox {
         return caja;
     }
 
-    private HBox crearBarraHerramientas() {
+    private VBox crearBarraHerramientas() {
         buscador.setPromptText("buscar --titulo --autor --genero");
         buscador.textProperty().addListener((obs, antes, ahora) -> actualizar());
         HBox.setHgrow(buscador, Priority.ALWAYS);
@@ -113,7 +115,24 @@ public class PaginaInicio extends VBox {
 
         HBox barra = new HBox(12, buscador, filtros);
         barra.setAlignment(Pos.CENTER_LEFT);
-        return barra;
+
+        buscador.setMinWidth(280);
+
+        VBox contenedor = new VBox(8, barra);
+
+        contenedor.widthProperty().addListener((obs, anterior, ancho) -> {
+            boolean estrecho = ancho.doubleValue() < 1050;
+
+            if (estrecho && filtros.getParent() == barra) {
+                barra.getChildren().remove(filtros);
+                contenedor.getChildren().add(filtros);
+            } else if (!estrecho && filtros.getParent() == contenedor) {
+                contenedor.getChildren().remove(filtros);
+                barra.getChildren().add(filtros);
+            }
+        });
+
+        return contenedor;
     }
 
     private HBox crearFilaTier() {
@@ -163,7 +182,7 @@ public class PaginaInicio extends VBox {
 
         galeria.getChildren().clear();
         for (ItemConsumption i : visibles) {
-            TarjetaItem tarjeta = new TarjetaItem(i);
+            TarjetaItem tarjeta = new TarjetaItem(i, tarjetasCompactas);
             tarjeta.setCursor(Cursor.HAND);
             tarjeta.setOnMouseClicked(e -> {
                 if (e.getButton() == MouseButton.PRIMARY) alAbrir.accept(i);

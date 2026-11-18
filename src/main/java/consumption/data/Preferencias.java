@@ -21,6 +21,17 @@ public class Preferencias {
     private String nombreUsuario = NOMBRE_INICIAL;
     private boolean bienvenidaVista = false;
 
+    private boolean tablaCompacta = false;
+    private boolean tarjetasCompactas = false;
+    private int escalaTexto = 100;
+
+    public boolean isTablaCompacta() { return tablaCompacta; }
+    public void setTablaCompacta(boolean v) { tablaCompacta = v; }
+    public boolean isTarjetasCompactas() { return tarjetasCompactas; }
+    public void setTarjetasCompactas(boolean v) { tarjetasCompactas = v; }
+    public int getEscalaTexto() { return Math.max(90, Math.min(115, escalaTexto == 0 ? 100 : escalaTexto)); }
+    public void setEscalaTexto(int v) { escalaTexto = Math.max(90, Math.min(115, v)); }
+
     private boolean ventanaGuardada = false;
     private double ventanaX;
     private double ventanaY;
@@ -90,6 +101,7 @@ public class Preferencias {
                 Preferencias leidas = new Gson().fromJson(lector, Preferencias.class);
                 if (leidas != null) {
                     leidas.setVolumen(leidas.volumen);
+                    leidas.setEscalaTexto(leidas.escalaTexto == 0 ? 100 : leidas.escalaTexto);
                     leidas.setNombreUsuario(leidas.nombreUsuario);
                     return leidas;
                 }

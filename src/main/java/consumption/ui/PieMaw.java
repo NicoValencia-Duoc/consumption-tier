@@ -8,6 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -53,12 +54,16 @@ public class PieMaw extends VBox {
 
         Label cancion = new Label();
         cancion.getStyleClass().add("cancion");
-        cancion.setMaxWidth(220);
+        cancion.setMinWidth(0);
+        cancion.setMaxWidth(Double.MAX_VALUE);
+        cancion.setTextOverrun(javafx.scene.control.OverrunStyle.ELLIPSIS);
         cancion.textProperty().bind(Bindings.concat("♪ ", reproductor.tituloProperty()));
 
         Label tiempo = new Label();
         tiempo.getStyleClass().add("tiempo");
-        tiempo.setMinWidth(100);
+        tiempo.setMinWidth(0);
+        tiempo.setPrefWidth(100);
+        tiempo.setMaxWidth(100);
         tiempo.textProperty().bind(reproductor.tiempoProperty());
 
         Button lista = new Button("☰");
@@ -81,7 +86,9 @@ public class PieMaw extends VBox {
         fijarTamano(siguiente);
 
         Slider volumen = new Slider(0, 1, reproductor.volumenProperty().get());
+        volumen.setMinWidth(90);
         volumen.setPrefWidth(90);
+        volumen.setMaxWidth(90);
         reproductor.volumenProperty().bind(volumen.valueProperty());
 
         Region separador = new Region();
@@ -90,13 +97,55 @@ public class PieMaw extends VBox {
         separador.setPrefSize(1, 16);
         separador.setMaxSize(1, 16);
 
-        Region espacio = new Region();
-        HBox.setHgrow(espacio, Priority.ALWAYS);
+// Los extremos tienen prioridad de ancho. Solo el centro musical se comprime.
+        HBox estado = new HBox(10, punto, izquierda);
+        estado.setAlignment(Pos.CENTER_LEFT);
+        estado.setMinWidth(Region.USE_PREF_SIZE);
+        estado.setMaxWidth(Region.USE_PREF_SIZE);
 
-        HBox fila = new HBox(10, punto, izquierda, espacio, cancion, tiempo, lista, pausa, siguiente, volumen,
-                separador, etiquetaNivel, nivel, etiquetaHambre, barra, porcentaje);
+        HBox controles = new HBox(10, lista, pausa, siguiente, volumen);
+        controles.setAlignment(Pos.CENTER_LEFT);
+        controles.setMinWidth(Region.USE_PREF_SIZE);
+        controles.setMaxWidth(Region.USE_PREF_SIZE);
+
+        HBox hambre = new HBox(10, separador, etiquetaNivel, nivel, etiquetaHambre, barra, porcentaje);
+        hambre.setAlignment(Pos.CENTER_LEFT);
+        hambre.setMinWidth(Region.USE_PREF_SIZE);
+        hambre.setMaxWidth(Region.USE_PREF_SIZE);
+
+        StackPane tituloVisible = new StackPane(cancion);
+        tituloVisible.setMinWidth(0);
+        tituloVisible.setPrefWidth(220);
+        tituloVisible.setMaxWidth(220);
+        tituloVisible.setAlignment(Pos.CENTER_LEFT);
+
+        Rectangle recorte = new Rectangle();
+        tituloVisible.setClip(recorte);
+        recorte.widthProperty().bind(tituloVisible.widthProperty());
+        recorte.heightProperty().bind(tituloVisible.heightProperty());
+
+        tituloVisible.widthProperty().addListener((obs, antes, ancho) -> {
+            cancion.setVisible(ancho.doubleValue() >= 220.0 * 2.0 / 3.0);
+        });
+        cancion.setVisible(false);
+
+        HBox centro = new HBox(10, tituloVisible, tiempo);
+        centro.setAlignment(Pos.CENTER_LEFT);
+        centro.setMinWidth(0);
+        centro.setMaxWidth(Double.MAX_VALUE);
+
+        HBox.setHgrow(tituloVisible, Priority.ALWAYS);
+        HBox.setHgrow(centro, Priority.ALWAYS);
+
+        centro.widthProperty().addListener((obs, antes, ancho) -> {
+            tiempo.setVisible(ancho.doubleValue() >= 320);
+        });
+        tiempo.setVisible(false);
+
+        HBox fila = new HBox(10, estado, centro, controles, hambre);
         fila.setAlignment(Pos.CENTER_LEFT);
         fila.getStyleClass().add("pie-fila");
+        fila.setMinWidth(0);
 
         getChildren().addAll(linea, fila);
 

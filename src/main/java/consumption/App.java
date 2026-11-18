@@ -113,6 +113,7 @@ public class App extends Application {
         scena = new Scene(Efectos.capa(ventana), 1295, 720);
         aplicarTema();
 
+        ventana.setAlCambiarEscala(this::aplicarTema);
         stage.setTitle("THE MAW");
         try (InputStream icono = getClass().getResourceAsStream("/consumption/iconos/icono-app.png")) {
             if (icono != null) stage.getIcons().add(new Image(icono));
@@ -162,6 +163,17 @@ public class App extends Application {
         String actual = getClass().getResource(tema.getRecurso()).toExternalForm();
         String estilo = getClass().getResource("/consumption/estilo.css").toExternalForm();
         scena.getStylesheets().setAll(base, estilo, actual);
+        int escala = preferencias.getEscalaTexto();
+        if (escala != 100) {
+            String recursoEscala = "/consumption/texto-" + escala + ".css";
+            java.net.URL cssEscala = getClass().getResource(recursoEscala);
+
+            if (cssEscala != null) {
+                scena.getStylesheets().add(cssEscala.toExternalForm());
+            } else {
+                System.err.println("No se encontro la hoja de escala: " + recursoEscala);
+            }
+        }
         scena.setFill(javafx.scene.paint.Color.web(tema.getFondo()));
     }
 

@@ -21,18 +21,19 @@ public class TarjetaItem extends VBox {
     private static final ColorAdjust GRISES = new ColorAdjust(0, -1, -0.15, 0);
     private static final double ESQUINA = 10;
     private final Region[] esquinas = new Region[4];
-    public TarjetaItem(ItemConsumption item){
+    public TarjetaItem(ItemConsumption item, boolean compacta){
 
         boolean pendiente = item.getEstado() == Estado.PENDIENTE;
 
         getStyleClass().add("tarjeta");
-        setSpacing(8);
-        setPrefWidth(235);
+        setSpacing(compacta ? 6 : 8);
+        setPrefWidth(compacta ? 200 : 235);
+        if (compacta) getStyleClass().add("tarjeta-compacta");
 
         StackPane miniatura = new StackPane();
         miniatura.getStyleClass().add("miniatura");
 
-        Image imagen = GestorImagenes.imagenDe(item, 215, 104);
+        Image imagen = GestorImagenes.imagenDe(item, compacta ? 180 : 215, compacta ? 87 : 104);
         if (imagen != null) {
             miniatura.getChildren().add(new ImageView(imagen));
         } else {
