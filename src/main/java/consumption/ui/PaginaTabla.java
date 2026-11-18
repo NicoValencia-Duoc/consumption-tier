@@ -576,10 +576,6 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
             marco.setMaxSize(ancho, alto);
             vista.setFitWidth(ancho - 4);
             vista.setFitHeight(alto - 4);
-            marco.setPrefSize(32, 42);
-            marco.setMaxSize(32, 42);
-            vista.setFitWidth(28);
-            vista.setFitHeight(38);
             vista.setPreserveRatio(true);
             setAlignment(Pos.CENTER);
         }

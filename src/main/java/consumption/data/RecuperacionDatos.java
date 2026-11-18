@@ -56,7 +56,7 @@ public final class RecuperacionDatos {
         }
     }
 
-    private static void comprobarContenido(byte[] bytes) throws IOException {
+    static void comprobarContenido(byte[] bytes) throws IOException {
         try (Reader lector = new InputStreamReader(
                 new java.io.ByteArrayInputStream(bytes), StandardCharsets.UTF_8)) {
             JsonElement raiz = JsonParser.parseReader(lector);
@@ -118,8 +118,7 @@ public final class RecuperacionDatos {
         }
     }
 
-    private static void mover(Path origen, Path destino) throws IOException {
-        try {
+    static void mover(Path origen, Path destino) throws IOException {        try {
             Files.move(origen, destino,
                     StandardCopyOption.REPLACE_EXISTING,
                     StandardCopyOption.ATOMIC_MOVE);

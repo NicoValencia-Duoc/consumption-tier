@@ -3,6 +3,8 @@ package consumption.data;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -38,8 +40,9 @@ public class RespaldoZip {
         zip.closeEntry();
     }
 
-    public static void restaurar(Path origen) throws IOException {
+    private static final DateTimeFormatter SELLO = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss_SSS");
 
+    public static Path restaurar(Path origen) throws IOException {
         Map<String, byte[]> contenido = new LinkedHashMap<>();
         try (ZipInputStream zip = new ZipInputStream(Files.newInputStream(origen))) {
             ZipEntry entrada;
@@ -49,22 +52,34 @@ public class RespaldoZip {
                 contenido.put(nombre, zip.readAllBytes());
             }
         }
-        if (!contenido.containsKey("datos.json")) {
+        byte[] datos = contenido.get("datos.json");
+        if (datos == null) {
             throw new IOException("El archivo no es un respaldo valido (falta datos.json).");
+        }
+        RecuperacionDatos.comprobarContenido(datos);
+
+        Files.createDirectories(Rutas.BASE);
+        Path copiaEmergencia = null;
+        if (Files.exists(Rutas.DATOS)) {
+            copiaEmergencia = Rutas.BASE.resolve(
+                    "datos-antes-restaurar-" + SELLO.format(LocalDateTime.now()) + ".json");
+            Files.copy(Rutas.DATOS, copiaEmergencia);
         }
 
         Files.createDirectories(Rutas.IMAGENES);
-        try (Stream<Path> actuales = Files.list(Rutas.IMAGENES)) {
-            for (Path imagen : (Iterable<Path>) actuales::iterator) {
-                if (Files.isRegularFile(imagen)) Files.delete(imagen);
-            }
-        }
         for (Map.Entry<String, byte[]> e : contenido.entrySet()) {
-            Path destino = e.getKey().equals("datos.json")
-                    ? Rutas.DATOS
-                    : Rutas.IMAGENES.resolve(e.getKey().substring(PREFIJO_IMAGENES.length()));
-            Files.write(destino, e.getValue());
+            if (e.getKey().equals("datos.json")) continue;
+            Files.write(Rutas.IMAGENES.resolve(e.getKey().substring(PREFIJO_IMAGENES.length())), e.getValue());
         }
+
+        Path temporal = Files.createTempFile(Rutas.BASE, "restaurar-", ".tmp");
+        try {
+            Files.write(temporal, datos);
+            RecuperacionDatos.mover(temporal, Rutas.DATOS);
+        } finally {
+            Files.deleteIfExists(temporal);
+        }
+        return copiaEmergencia;
     }
 
     private static boolean esNombreSeguro(String nombre) {
