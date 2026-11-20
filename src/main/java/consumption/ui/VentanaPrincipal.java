@@ -8,6 +8,8 @@ import consumption.data.RecuperacionDatos;
 import consumption.data.RespaldoZip;
 import consumption.data.Preferencias;
 import consumption.data.Papelera;
+import consumption.data.DiarioRestauracion;
+import consumption.data.EliminacionTransaccional;
 import consumption.data.LimpiezaImagenes;
 import java.util.Set;
 import java.util.HashSet;
@@ -61,6 +63,8 @@ public class VentanaPrincipal extends VBox {
         cabecera.setViewOrder(-1);
 
         StackPane zona = new StackPane(contenido, aviso);
+        zona.setMinHeight(0);
+        contenido.setMinHeight(0);
         VBox.setVgrow(zona, Priority.ALWAYS);
         pie = new PieMaw(reproductor);
         pie.setMaxWidth(Double.MAX_VALUE);
@@ -71,10 +75,24 @@ public class VentanaPrincipal extends VBox {
         mostrar(inicial);
     }
 
+    public void notificarIntegridadSiCambio() {
+        if (!repositorio.tieneRechazados()) return;
+        String huella = repositorio.huellaRechazados();
+        if (preferencias.rechazadosYaVistos(huella)) return;
+        aviso.mostrar("DATOS PARA REVISAR // CONSULTA OPCIONES");
+        try {
+            preferencias.marcarRechazadosVistos(huella);
+            preferencias.guardar();
+        } catch (RuntimeException ex) {
+            System.err.println("No se pudo guardar el estado del aviso de integridad: " + ex.getMessage());
+        }
+    }
+
     private void abrirOpciones() {
         DialogoOpciones.mostrar(getScene().getWindow(), getScene().getStylesheets(),
                 preferencias, () -> mostrar(pestanaActual), alCambiarEscala,
-                this::abrirPapelera, this::abrirCarpetaDatos, this::revisarPortadasHuerfanas);
+                this::abrirPapelera, this::abrirCarpetaDatos, this::revisarPortadasHuerfanas,
+                this::crearRespaldo, this::restaurarRespaldo, repositorio);
     }
 
     private void mostrar(String pestana) {
@@ -91,13 +109,7 @@ public class VentanaPrincipal extends VBox {
             case "PELICULAS" -> paginaPeliculas();
             case "SERIES" -> paginaSeries();
             case "PENDIENTES" -> paginaPendientes();
-            case "ESTADISTICAS" -> new PaginaEstadisticas(
-                    items,
-                    this::crearRespaldo,
-                    this::restaurarRespaldo,
-                    this::abrirPapelera,
-                    this::abrirCarpetaDatos,
-                    this::revisarPortadasHuerfanas);
+            case "ESTADISTICAS" -> new PaginaEstadisticas(items);
             default -> paginaInicio();
         };
         contenido.getChildren().setAll(pagina);
@@ -149,7 +161,8 @@ public class VentanaPrincipal extends VBox {
     private Node paginaPeliculas() {
         List<Pelicula> peliculas = items.stream().filter(Pelicula.class::isInstance).map(Pelicula.class::cast).toList();
         PaginaTabla<Pelicula> p = new PaginaTabla<>("PELICULAS", peliculas, preferencias);
-        p.agregarColumna("director", "DIRIGIDA POR", Pelicula::getDirector, true);        p.agregarColumna("genero", "GENERO", Pelicula::getGenero, true);
+        p.agregarColumna("director", "DIRIGIDA POR", Pelicula::getDirector, true);
+        p.agregarColumna("genero", "GENERO", Pelicula::getGenero, true);
         p.agregarColumna("duracion", "DURACION (MIN)", Pelicula::getDuracionMin, false);
         p.agregarColumna("anio", "AÑO", Pelicula::getAnio, false);
         conectar(p, FormularioPelicula::new);
@@ -184,6 +197,7 @@ public class VentanaPrincipal extends VBox {
     private <T extends ItemConsumption> void conectarComunes(PaginaTabla<T> pagina) {
         pagina.setAlVerDetalle(this::verDetalle);
         pagina.setAlFavorito(this::alternarFavorito);
+        pagina.setAlFavoritosEnLote(this::alternarFavoritosEnLote);
         pagina.setAlEliminar(this::eliminarLote);
         pagina.setAlCambiarEstado((item, transicion) -> cambiarEstado(item, transicion, false));
         pagina.montar();
@@ -294,9 +308,34 @@ public class VentanaPrincipal extends VBox {
                 .findFirst().orElse(item);
         verDetalle(actual);
     }
+    private void alternarFavoritosEnLote(List<? extends ItemConsumption> lote) {
+        if (lote.isEmpty()) return;
+        Map<ItemConsumption, Boolean> anteriores = new LinkedHashMap<>();
+        for (ItemConsumption item : lote) {
+            anteriores.putIfAbsent(item, item.isFavorito());
+            item.setFavorito(!item.isFavorito());
+        }
+        try {
+            repositorio.guardar(items);
+        } catch (RuntimeException ex) {
+            anteriores.forEach(ItemConsumption::setFavorito);
+            avisar(Alert.AlertType.ERROR,
+                    "No se pudo guardar el lote de favoritos. Se restauraron los estados anteriores: "
+                            + ex.getMessage());
+        }
+    }
+
     private void alternarFavorito(ItemConsumption item) {
-        item.setFavorito(!item.isFavorito());
-        repositorio.guardar(items);
+        boolean anterior = item.isFavorito();
+        item.setFavorito(!anterior);
+        try {
+            repositorio.guardar(items);
+        } catch (RuntimeException ex) {
+            item.setFavorito(anterior);
+            avisar(Alert.AlertType.ERROR,
+                    "No se pudo guardar el favorito. Se restauro su estado anterior: "
+                            + ex.getMessage());
+        }
     }
 
     private void revisarPortadasHuerfanas() {
@@ -378,7 +417,7 @@ public class VentanaPrincipal extends VBox {
             repositorio.guardar(items);
             RespaldoZip.crear(archivo.toPath());
             avisar(Alert.AlertType.INFORMATION, "Respaldo guardado en " + archivo.getName());
-        } catch (IOException ex) {
+        } catch (IOException | RuntimeException ex) {
             avisar(Alert.AlertType.ERROR, "No se pudo crear el respaldo: " + ex.getMessage());
         }
     }
@@ -416,7 +455,9 @@ public class VentanaPrincipal extends VBox {
             mostrar(pestanaActual);
             avisar(Alert.AlertType.INFORMATION, "Respaldo restaurado: " + items.size() + " items.");
         } catch (IOException | RuntimeException ex) {
-            avisar(Alert.AlertType.ERROR, "No se pudo restaurar (tus datos actuales no se tocaron): " + ex.getMessage());
+            avisar(Alert.AlertType.ERROR, "No se pudo completar la restauracion. "
+                    + "Comprueba tus datos y la copia de emergencia antes de continuar: "
+                    + ex.getMessage());
         }
     }
 
@@ -509,46 +550,47 @@ public class VentanaPrincipal extends VBox {
         List<ItemConsumption> lote = new ArrayList<>(seleccion);
         if (lote.isEmpty() || !confirmarEliminar(lote)) return;
 
-        Set<String> idsAntes = new HashSet<>();
-        for (Papelera.Entrada e : papelera.listar()) idsAntes.add(e.id());
+        Set<String> nuevosIds;
         try {
-            papelera.enviar(lote);
-        } catch (RuntimeException ex) {
-            avisar(Alert.AlertType.ERROR, "No se pudo guardar la papelera: " + ex.getMessage());
-            return;
-        }
-        Set<String> nuevosIds = new HashSet<>();
-        for (Papelera.Entrada e : papelera.listar()) {
-            if (!idsAntes.contains(e.id())) nuevosIds.add(e.id());
-        }
-
-        items.removeAll(lote);
-        try {
-            repositorio.guardar(items);
-        } catch (RuntimeException ex) {
-            items.addAll(lote);
-
+            nuevosIds = EliminacionTransaccional.ejecutar(items, lote, repositorio, papelera);
+        } catch (Exception ex) {
             avisar(Alert.AlertType.ERROR,
-                    "No se pudo guardar la biblioteca. Los registros siguen "
-                            + "disponibles y existe una copia en la papelera. " + ex.getMessage());
-            mostrar(pestanaActual);
+                    "No se completo la eliminacion. Si persiste el problema, "
+                            + "cierra THE MAW antes de realizar otras operaciones: " + ex.getMessage());
             return;
         }
-        mostrar(pestanaActual);
+        try {
+            mostrar(pestanaActual);
+        } catch (RuntimeException ex) {
+            avisar(Alert.AlertType.WARNING,
+                    "Los registros se eliminaron, pero no se pudo actualizar la pantalla: "
+                            + ex.getMessage());
+        }
         aviso.mostrarConDeshacer(
                 ReglasAcciones.textoEliminado(lote.size()),
                 () -> {
-                    items.addAll(lote);
                     try {
-                        repositorio.guardar(items);
-                        papelera.retirar(nuevosIds);
+                        DiarioRestauracion.ejecutar(() -> {
+                            List<ItemConsumption> nuevos = new ArrayList<>(items);
+                            nuevos.addAll(lote);
+                            repositorio.guardar(nuevos);
+                            papelera.retirar(nuevosIds);
+                        });
+                        items.addAll(lote);
+                    } catch (Exception ex) {
+                        avisar(Alert.AlertType.ERROR,
+                                "No se completo DESHACER. Cierra THE MAW para evitar operaciones "
+                                        + "sobre datos posiblemente desactualizados: " + ex.getMessage());
+                        javafx.application.Platform.exit();
+                        return;
+                    }
+                    try {
                         mostrar(pestanaActual);
                         aviso.mostrar(ReglasAcciones.textoRestaurado(lote.size()));
                     } catch (RuntimeException ex) {
-                        avisar(Alert.AlertType.ERROR,
-                                "No se completo DESHACER: " + ex.getMessage()
-                                        + ". Revisa la biblioteca y la papelera.");
-                        mostrar(pestanaActual);
+                        avisar(Alert.AlertType.WARNING,
+                                "Los registros se recuperaron, pero no se pudo actualizar la pantalla: "
+                                        + ex.getMessage());
                     }
                 },
                 null);
@@ -575,7 +617,7 @@ public class VentanaPrincipal extends VBox {
         selector.setHeaderText("RESTAURAR REGISTRO · 15 DIAS");
         selector.setContentText("Selecciona un registro:");
         selector.getDialogPane().getStylesheets().setAll(hojas());
-        Terminal.dialogo(selector, "PAPELERA", "boton-accion", null);
+        Terminal.dialogo(selector, "PAPELERA", "boton-accion", "RESTAURAR");
 
         javafx.scene.control.ComboBox<Papelera.Entrada> combo =
                 (javafx.scene.control.ComboBox<Papelera.Entrada>)
@@ -595,28 +637,36 @@ public class VentanaPrincipal extends VBox {
 
         Papelera.Entrada entrada = elegido.get();
         ItemConsumption item = entrada.item();
+
+        int numeroEnPapelera = item.getNumero();
         boolean ocupado = items.stream().anyMatch(i -> i.getNumero() == item.getNumero());
         if (ocupado || item.getNumero() <= 0)
             item.setNumero(Numeracion.siguiente(items));
 
-        items.add(item);
         try {
-            repositorio.guardar(items);
-        } catch (RuntimeException ex) {
-            items.remove(item);
+            DiarioRestauracion.ejecutar(() -> {
+                List<ItemConsumption> nuevos = new ArrayList<>(items);
+                nuevos.add(item);
+                repositorio.guardar(nuevos);
+                papelera.retirar(Set.of(entrada.id()));
+            });
+            items.add(item);
+        } catch (Exception ex) {
+            item.setNumero(numeroEnPapelera);
             avisar(Alert.AlertType.ERROR,
-                    "No se pudo restaurar el registro: " + ex.getMessage());
+                    "No se completo RESTAURAR. Cierra THE MAW para evitar operaciones "
+                            + "sobre datos posiblemente desactualizados: " + ex.getMessage());
+            javafx.application.Platform.exit();
             return;
         }
         try {
-            papelera.retirar(Set.of(entrada.id()));
+            mostrar(pestanaActual);
+            aviso.mostrar("REGISTRO RESTAURADO");
         } catch (RuntimeException ex) {
-            avisar(Alert.AlertType.ERROR,
-                    "Registro restaurado en la biblioteca, pero no se pudo "
-                            + "retirar su copia de papelera: " + ex.getMessage());
+            avisar(Alert.AlertType.WARNING,
+                    "El registro se restauro, pero no se pudo actualizar la pantalla: "
+                            + ex.getMessage());
         }
-        mostrar(pestanaActual);
-        aviso.mostrar("REGISTRO RESTAURADO");
     }
 
     private void cambiarEstado(ItemConsumption item,
@@ -624,23 +674,33 @@ public class VentanaPrincipal extends VBox {
                                boolean desdeDetalle) {
         int numero = item.getNumero();
         try {
-            transicion.aplicar(item, LocalDate.now());
+            TransicionPersistida.ejecutar(item, transicion, LocalDate.now(),
+                    () -> repositorio.guardar(items));
         } catch (IllegalArgumentException ex) {
             avisar(Alert.AlertType.ERROR, ex.getMessage());
             return;
-        }
-        repositorio.guardar(items);
-
-        if (transicion == Transicion.TERMINAR) {
-            editarParaCalificar(item);
-            repositorio.guardar(items);
-            avisarGuardado(vigente(item, numero));
-        } else {
-            aviso.mostrar(ReglasAcciones.textoAviso(transicion));
+        } catch (RuntimeException ex) {
+            avisar(Alert.AlertType.ERROR,
+                    "No se pudo guardar el cambio de estado. Se restauro el estado anterior: "
+                            + ex.getMessage());
+            return;
         }
 
-        if (desdeDetalle) verDetalle(vigente(item, numero));
-        else mostrar(pestanaActual);
+        try {
+            if (transicion == Transicion.TERMINAR) {
+                editarParaCalificar(item);
+                avisarGuardado(vigente(item, numero));
+            } else {
+                aviso.mostrar(ReglasAcciones.textoAviso(transicion));
+            }
+
+            if (desdeDetalle) verDetalle(vigente(item, numero));
+            else mostrar(pestanaActual);
+        } catch (RuntimeException ex) {
+            avisar(Alert.AlertType.WARNING,
+                    "El cambio de estado se guardo correctamente, pero no se pudo "
+                            + "completar la actualizacion de pantalla: " + ex.getMessage());
+        }
     }
 
     private ItemConsumption vigente(ItemConsumption item, int numero) {

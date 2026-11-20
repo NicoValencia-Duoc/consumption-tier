@@ -35,6 +35,25 @@ public abstract class ItemConsumption {
         setEstado(estado);
     }
 
+    public record EstadoAnterior(Estado estado, double porcentaje, LocalDate inicio,
+                                 LocalDate termino, boolean sinInicio, boolean sinTermino,
+                                 Integer consumos, int repeticiones) {}
+
+    public EstadoAnterior capturarEstado() {
+        return new EstadoAnterior(estado, porcentaje, fechaInicio, fechaTermino,
+                sinFechaInicio, sinFechaTermino, vecesConsumido, vecesRepetido);
+    }
+
+    public void restaurarEstado(EstadoAnterior anterior) {
+        this.estado = anterior.estado();
+        this.porcentaje = anterior.porcentaje();
+        this.fechaInicio = anterior.inicio();
+        this.fechaTermino = anterior.termino();
+        this.sinFechaInicio = anterior.sinInicio();
+        this.sinFechaTermino = anterior.sinTermino();
+        this.vecesConsumido = anterior.consumos();
+        this.vecesRepetido = anterior.repeticiones();
+    }
     public abstract String getTipo();
     public abstract String getLetra();
     public abstract String getGenero();

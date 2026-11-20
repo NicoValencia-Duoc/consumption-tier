@@ -35,6 +35,30 @@ public final class LimpiezaImagenes {
         }
     }
 
+    public static List<String> referenciasAusentes() {
+        try {
+            Set<String> usadas = new HashSet<>();
+            leerReferencias(Rutas.DATOS, usadas, true);
+            leerReferencias(Rutas.PAPELERA, usadas, false);
+            if (Files.exists(Rutas.IMAGENES, LinkOption.NOFOLLOW_LINKS)
+                    && (!Files.isDirectory(Rutas.IMAGENES, LinkOption.NOFOLLOW_LINKS)
+                    || Files.isSymbolicLink(Rutas.IMAGENES))) {
+                throw new IOException("Directorio de imagenes invalido");
+            }
+            List<String> ausentes = new ArrayList<>();
+            for (String nombre : usadas) {
+                Path archivo = Rutas.IMAGENES.resolve(nombre);
+                if (!Files.isRegularFile(archivo, LinkOption.NOFOLLOW_LINKS)
+                        || Files.isSymbolicLink(archivo)) ausentes.add(nombre);
+            }
+            ausentes.sort(String::compareTo);
+            return List.copyOf(ausentes);
+        } catch (IOException | RuntimeException ex) {
+            throw new IllegalStateException("Diagnostico cancelado sin modificar imagenes: "
+                    + ex.getMessage(), ex);
+        }
+    }
+
     public static Path carpetaCuarentena() {
         return CUARENTENA;
     }
@@ -43,7 +67,7 @@ public final class LimpiezaImagenes {
         try {
             Set<String> usadas = new HashSet<>();
             leerReferencias(Rutas.DATOS, usadas, true);
-            leerReferencias(Rutas.PAPELERA, usadas, false);
+             leerReferencias(Rutas.PAPELERA, usadas, false);
 
             List<Candidata> candidatas = new ArrayList<>();
             if (!Files.exists(Rutas.IMAGENES, LinkOption.NOFOLLOW_LINKS)) {
@@ -131,6 +155,12 @@ public final class LimpiezaImagenes {
     }
 
     public static int ponerEnCuarentena(Informe aprobado) {
+        final int[] movidas = new int[1];
+        BarreraEscritura.escritura(() -> movidas[0] = ponerEnCuarentenaProtegido(aprobado));
+        return movidas[0];
+    }
+
+    private static int ponerEnCuarentenaProtegido(Informe aprobado) {
         if (aprobado == null) throw new IllegalArgumentException("Falta el informe aprobado.");
         Informe actual = analizar();
         if (!actual.equals(aprobado)) {

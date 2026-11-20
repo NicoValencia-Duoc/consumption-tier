@@ -33,6 +33,11 @@ public final class Papelera {
         cargar();
     }
 
+    public void recargar() {
+        entradas.clear();
+        cargar();
+    }
+
     public List<Entrada> listar() {
         return List.copyOf(entradas);
     }
@@ -54,6 +59,7 @@ public final class Papelera {
         if (ids.isEmpty()) return;
         List<Entrada> nuevas = new ArrayList<>(entradas);
         nuevas.removeIf(e -> ids.contains(e.id()));
+        if (Boolean.getBoolean("maw.c16.failRetirar")) throw new IllegalStateException("C16 injected failure after datos.json write");
         guardar(nuevas);
         entradas.clear();
         entradas.addAll(nuevas);
@@ -115,6 +121,10 @@ public final class Papelera {
     }
 
     private void guardar(List<Entrada> lista) {
+        BarreraEscritura.escritura(() -> guardarInterno(lista));
+    }
+
+    private void guardarInterno(List<Entrada> lista) {
         JsonObject raiz = new JsonObject();
         raiz.addProperty("version", 1);
         JsonArray array = new JsonArray();

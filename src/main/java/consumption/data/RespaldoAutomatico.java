@@ -28,24 +28,52 @@ public final class RespaldoAutomatico {
 
     public static boolean crearSiCambio(LocalDateTime ahora) {
         try {
-            if (!Files.exists(Rutas.DATOS)) return false;
-            Files.createDirectories(Rutas.RESPALDOS);
-            borrarTemporales();
-
-            List<Path> previas = listar();
-            if (!previas.isEmpty() && mismoDatos(previas.get(previas.size() - 1))) return false;
-
-            Path destino = Rutas.RESPALDOS.resolve(PREFIJO + FORMATO.format(ahora) + SUFIJO);
-            Path temporal = destino.resolveSibling(destino.getFileName() + ".tmp");
-            RespaldoZip.crear(temporal);
-            Files.move(temporal, destino, StandardCopyOption.REPLACE_EXISTING);
-
-            podar();
-            return true;
-        } catch (IOException | RuntimeException e) {
+            return BarreraEscritura.conBloqueo(() -> {
+                if (Files.exists(Rutas.BASE.resolve("diario-restauracion-c14/active")))
+                    return false;
+                if (!Files.exists(Rutas.DATOS)) return false;
+                Files.createDirectories(Rutas.RESPALDOS);
+                borrarTemporales();
+                List<Path> previas = listar();
+                if (!previas.isEmpty() && mismoDatos(previas.get(previas.size() - 1))) {
+                    // Reparar retencion pendiente incluso sin cambios de biblioteca.
+                    podar();
+                    return false;
+                }
+                Path destino = destinoDisponible(ahora);
+                Path temporal = destino.resolveSibling(destino.getFileName() + ".tmp");
+                try {
+                    RespaldoZip.crear(temporal);
+                    falloPrueba("afterCreate");
+                    try { Files.move(temporal, destino, StandardCopyOption.ATOMIC_MOVE); }
+                    catch (java.nio.file.AtomicMoveNotSupportedException ex) { Files.move(temporal, destino); }
+                } finally { Files.deleteIfExists(temporal); }
+                falloPrueba("afterPublish");
+                podar();
+                return true;
+            });
+        } catch (Exception e) {
             System.err.println("No se pudo crear el respaldo automatico: " + e.getMessage());
             return false;
         }
+    }
+
+    private static Path destinoDisponible(LocalDateTime ahora) throws IOException {
+        String base = PREFIJO + FORMATO.format(ahora);
+        int siguiente = 0;
+        for (Path previo : listar()) {
+            String n = previo.getFileName().toString();
+            if (n.startsWith(base + "~") && n.endsWith(SUFIJO)) {
+                String indice = n.substring((base + "~").length(), n.length() - SUFIJO.length());
+                if (indice.matches("[0-9]{4}")) siguiente = Math.max(siguiente, Integer.parseInt(indice) + 1);
+            }
+        }
+        for (int i = siguiente; i < 10000; i++) {
+            String nombre = base + String.format("~%04d", i) + SUFIJO;
+            Path candidato = Rutas.RESPALDOS.resolve(nombre);
+            if (!Files.exists(candidato)) return candidato;
+        }
+        throw new IOException("No hay nombre disponible para respaldo automatico");
     }
 
     public static List<Path> listar() throws IOException {
@@ -71,9 +99,17 @@ public final class RespaldoAutomatico {
         }
     }
 
+    private static void falloPrueba(String fase) throws IOException {
+        if (fase.equals(System.getProperty("maw.b03.autoFail")))
+            throw new IOException("Fallo inyectado en " + fase);
+        if (fase.equals(System.getProperty("maw.b03.autoHalt")))
+            Runtime.getRuntime().halt(79);
+    }
+
     private static void podar() throws IOException {
         List<Path> copias = listar();
         for (int i = 0; i < copias.size() - MAXIMO; i++) {
+            falloPrueba("duringPrune");
             Files.deleteIfExists(copias.get(i));
         }
     }

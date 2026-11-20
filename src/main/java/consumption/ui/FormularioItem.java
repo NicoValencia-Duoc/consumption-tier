@@ -11,6 +11,8 @@ import consumption.data.Rutas;
 import javafx.scene.Parent;
 import java.util.HashMap;
 import javafx.application.Platform;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 import javafx.event.ActionEvent;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
@@ -109,6 +111,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     private boolean descarteConfirmado;
     private boolean restaurandoBorrador;
     private boolean capturarBorrador;
+    private final PauseTransition demoraBorrador = new PauseTransition(Duration.millis(400));
     private ComprobadorDuplicado comprobador;
     private Dialog<ButtonType> dialogo;
     private List<String> hojas;
@@ -294,11 +297,6 @@ public abstract class FormularioItem<T extends ItemConsumption> {
             if (!puedeDescartar()) ev.consume();
         });
 
-        dialogo.setOnShown(ev -> dialogo.getDialogPane().getScene().getWindow()
-                .addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, cierre -> {
-                    if (!puedeDescartar()) cierre.consume();
-                }));
-
         Platform.runLater(titulo::requestFocus);
         if (irACriterios) Platform.runLater(() -> Platform.runLater(this::desplazarACriterios));
 
@@ -315,6 +313,15 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         try {
             respuesta = dialogo.showAndWait();
         } finally {
+            demoraBorrador.stop();
+            if (!descarteConfirmado && capturarBorrador
+                    && modificado && original == null) {
+                try { BorradorFormulario.guardar(nombreTipo(), capturarCampos()); }
+                catch (RuntimeException ex) {
+                    mensaje.setText("!! BORRADOR NO GUARDADO: " + ex.getMessage());
+                    System.err.println("Borrador pendiente: " + ex.getMessage());
+                }
+            }
             limpiarTemporalPortada();
             if (resultado == null) revertirPortadaNoGuardada();
         }
@@ -326,6 +333,8 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     }
 
     public void confirmarBorradorGuardado() {
+        demoraBorrador.stop();
+        capturarBorrador = false;
         if (original == null) {
             try {
                 BorradorFormulario.borrar(nombreTipo());
@@ -405,11 +414,16 @@ public abstract class FormularioItem<T extends ItemConsumption> {
 
     private void guardarBorradorActual() {
         if (!capturarBorrador || restaurandoBorrador || original != null) return;
-        try {
-            BorradorFormulario.guardar(nombreTipo(), capturarCampos());
-        } catch (RuntimeException ex) {
-            mensaje.setText("!! BORRADOR NO GUARDADO: " + ex.getMessage());
-        }
+        demoraBorrador.stop();
+        demoraBorrador.setOnFinished(ev -> {
+            if (!capturarBorrador || restaurandoBorrador || original != null) return;
+            try {
+                BorradorFormulario.guardar(nombreTipo(), capturarCampos());
+            } catch (RuntimeException ex) {
+                mensaje.setText("!! BORRADOR NO GUARDADO: " + ex.getMessage());
+            }
+        });
+        demoraBorrador.playFromStart();
     }
 
     private Map<String, String> capturarCampos() {
@@ -1067,6 +1081,8 @@ public abstract class FormularioItem<T extends ItemConsumption> {
 
         if (!modificado) {
             try {
+                demoraBorrador.stop();
+                capturarBorrador = false;
                 borrarBorradorSiNuevo();
             } catch (RuntimeException ex) {
                 mensaje.setText("!! No se pudo borrar el borrador: " + ex.getMessage());
@@ -1078,6 +1094,8 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         if (preguntar("Hay cambios sin guardar. ¿Descartarlos?",
                 "DESCARTAR", "SEGUIR EDITANDO")) {
             try {
+                demoraBorrador.stop();
+                capturarBorrador = false;
                 borrarBorradorSiNuevo();
             } catch (RuntimeException ex) {
                 mensaje.setText("!! No se pudo borrar el borrador: " + ex.getMessage());
@@ -1117,7 +1135,8 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         criterios.forEach((nombre, fila) -> notas.put(nombre, fila.getValor()));
 
         T prueba = crear(t, 0, e);
-        aplicarComunes(prueba, t, e, p, ini, fin, sinIni, sinFin, notas, veces, textoComentario);        prueba.validarCoherencia();
+        aplicarComunes(prueba, t, e, p, ini, fin, sinIni, sinFin, notas, veces, textoComentario);
+        prueba.validarCoherencia();
         boolean tituloCambio = existente == null || !tituloIgual(existente.getTitulo(), t);
         if (comprobador != null && tituloCambio && comprobador.existe(prueba.getTipo(), t, existente)) {
             String texto = "Ya tienes «" + t + "» en " + prueba.getTipo() + ". ¿Guardar de todas formas?";

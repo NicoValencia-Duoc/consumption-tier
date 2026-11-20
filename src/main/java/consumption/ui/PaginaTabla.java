@@ -96,6 +96,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
     };
     private Consumer<T> alFavorito = t -> {
     };
+    private Consumer<List<T>> alFavoritosEnLote;
 
     public PaginaTabla(String nombreTipo, List<T> items, Preferencias preferencias) {
         this.nombreTipo = nombreTipo;
@@ -505,8 +506,13 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
 
     private void favoritoEn(List<T> lista) {
         boolean todas = lista.stream().allMatch(ItemConsumption::isFavorito);
-        for (T i : lista) {
-            if (ReglasTabla.debeAlternarFavorito(i.isFavorito(), todas)) alFavorito.accept(i);
+        List<T> cambiar = lista.stream()
+                .filter(i -> ReglasTabla.debeAlternarFavorito(i.isFavorito(), todas))
+                .toList();
+        if (alFavoritosEnLote != null) {
+            if (!cambiar.isEmpty()) alFavoritosEnLote.accept(cambiar);
+        } else {
+            for (T i : cambiar) alFavorito.accept(i);
         }
         tabla.refresh();
         aplicarFiltros();
@@ -690,6 +696,10 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
 
     public void setAlFavorito(Consumer<T> accion) {
         this.alFavorito = accion;
+    }
+
+    public void setAlFavoritosEnLote(Consumer<List<T>> accion) {
+        this.alFavoritosEnLote = accion;
     }
 
     public void agregarColumna(String id, String titulo, Function<T, Object> extractor, boolean visiblePorDefecto) {

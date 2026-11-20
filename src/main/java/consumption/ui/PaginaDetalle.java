@@ -81,10 +81,16 @@ public class PaginaDetalle extends VBox{
 
         Button guardar = Terminal.corchetes(new Button("GUARDAR COMENTARIO"));
         guardar.getStyleClass().addAll("pestana", "boton-accion");
-        guardar.setOnAction(e ->{
-            item.setComentario(comentario.getText());
-            alGuardar.run();
-            aviso.setText("GUARDADO");
+        guardar.setOnAction(e -> {
+            String comentarioAnterior = item.getComentario();
+            try {
+                item.setComentario(comentario.getText());
+                alGuardar.run();
+                aviso.setText("GUARDADO");
+            } catch (RuntimeException ex) {
+                item.setComentario(comentarioAnterior);
+                aviso.setText("NO SE PUDO GUARDAR");
+            }
         });
 
         Button editar = Terminal.corchetes(new Button("EDITAR"));
@@ -149,12 +155,19 @@ public class PaginaDetalle extends VBox{
             avisoAvance.getStyleClass().add("valor-criterio");
             avance.valorProperty().addListener((obs, antes, ahora) -> avisoAvance.setText(""));
             avance.setAlConfirmar(() -> {
+                double porcentajeAnterior = item.getPorcentaje();
                 try {
                     item.setPorcentaje(avance.getValor());
                     alGuardar.run();
                     avisoAvance.setText("AVANCE GUARDADO");
                 } catch (IllegalArgumentException ex) {
+                    item.setPorcentaje(porcentajeAnterior);
+                    avance.setValor(porcentajeAnterior);
                     avisoAvance.setText(ex.getMessage());
+                } catch (RuntimeException ex) {
+                    item.setPorcentaje(porcentajeAnterior);
+                    avance.setValor(porcentajeAnterior);
+                    avisoAvance.setText("NO SE PUDO GUARDAR AVANCE");
                 }
             });
             datos.getChildren().add(new HBox(10, etiquetaAvance, avance, avisoAvance));

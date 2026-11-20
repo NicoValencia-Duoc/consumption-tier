@@ -83,6 +83,10 @@ public final class RecuperacionDatos {
     }
 
     public static Path restaurarSoloDatos(Path zip) throws IOException {
+        return ejecutarProtegido(() -> restaurarSoloDatosInterno(zip));
+    }
+
+    private static Path restaurarSoloDatosInterno(Path zip) throws IOException {
         byte[] bytes = leerDatosZip(zip);
         comprobarContenido(bytes);
         Files.createDirectories(Rutas.BASE);
@@ -105,6 +109,10 @@ public final class RecuperacionDatos {
     }
 
     public static void revertir(Path copiaEmergencia) throws IOException {
+        ejecutarProtegido(() -> { revertirInterno(copiaEmergencia); return null; });
+    }
+
+    private static void revertirInterno(Path copiaEmergencia) throws IOException {
         if (copiaEmergencia == null) {
             Files.deleteIfExists(Rutas.DATOS);
             return;
@@ -118,8 +126,21 @@ public final class RecuperacionDatos {
         }
     }
 
+    @FunctionalInterface interface Operacion<T> { T ejecutar() throws IOException; }
+    static <T> T ejecutarProtegido(Operacion<T> operacion) throws IOException {
+        try {
+            return BarreraEscritura.conBloqueo(() -> {
+                Path active = Rutas.BASE.resolve("diario-restauracion-c14/active");
+                if (Files.exists(active) && !DiarioRestauracion.enTransaccion())
+                    throw new IOException("Recuperacion pendiente: operacion bloqueada");
+                return operacion.ejecutar();
+            });
+        } catch (IOException e) { throw e; }
+        catch (Exception e) { throw new IOException("Error al adquirir barrera de escritura", e); }
+    }
+
     static void mover(Path origen, Path destino) throws IOException {        try {
-            Files.move(origen, destino,
+        Files.move(origen, destino,
                     StandardCopyOption.REPLACE_EXISTING,
                     StandardCopyOption.ATOMIC_MOVE);
         } catch (AtomicMoveNotSupportedException e) {

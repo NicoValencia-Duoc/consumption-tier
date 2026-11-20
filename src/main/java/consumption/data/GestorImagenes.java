@@ -16,6 +16,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.LinkOption;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -44,6 +46,12 @@ public class GestorImagenes {
     }
 
     public static String copiar(File origen) {
+        final String[] resultado = new String[1];
+        BarreraEscritura.escritura(() -> resultado[0] = copiarProtegido(origen));
+        return resultado[0];
+    }
+
+    private static String copiarProtegido(File origen) {
         validar(origen);
         String extension = origen.getName().toLowerCase(java.util.Locale.ROOT);
         extension = extension.substring(extension.lastIndexOf('.') + 1);
@@ -89,7 +97,7 @@ public class GestorImagenes {
             }
 
             String nombre = UUID.randomUUID() + sufijo;
-            Files.move(temporal, CARPETA.resolve(nombre));
+            Files.move(temporal, CARPETA.resolve(nombre), StandardCopyOption.ATOMIC_MOVE);
             temporal = null;
             return nombre;
         } catch (IOException ex) {
@@ -109,8 +117,14 @@ public class GestorImagenes {
         try {
             Files.createDirectories(CARPETA);
             String nombre = UUID.randomUUID() + extension;
-            Files.copy(origen.toPath(), CARPETA.resolve(nombre));
-            return nombre;
+            Path temporal = Files.createTempFile(CARPETA, "maw-copia-", ".tmp");
+            try {
+                Files.copy(origen.toPath(), temporal, StandardCopyOption.REPLACE_EXISTING);
+                Files.move(temporal, CARPETA.resolve(nombre), StandardCopyOption.ATOMIC_MOVE);
+                return nombre;
+            } finally {
+                Files.deleteIfExists(temporal);
+            }
         } catch (IOException ex) {
             throw new IllegalArgumentException("No se pudo copiar la imagen.", ex);
         }
@@ -171,11 +185,20 @@ public class GestorImagenes {
 
     public static void eliminar(String nombre) {
         if (nombre == null) return;
-        CACHE.keySet().removeIf(k -> k.startsWith(nombre + "@"));
-        try {
-            Files.deleteIfExists(CARPETA.resolve(nombre));
-        } catch (IOException ignorada) {
+        if (!nombre.matches("(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.(png|jpg|jpeg|gif|bmp)")) {
+            throw new IllegalArgumentException("Nombre de portada no valido.");
         }
+        BarreraEscritura.escritura(() -> {
+            try {
+                Path destino = CARPETA.resolve(nombre);
+                if (Files.isSymbolicLink(destino))
+                    throw new IOException("No se permite eliminar un enlace simbolico.");
+                Files.deleteIfExists(destino);
+                CACHE.keySet().removeIf(k -> k.startsWith(nombre + "@"));
+            } catch (IOException ex) {
+                throw new IllegalStateException("No se pudo eliminar la portada: " + nombre, ex);
+            }
+        });
     }
 
     public static Image imagenDe(ItemConsumption item, double ancho, double alto) {

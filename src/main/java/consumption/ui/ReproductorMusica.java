@@ -77,7 +77,6 @@ public class ReproductorMusica {
             sonando.set(false);
         } else {
             jugador.play();
-            sonando.set(true);
         }
     }
 
@@ -114,15 +113,29 @@ public class ReproductorMusica {
             MediaPlayer nuevo = new MediaPlayer(new Media(url.toExternalForm()));
             jugador = nuevo;
             nuevo.setVolume(volumen.get());
-            nuevo.setOnPlaying(() -> fallosSeguidos = 0);
-            nuevo.setOnEndOfMedia(this::siguiente);
-            nuevo.setOnError(() -> alFallar());
+            nuevo.setOnPlaying(() -> {
+                if (jugador != nuevo) return;
+                fallosSeguidos = 0;
+                sonando.set(true);
+            });
+            nuevo.setOnPaused(() -> {
+                if (jugador == nuevo) sonando.set(false);
+            });
+            nuevo.setOnStopped(() -> {
+                if (jugador == nuevo) sonando.set(false);
+            });
+            nuevo.setOnEndOfMedia(() -> {
+                if (jugador == nuevo) siguiente();
+            });
+            nuevo.setOnError(() -> {
+                if (jugador == nuevo) alFallar();
+            });
             nuevo.setOnReady(() -> actualizarProgreso(nuevo));
             nuevo.currentTimeProperty().addListener((obs, antes, ahora) -> actualizarProgreso(nuevo));
             nuevo.play();
 
             titulo.set(pista.textoCompleto().toUpperCase());
-            sonando.set(true);
+            sonando.set(false);
         } catch (Exception e) {
             alFallar();
         }
@@ -130,7 +143,7 @@ public class ReproductorMusica {
 
     private void alFallar() {
         fallosSeguidos++;
-        if (fallosSeguidos >= cola.size()) {
+        if (cola.isEmpty() || fallosSeguidos >= cola.size()) {
             detenerJugador();
             sonando.set(false);
             titulo.set("NO SE PUDO REPRODUCIR LA MUSICA");
@@ -168,6 +181,8 @@ public class ReproductorMusica {
         jugador.setOnEndOfMedia(null);
         jugador.setOnError(null);
         jugador.setOnPlaying(null);
+        jugador.setOnPaused(null);
+        jugador.setOnStopped(null);
         jugador.setOnReady(null);
         jugador.stop();
         jugador.dispose();

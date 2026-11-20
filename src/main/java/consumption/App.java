@@ -1,6 +1,7 @@
 package consumption;
 
 import consumption.data.Preferencias;
+import consumption.data.DiarioRestauracion;
 import consumption.data.RespaldoAutomatico;
 import consumption.data.RepositorioJson;
 import consumption.data.RecuperacionDatos;
@@ -14,8 +15,6 @@ import consumption.model.ItemConsumption;
 import consumption.ui.*;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
@@ -33,8 +32,30 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
+        try {
+            consumption.data.DiarioZipImagenes.recuperarPendiente();
+            DiarioRestauracion.recuperarAntesDeCargar();
+        } catch (Exception ex) {
+            Alert error = new Alert(Alert.AlertType.ERROR,
+                    "Recuperacion A08/A10 incompleta. No se abriran los datos. " + ex.getMessage(), ButtonType.CLOSE);
+            error.setTitle("THE MAW — RECUPERACION PENDIENTE");
+            error.showAndWait();
+            Platform.exit();
+            return;
+        }
         Tipografia.cargar();
-        preferencias = Preferencias.cargar();
+        try {
+            preferencias = Preferencias.cargar();
+        } catch (IllegalStateException ex) {
+            Alert error = new Alert(Alert.AlertType.ERROR,
+                    "No se pueden cargar las preferencias. El archivo original no se ha "
+                            + "sobrescrito. Revise preferencias.json y sus respaldos. "
+                            + ex.getMessage(), ButtonType.CLOSE);
+            error.setTitle("THE MAW — PREFERENCIAS NO LEGIBLES");
+            error.showAndWait();
+            Platform.exit();
+            return;
+        }
         tema = Tema.de(preferencias.getTema());
 
         RepositorioJson repositorio = new RepositorioJson();
@@ -126,18 +147,7 @@ public class App extends Application {
         stage.show();
         GeometriaVentana.registrar(stage, preferencias);
 
-        if (!repositorio.getAvisosCarga().isEmpty()) {
-            Alert alerta = new Alert(Alert.AlertType.WARNING,
-                    "Se encontraron " + repositorio.getAvisosCarga().size()
-                            + " registros invalidos. Se han conservado en datos.json. "
-                            + "Los demas registros estan disponibles.\n\n"
-                            + String.join("\n", repositorio.getAvisosCarga()),
-                    ButtonType.OK);
-            alerta.setTitle("THE MAW — DATOS PARA REVISAR");
-            alerta.setHeaderText("REGISTROS CONSERVADOS SIN CARGAR");
-            alerta.getDialogPane().setMinWidth(650);
-            alerta.showAndWait();
-        }
+        ventana.notificarIntegridadSiCambio();
     }
 
     @Override

@@ -687,3 +687,17 @@
 
 /* THE MAW 0.4: acercar los atajos del formulario a sus botones sin alterar otros dialogos. */
 .dialog-pane.formulario-item-dialogo .button-bar { -fx-padding: 1px 0 2px 0; }
+
+/* M03-V01-R3: barra externa de estadísticas */
+.scroll-bar.estadisticas-barra-horizontal .track {
+    -fx-background-color: -c-pn;
+    -fx-border-color: -c-ln;
+}
+.scroll-bar.estadisticas-barra-horizontal .thumb {
+    -fx-background-color: -c-mt;
+    -fx-background-insets: 1;
+}
+.scroll-bar.estadisticas-barra-horizontal .thumb:hover,
+.scroll-bar.estadisticas-barra-horizontal .thumb:pressed {
+    -fx-background-color: -c-acento;
+}

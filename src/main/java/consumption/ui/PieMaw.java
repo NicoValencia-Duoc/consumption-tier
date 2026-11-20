@@ -2,6 +2,7 @@ package consumption.ui;
 
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
+import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -97,11 +98,13 @@ public class PieMaw extends VBox {
         separador.setPrefSize(1, 16);
         separador.setMaxSize(1, 16);
 
-// Los extremos tienen prioridad de ancho. Solo el centro musical se comprime.
         HBox estado = new HBox(10, punto, izquierda);
         estado.setAlignment(Pos.CENTER_LEFT);
-        estado.setMinWidth(Region.USE_PREF_SIZE);
-        estado.setMaxWidth(Region.USE_PREF_SIZE);
+        estado.setMinWidth(0);
+        estado.setMaxWidth(Double.MAX_VALUE);
+        izquierda.setMinWidth(0);
+        izquierda.setTextOverrun(javafx.scene.control.OverrunStyle.ELLIPSIS);
+        HBox.setHgrow(izquierda, Priority.ALWAYS);
 
         HBox controles = new HBox(10, lista, pausa, siguiente, volumen);
         controles.setAlignment(Pos.CENTER_LEFT);
@@ -112,11 +115,12 @@ public class PieMaw extends VBox {
         hambre.setAlignment(Pos.CENTER_LEFT);
         hambre.setMinWidth(Region.USE_PREF_SIZE);
         hambre.setMaxWidth(Region.USE_PREF_SIZE);
+        porcentaje.setMinWidth(Region.USE_PREF_SIZE);
 
         StackPane tituloVisible = new StackPane(cancion);
         tituloVisible.setMinWidth(0);
         tituloVisible.setPrefWidth(220);
-        tituloVisible.setMaxWidth(220);
+        tituloVisible.setMaxWidth(Double.MAX_VALUE);
         tituloVisible.setAlignment(Pos.CENTER_LEFT);
 
         Rectangle recorte = new Rectangle();
@@ -124,30 +128,47 @@ public class PieMaw extends VBox {
         recorte.widthProperty().bind(tituloVisible.widthProperty());
         recorte.heightProperty().bind(tituloVisible.heightProperty());
 
-        tituloVisible.widthProperty().addListener((obs, antes, ancho) -> {
-            cancion.setVisible(ancho.doubleValue() >= 220.0 * 2.0 / 3.0);
-        });
-        cancion.setVisible(false);
-
         HBox centro = new HBox(10, tituloVisible, tiempo);
         centro.setAlignment(Pos.CENTER_LEFT);
         centro.setMinWidth(0);
+        centro.setPrefWidth(250);
         centro.setMaxWidth(Double.MAX_VALUE);
-
         HBox.setHgrow(tituloVisible, Priority.ALWAYS);
         HBox.setHgrow(centro, Priority.ALWAYS);
+        cancion.setVisible(true);
+        cancion.setManaged(true);
+        tiempo.setVisible(true);
+        tiempo.setManaged(true);
 
-        centro.widthProperty().addListener((obs, antes, ancho) -> {
-            tiempo.setVisible(ancho.doubleValue() >= 320);
-        });
-        tiempo.setVisible(false);
-
-        HBox fila = new HBox(10, estado, centro, controles, hambre);
+        HBox fila = new HBox(10);
         fila.setAlignment(Pos.CENTER_LEFT);
         fila.getStyleClass().add("pie-fila");
+        fila.setPadding(new Insets(0, 12, 0, 0));
         fila.setMinWidth(0);
+        HBox.setHgrow(estado, Priority.ALWAYS);
 
-        getChildren().addAll(linea, fila);
+        HBox filaMusica = new HBox(10);
+        filaMusica.setAlignment(Pos.CENTER_LEFT);
+        filaMusica.getStyleClass().add("pie-fila");
+        filaMusica.setPadding(new Insets(0, 12, 0, 0));
+        filaMusica.setMinWidth(0);
+
+        HBox filaHambre = new HBox(10);
+        filaHambre.setAlignment(Pos.CENTER_LEFT);
+        filaHambre.getStyleClass().add("pie-fila");
+        filaHambre.setPadding(new Insets(0, 12, 0, 0));
+        filaHambre.setMinWidth(0);
+
+        HBox filaExtra = new HBox(10);
+        filaExtra.setAlignment(Pos.CENTER_LEFT);
+        filaExtra.getStyleClass().add("pie-fila");
+        filaExtra.setPadding(new Insets(0, 12, 0, 0));
+        getChildren().addAll(linea, fila, filaMusica, filaHambre, filaExtra);
+        widthProperty().addListener((obs, anterior, ancho) ->
+                distribuirPie(ancho.doubleValue(), fila, filaMusica, filaHambre, filaExtra,
+                        estado, centro, controles, hambre, izquierda));
+        distribuirPie(1200, fila, filaMusica, filaHambre, filaExtra,
+                estado, centro, controles, hambre, izquierda);
 
         if (!reproductor.hayMusica()) {
             linea.setDisable(true);
@@ -156,6 +177,45 @@ public class PieMaw extends VBox {
             siguiente.setDisable(true);
             volumen.setDisable(true);
         }
+    }
+
+    private int distribucionActual = -1;
+
+    private void distribuirPie(double ancho, HBox fila, HBox filaMusica, HBox filaHambre,
+                               HBox filaExtra, HBox estado, HBox centro, HBox controles, HBox hambre,
+                               Label textoEstado) {
+        int modo = ancho >= 1650 ? 0 : ancho >= 950 ? 1 : ancho >= 680 ? 2 : 3;
+        if (modo == distribucionActual) return;
+        distribucionActual = modo;
+        fila.getChildren().clear();
+        filaMusica.getChildren().clear();
+        filaHambre.getChildren().clear();
+        filaExtra.getChildren().clear();
+        if (modo == 0) {
+            textoEstado.setWrapText(false);
+            fila.getChildren().addAll(estado, centro, controles, hambre);
+        } else if (modo == 1) {
+            textoEstado.setWrapText(true);
+            fila.getChildren().add(estado);
+            filaMusica.getChildren().addAll(centro, controles, hambre);
+        } else {
+            textoEstado.setWrapText(true);
+            fila.getChildren().add(estado);
+            if (modo == 2) {
+                filaMusica.getChildren().addAll(centro, controles);
+                filaHambre.getChildren().add(hambre);
+            } else {
+                filaMusica.getChildren().add(centro);
+                filaHambre.getChildren().add(controles);
+                filaExtra.getChildren().add(hambre);
+            }
+        }
+        filaMusica.setManaged(modo != 0);
+        filaMusica.setVisible(modo != 0);
+        filaHambre.setManaged(modo >= 2);
+        filaHambre.setVisible(modo >= 2);
+        filaExtra.setManaged(modo == 3);
+        filaExtra.setVisible(modo == 3);
     }
 
     public void actualizar(int devorados, int sinDevorar) {

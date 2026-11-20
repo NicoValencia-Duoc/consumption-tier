@@ -48,7 +48,7 @@ public final class Terminal {
 
         dialogo.addEventHandler(
                 javafx.scene.control.DialogEvent.DIALOG_SHOWN,
-                evento -> {
+                evento -> javafx.application.Platform.runLater(() -> {
                     Window ventana = dialogo.getDialogPane().getScene() == null
                             ? null
                             : dialogo.getDialogPane().getScene().getWindow();
@@ -82,7 +82,7 @@ public final class Terminal {
                             Math.min(x, maxX)));
                     emergente.setY(Math.max(visible.getMinY(),
                             Math.min(y, maxY)));
-                });
+                }));
     }
 
     public static HBox titulo(String texto, Label subtitulo) {
@@ -151,37 +151,14 @@ public final class Terminal {
             boton.setMaxWidth(Double.MAX_VALUE);
         }
         panel.setMinWidth(420);
-        panel.setPrefWidth(Math.max(panel.getPrefWidth(), 470));
+        panel.setPrefWidth(Math.max(panel.getPrefWidth(), 540));
+        if (dialogo instanceof Alert alerta && alerta.getContentText() != null
+                && !alerta.getContentText().isBlank()) {
+            Label contenido = (Label) panel.lookup(".content.label");
+            if (contenido != null) contenido.setWrapText(true);
+        }
         panel.setMinHeight(Region.USE_COMPUTED_SIZE);
         panel.setPrefHeight(Region.USE_COMPUTED_SIZE);
-        dialogo.addEventHandler(javafx.scene.control.DialogEvent.DIALOG_SHOWN, e -> {
-            panel.applyCss();
-            panel.layout();
-            Window ventana = panel.getScene() == null ? null : panel.getScene().getWindow();
-            if (ventana instanceof javafx.stage.Stage stage) {
-                Rectangle2D limites = Screen.getScreensForRectangle(
-                                stage.getX(), stage.getY(), Math.max(1,stage.getWidth()), Math.max(1,stage.getHeight()))
-                        .stream().findFirst().orElse(Screen.getPrimary()).getVisualBounds();
-                double ancho = Math.min(limites.getWidth(), Math.max(470, panel.prefWidth(-1)));
-                if (dialogo instanceof Alert) {
-                    double sobraAncho = Math.max(0, stage.getWidth() - panel.getScene().getWidth());
-                    double sobraAlto = Math.max(0, stage.getHeight() - panel.getScene().getHeight());
-                    stage.setMinHeight(0);
-                    stage.setMinWidth(Math.min(420, limites.getWidth()));
-                    stage.setWidth(ancho);
-                    panel.applyCss();
-                    panel.layout();
-                    double alto = panel.prefHeight(Math.max(1, ancho - sobraAncho)) + sobraAlto;
-                    stage.setHeight(Math.min(limites.getHeight(), alto));
-                } else {
-                    stage.sizeToScene();
-                    stage.setWidth(ancho);
-                    stage.setHeight(Math.min(limites.getHeight(), stage.getHeight()));
-                    stage.setMinWidth(Math.min(420, limites.getWidth()));
-                    stage.setMinHeight(0);
-                }
-            }
-        });
         prepararCentrado(dialogo);
     }
 }

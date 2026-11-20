@@ -57,8 +57,9 @@ public final class BorradorFormulario {
         Datos datos = new Datos();
         datos.tipo = tipo;
         datos.campos = new LinkedHashMap<>(campos);
-        try {
-            Files.createDirectories(archivo.getParent());
+        BarreraEscritura.escritura(() -> {
+            try {
+                Files.createDirectories(archivo.getParent());
             try (Writer escritor = Files.newBufferedWriter(temporal, StandardCharsets.UTF_8)) {
                 GSON.toJson(datos, escritor);
             }
@@ -69,15 +70,18 @@ public final class BorradorFormulario {
                 Files.move(temporal, archivo, StandardCopyOption.REPLACE_EXISTING);
             }
         } catch (IOException ex) {
-            throw new IllegalStateException("No se pudo guardar el borrador: " + ex.getMessage(), ex);
-        }
+                throw new IllegalStateException("No se pudo guardar el borrador: " + ex.getMessage(), ex);
+            }
+        });
     }
 
     public static void borrar(String tipo) {
-        try {
-            Files.deleteIfExists(ruta(tipo));
+        BarreraEscritura.escritura(() -> {
+            try {
+                Files.deleteIfExists(ruta(tipo));
         } catch (IOException ex) {
-            throw new IllegalStateException("No se pudo borrar el borrador: " + ex.getMessage(), ex);
-        }
+                throw new IllegalStateException("No se pudo borrar el borrador: " + ex.getMessage(), ex);
+            }
+        });
     }
 }

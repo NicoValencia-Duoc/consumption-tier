@@ -33,7 +33,20 @@ public class ExportadorCsv {
             }
             csv.append("\r\n");
         }
-        Files.writeString(destino, csv.toString(), StandardCharsets.UTF_8);
+        try {
+            BarreraEscritura.conBloqueo(() -> {
+                if (Files.exists(consumption.data.Rutas.BASE.resolve("diario-restauracion-c14/active"))) throw new IOException("Recuperación pendiente");
+                Path parent = destino.toAbsolutePath().getParent();
+                Path tmp = Files.createTempFile(parent, "the-maw-export-", ".tmp");
+                try {
+                    Files.writeString(tmp, csv.toString(), StandardCharsets.UTF_8);
+                    try { Files.move(tmp, destino, java.nio.file.StandardCopyOption.ATOMIC_MOVE, java.nio.file.StandardCopyOption.REPLACE_EXISTING); }
+                    catch (java.nio.file.AtomicMoveNotSupportedException ex) { Files.move(tmp, destino, java.nio.file.StandardCopyOption.REPLACE_EXISTING); }
+                } finally { Files.deleteIfExists(tmp); }
+                return null;
+            });
+        } catch (IOException ex) { throw ex; }
+        catch (Exception ex) { throw new IOException("No se pudo exportar CSV", ex); }
     }
 
     private static String texto(Object valor) {

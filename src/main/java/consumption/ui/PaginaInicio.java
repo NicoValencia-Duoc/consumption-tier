@@ -63,6 +63,11 @@ public class PaginaInicio extends VBox {
 
         StackPane zona = new StackPane(scroll, bienvenida, sinResultados);
         VBox.setVgrow(zona, Priority.ALWAYS);
+        zona.setMinHeight(0);
+        zona.setPrefHeight(0);
+        zona.setMaxHeight(Double.MAX_VALUE);
+        scroll.setMinHeight(0);
+        scroll.setFitToHeight(false);
 
         subtitulo.getStyleClass().add("subtitulo");
         getChildren().addAll(new VBox(2, Terminal.titulo("BIBLIOTECA", null), subtitulo),
@@ -208,8 +213,12 @@ public class PaginaInicio extends VBox {
 
         boolean sinNada = items.isEmpty();
         bienvenida.setVisible(sinNada);
+        bienvenida.setManaged(sinNada);
         scroll.setVisible(!sinNada);
-        sinResultados.setVisible(!sinNada && visibles.isEmpty());
+        scroll.setManaged(!sinNada);
+        boolean sinCoincidencias = !sinNada && visibles.isEmpty();
+        sinResultados.setVisible(sinCoincidencias);
+        sinResultados.setManaged(sinCoincidencias);
     }
 
     private boolean coincideConFiltro(ItemConsumption i) {

@@ -94,7 +94,10 @@ public class CampoFecha extends HBox {
         mes = YearMonth.from(base);
         dibujar();
 
-        panel.getStylesheets().setAll(getScene().getRoot().getStylesheets());
+        panel.getStylesheets().setAll(getScene().getStylesheets());
+        for (String hoja : getScene().getRoot().getStylesheets()) {
+            if (!panel.getStylesheets().contains(hoja)) panel.getStylesheets().add(hoja);
+        }
         Bounds caja = campo.localToScreen(campo.getBoundsInLocal());
         popup.show(campo, caja.getMinX(), caja.getMaxY() + 2);
     }

@@ -27,6 +27,60 @@ public class RepositorioJson {
     private final List<String> avisos = new ArrayList<>();
     private boolean cargaCompletada = false;
 
+    public int cantidadRechazados() {
+        return conservados.entrySet().stream()
+                .filter(e -> e.getValue().isJsonArray())
+                .mapToInt(e -> e.getValue().getAsJsonArray().size()).sum();
+    }
+
+    public boolean tieneRechazados() {
+        return conservados.entrySet().stream().anyMatch(e -> e.getValue().isJsonArray()
+                && e.getValue().getAsJsonArray().size() > 0);
+    }
+
+    public String huellaRechazados() {
+        try {
+            var digest = java.security.MessageDigest.getInstance("SHA-256");
+            for (String categoria : CATEGORIAS) {
+                JsonArray arr = conservados.getAsJsonArray(categoria);
+                if (arr == null || arr.isEmpty()) continue;
+                digest.update(categoria.getBytes(StandardCharsets.UTF_8));
+                digest.update(arr.toString().getBytes(StandardCharsets.UTF_8));
+            }
+            return java.util.HexFormat.of().formatHex(digest.digest());
+        } catch (java.security.NoSuchAlgorithmException ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
+
+    public Path exportarRechazados(Path destino) {
+        if (!cargaCompletada || !tieneRechazados())
+            throw new IllegalStateException("No hay registros rechazados disponibles para exportar.");
+        JsonObject exportacion = new JsonObject();
+        exportacion.addProperty("versionExportacion", 1);
+        for (String categoria : CATEGORIAS) {
+            JsonArray arr = conservados.getAsJsonArray(categoria);
+            exportacion.add(categoria, arr == null ? new JsonArray() : arr.deepCopy());
+        }
+        Path temporal = null;
+        try {
+            Path padre = destino.toAbsolutePath().getParent();
+            Files.createDirectories(padre);
+            if (Files.exists(destino))
+                throw new java.nio.file.FileAlreadyExistsException(destino.toString());
+            temporal = Files.createTempFile(padre, "rechazados-", ".tmp");
+            Files.writeString(temporal, gson.toJson(exportacion), StandardCharsets.UTF_8);
+            try { Files.move(temporal, destino, StandardCopyOption.ATOMIC_MOVE); }
+            catch (AtomicMoveNotSupportedException ex) { Files.move(temporal, destino); }
+            return destino;
+        } catch (IOException ex) {
+            throw new IllegalStateException("No se pudo exportar los registros rechazados.", ex);
+        } finally {
+            if (temporal != null) try { Files.deleteIfExists(temporal); }
+            catch (IOException ex) { System.err.println("Temporal pendiente: " + temporal); }
+        }
+    }
+
     public List<String> getAvisosCarga() {
         return List.copyOf(avisos);
     }
@@ -157,6 +211,10 @@ public class RepositorioJson {
     }
 
     public void guardar(List<ItemConsumption> items) {
+        BarreraEscritura.escritura(() -> guardarInterno(items));
+    }
+
+    private void guardarInterno(List<ItemConsumption> items) {
         if (!cargaCompletada) {
             throw new IllegalStateException(
                     "Primero debe completarse la carga antes de guardar.");
