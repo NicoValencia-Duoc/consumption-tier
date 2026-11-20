@@ -17,6 +17,7 @@ public abstract class ItemConsumption {
     private double porcentaje;
     private LocalDate fechaInicio;
     private LocalDate fechaTermino;
+    private LocalDate fechaPrimeraFinalizacion;
     private String comentario = "";
     private Map<String, Double> criterios = new LinkedHashMap<>();
     private boolean favorito;
@@ -37,11 +38,11 @@ public abstract class ItemConsumption {
 
     public record EstadoAnterior(Estado estado, double porcentaje, LocalDate inicio,
                                  LocalDate termino, boolean sinInicio, boolean sinTermino,
-                                 Integer consumos, int repeticiones) {}
+                                 Integer consumos, int repeticiones, LocalDate primeraFinalizacion) {}
 
     public EstadoAnterior capturarEstado() {
         return new EstadoAnterior(estado, porcentaje, fechaInicio, fechaTermino,
-                sinFechaInicio, sinFechaTermino, vecesConsumido, vecesRepetido);
+                sinFechaInicio, sinFechaTermino, vecesConsumido, vecesRepetido, fechaPrimeraFinalizacion);
     }
 
     public void restaurarEstado(EstadoAnterior anterior) {
@@ -53,6 +54,7 @@ public abstract class ItemConsumption {
         this.sinFechaTermino = anterior.sinTermino();
         this.vecesConsumido = anterior.consumos();
         this.vecesRepetido = anterior.repeticiones();
+        this.fechaPrimeraFinalizacion = anterior.primeraFinalizacion();
     }
     public abstract String getTipo();
     public abstract String getLetra();
@@ -88,6 +90,14 @@ public abstract class ItemConsumption {
     }
     public LocalDate getFechaInicio() {
         return fechaInicio;
+    }
+    public LocalDate getFechaPrimeraFinalizacion() {
+        if (fechaPrimeraFinalizacion != null) return fechaPrimeraFinalizacion;
+        return estado == Estado.TERMINADO && getVecesConsumido() == 1
+                ? fechaTermino : null;
+    }
+    public void setFechaPrimeraFinalizacion(LocalDate fecha) {
+        this.fechaPrimeraFinalizacion = fecha;
     }
     public LocalDate getFechaTermino() {
         return fechaTermino;

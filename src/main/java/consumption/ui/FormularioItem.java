@@ -1136,6 +1136,9 @@ public abstract class FormularioItem<T extends ItemConsumption> {
 
         T prueba = crear(t, 0, e);
         aplicarComunes(prueba, t, e, p, ini, fin, sinIni, sinFin, notas, veces, textoComentario);
+        if (existente == null && e == Estado.TERMINADO && veces == 1) {
+            prueba.setFechaPrimeraFinalizacion(fin);
+        }
         prueba.validarCoherencia();
         boolean tituloCambio = existente == null || !tituloIgual(existente.getTitulo(), t);
         if (comprobador != null && tituloCambio && comprobador.existe(prueba.getTipo(), t, existente)) {
@@ -1153,6 +1156,10 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         }
 
         if (existente != null) {
+            LocalDate primera = existente.getFechaPrimeraFinalizacion();
+            if (e == Estado.TERMINADO && veces == 1
+                    && existente.getVecesConsumido() <= 1) primera = fin;
+            prueba.setFechaPrimeraFinalizacion(primera);
             prueba.setNumero(existente.getNumero());
             prueba.setFavorito(existente.isFavorito());
         }

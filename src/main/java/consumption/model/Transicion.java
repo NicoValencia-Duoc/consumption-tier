@@ -60,10 +60,16 @@ public enum Transicion {
 
                 item.setEstado(Estado.TERMINADO);
                 item.setFechaTermino(hoy);
+                if (veces == 0 && item.getFechaPrimeraFinalizacion() == null) {
+                    item.setFechaPrimeraFinalizacion(hoy);
+                }
                 item.setPorcentaje(Math.max(100, item.getPorcentaje()));
                 item.setVecesConsumido(veces + 1);
             }
             case REPETIR -> {
+                if (item.getFechaPrimeraFinalizacion() != null) {
+                    item.setFechaPrimeraFinalizacion(item.getFechaPrimeraFinalizacion());
+                }
                 item.setEstado(Estado.EN_PROGRESO);
                 item.setPorcentaje(0);
                 item.setFechaTermino(null);

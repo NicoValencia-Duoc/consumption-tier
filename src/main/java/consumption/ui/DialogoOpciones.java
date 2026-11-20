@@ -2,6 +2,8 @@ package consumption.ui;
 
 import consumption.data.Preferencias;
 import consumption.data.RepositorioJson;
+import javafx.animation.*;
+import javafx.util.Duration;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -59,6 +61,18 @@ public final class DialogoOpciones {
         Label texto = new Label("TAMAÑO GENERAL DEL TEXTO");
         Label porcentaje = new Label(preferencias.getEscalaTexto() + " %");
         porcentaje.getStyleClass().add("opciones-valor");
+        javafx.scene.effect.DropShadow brilloEscala = new javafx.scene.effect.DropShadow();
+        brilloEscala.setRadius(9);
+        brilloEscala.setSpread(0.12);
+        porcentaje.setEffect(brilloEscala);
+        PauseTransition limpiarGlitch = new PauseTransition(Duration.millis(250));
+        limpiarGlitch.setOnFinished(e -> {
+            porcentaje.setTranslateX(0);
+            porcentaje.setOpacity(1);
+            porcentaje.setEffect(null);
+            porcentaje.getStyleClass().remove("opciones-valor-glitch-c30");
+        });
+        final Timeline[] glitchActual = {null};
         Slider escala = new Slider(90, 115, preferencias.getEscalaTexto());
         escala.setMajorTickUnit(5);
         escala.setMinorTickCount(0);
@@ -84,7 +98,25 @@ public final class DialogoOpciones {
                 errorGuardado(propietario, hojas, ex);
                 return;
             }
-            porcentaje.setText(valor + " %");
+            limpiarGlitch.stop();
+            if (glitchActual[0] != null) glitchActual[0].stop();
+            porcentaje.getStyleClass().remove("opciones-valor-glitch-c30");
+            porcentaje.getStyleClass().add("opciones-valor-glitch-c30");
+            porcentaje.setText(previo + " %");
+            porcentaje.setOpacity(0.22);
+            glitchActual[0] = new Timeline(
+                    new KeyFrame(Duration.millis(35), e -> {
+                        porcentaje.setText(valor + " %");
+                        porcentaje.setTranslateX(-3);
+                        porcentaje.setOpacity(1);
+                    }),
+                    new KeyFrame(Duration.millis(75), e -> porcentaje.setTranslateX(3)),
+                    new KeyFrame(Duration.millis(115), e -> porcentaje.setTranslateX(-2)),
+                    new KeyFrame(Duration.millis(165), e -> porcentaje.setTranslateX(2)),
+                    new KeyFrame(Duration.millis(215), e -> porcentaje.setTranslateX(0))
+            );
+            glitchActual[0].playFromStart();
+            limpiarGlitch.playFromStart();
             refrescarEscala.run();
             refrescarPagina.run();
             if (dialogo.getDialogPane().getScene() != null) {

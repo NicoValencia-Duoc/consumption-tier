@@ -26,6 +26,9 @@ import javafx.stage.FileChooser;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.LinkedHashMap;
@@ -46,6 +49,20 @@ public class VentanaPrincipal extends VBox {
     private final Papelera papelera = new Papelera();
     private final PieMaw pie;
     private Runnable alCambiarEscala = () -> {};
+    private final Timeline relojRacha = new Timeline(new KeyFrame(Duration.seconds(30), e -> verificarCambioDeDia()));
+    private LocalDate fechaRachaMostrada;
+    private int diasRachaMostrados;
+    private Consumer<String> alCambiarTitulo = titulo -> {};
+
+    public void setAlCambiarTitulo(Consumer<String> accion) {
+        alCambiarTitulo = java.util.Objects.requireNonNull(accion);
+        actualizarTitulo();
+    }
+
+    private void actualizarTitulo() {
+        alCambiarTitulo.accept("THE MAW · " + consumption.model.NivelMaw.de(items).name()
+                + " · " + diasRachaMostrados + " " + (diasRachaMostrados == 1 ? "DÍA" : "DÍAS"));
+    }
 
     public void setAlCambiarEscala(Runnable accion) { alCambiarEscala = accion; }
 
@@ -73,6 +90,8 @@ public class VentanaPrincipal extends VBox {
         String inicial = preferencias.getUltimaPestana();
         cabecera.marcarActiva(inicial);
         mostrar(inicial);
+        relojRacha.setCycleCount(Timeline.INDEFINITE);
+        relojRacha.play();
     }
 
     public void notificarIntegridadSiCambio() {
@@ -114,6 +133,21 @@ public class VentanaPrincipal extends VBox {
         };
         contenido.getChildren().setAll(pagina);
         actualizarContadores();
+        actualizarRacha();
+        actualizarTitulo();
+    }
+
+    private void actualizarRacha() {
+        fechaRachaMostrada = LocalDate.now();
+        diasRachaMostrados = RachaMaw.dias(items, fechaRachaMostrada);
+        cabecera.actualizarTierRacha(RachaMaw.tier(diasRachaMostrados));
+    }
+
+    private void verificarCambioDeDia() {
+        if (!LocalDate.now().equals(fechaRachaMostrada)) {
+            actualizarRacha();
+            actualizarTitulo();
+        }
     }
 
     private void actualizarContadores() {
@@ -127,7 +161,7 @@ public class VentanaPrincipal extends VBox {
         cabecera.setContadores(cantidades);
 
         int sinDevorar = cantidades.get("PENDIENTES");
-        int devorados = items.size() - sinDevorar;
+        int devorados = Math.toIntExact(consumption.model.NivelMaw.contarTerminados(items));
         pie.actualizar(devorados, sinDevorar);
     }
 
@@ -720,6 +754,7 @@ public class VentanaPrincipal extends VBox {
     }
 
     public void alCerrar() {
+        relojRacha.stop();
         aviso.confirmarPendiente();
     }
 

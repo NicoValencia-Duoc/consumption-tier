@@ -227,6 +227,14 @@ public class PieMaw extends VBox {
         nivel.setText(actual.name());
         porcentaje.setText(avance + "%");
 
+        boolean exceso = devorados > 100;
+        barra.getStyleClass().remove("pie-hambre-exceso");
+        porcentaje.getStyleClass().remove("pie-porcentaje-exceso");
+        if (exceso) {
+            barra.getStyleClass().add("pie-hambre-exceso");
+            porcentaje.getStyleClass().add("pie-porcentaje-exceso");
+        }
+
         int llenos = Math.round(avance * SEGMENTOS / 100f);
         for (int i = 0; i < SEGMENTOS; i++) {
             Node segmento = barra.getChildren().get(i);

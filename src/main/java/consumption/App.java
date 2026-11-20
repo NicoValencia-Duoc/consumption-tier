@@ -131,11 +131,13 @@ public class App extends Application {
         reproductor.volumenProperty().set(preferencias.getVolumen());
 
         ventana = new VentanaPrincipal(items, repositorio, this::elegirTema, reproductor, preferencias);
-        scena = new Scene(Efectos.capa(ventana), 1295, 720);
+        javafx.scene.layout.StackPane raizArranque = PantallaArranque.preparar(Efectos.capa(ventana));
+        javafx.geometry.Rectangle2D areaInicial = javafx.stage.Screen.getPrimary().getVisualBounds();
+        scena = new Scene(raizArranque, areaInicial.getWidth(), areaInicial.getHeight());
         aplicarTema();
 
         ventana.setAlCambiarEscala(this::aplicarTema);
-        stage.setTitle("THE MAW");
+        ventana.setAlCambiarTitulo(stage::setTitle);
         try (InputStream icono = getClass().getResourceAsStream("/consumption/iconos/icono-app.png")) {
             if (icono != null) stage.getIcons().add(new Image(icono));
         } catch (Exception e) {
@@ -145,6 +147,7 @@ public class App extends Application {
         GeometriaVentana.aplicar(stage, preferencias);
         Terminal.registrarVentanaPrincipal(stage);
         stage.show();
+        PantallaArranque.iniciar(raizArranque);
         GeometriaVentana.registrar(stage, preferencias);
 
         ventana.notificarIntegridadSiCambio();

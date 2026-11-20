@@ -37,6 +37,7 @@ public class Cabecera extends HBox {
     private final Button pestanaDetalle = new Button("DETALLE");
     private final Preferencias preferencias;
     private final HBox logo = new HBox();
+    private final Label marca = new Label("THE MAW// ");
     private final Label nombre = new Label();
     private final Label globo = new Label("▲ HAZ CLIC EN TU NOMBRE PARA CAMBIARLO");
     private final PauseTransition cierreGlobo = new PauseTransition(Duration.seconds(12));
@@ -44,7 +45,6 @@ public class Cabecera extends HBox {
     public Cabecera(Consumer<String> alElegirPestana, Consumer<Tema> alElegirTema, Preferencias preferencias, Runnable alOpciones) {
         this.preferencias = preferencias;
 
-        Label marca = new Label("THE MAW// ");
         marca.getStyleClass().add("logo");
         Efectos.glitchAlPasar(marca);
         Label sesion = new Label("sesion: ");
@@ -155,6 +155,10 @@ public class Cabecera extends HBox {
         setAlignment(Pos.CENTER_LEFT);
         getStyleClass().add("cabecera");
         marcarActiva("INICIO");
+    }
+
+    public void actualizarTierRacha(consumption.model.RachaMaw.TierRacha tier) {
+        marca.setStyle(tier.color() == null ? "" : "-fx-text-fill: " + tier.color() + ";");
     }
 
     private static void fijarAnchoNavegacion(Button boton) {
