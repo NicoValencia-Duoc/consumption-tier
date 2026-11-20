@@ -702,10 +702,29 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         this.alFavoritosEnLote = accion;
     }
 
-    public void agregarColumna(String id, String titulo, Function<T, Object> extractor, boolean visiblePorDefecto) {
-        tabla.getColumns().add(tabla.getColumns().size() - COMUNES, columna(id, titulo, extractor));
-        if (!visiblePorDefecto) ocultasPorDefecto.add(id);
+
+    public void agregarColumna(
+            String id,
+            String titulo,
+            Function<T, Object> extractor,
+            boolean visiblePorDefecto) {
+
+        TableColumn<T, Object> nueva = columna(id, titulo, extractor);
+
+        if ("director".equals(id)) {
+            nueva.setMinWidth(130);
+            nueva.setPrefWidth(130);
+        }
+
+        tabla.getColumns().add(
+                tabla.getColumns().size() - COMUNES, nueva
+        );
+
+        if (!visiblePorDefecto) {
+            ocultasPorDefecto.add(id);
+        }
     }
+
 
     private TableColumn<T, Object> columna(String id, String titulo, Function<T, Object> extractor) {
         TableColumn<T, Object> c = new TableColumn<>(titulo);

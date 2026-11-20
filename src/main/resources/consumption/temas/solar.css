@@ -38,3 +38,8 @@
 .estado-progreso, .chip-progreso:selected { -fx-text-fill: -c-yl; -fx-border-color: -c-yl; }
 .dias-en-curso, .estrella, .letra, .boton-musica,
 .pestana-barra:hover, .boton-opciones:hover, .dialog-pane .button:hover { -fx-text-fill: -c-yl; }
+
+.boton-accion, .dialog-pane .button.boton-dialogo.boton-accion,
+.estado-progreso, .chip-progreso:selected { -fx-text-fill: -c-yl; -fx-border-color: -c-yl; }
+.dias-en-curso, .estrella, .letra, .boton-musica,
+.pestana-barra:hover, .boton-opciones:hover, .dialog-pane .button:hover { -fx-text-fill: -c-yl; }
