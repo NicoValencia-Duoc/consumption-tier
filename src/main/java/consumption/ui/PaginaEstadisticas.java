@@ -93,16 +93,11 @@ public class PaginaEstadisticas extends VBox {
         desplazamiento.setMaxWidth(Double.MAX_VALUE);
         desplazamiento.getStyleClass().add("estadisticas-desplazamiento");
 
-        desplazamiento.setPrefViewportHeight(260);
+        desplazamiento.setPrefViewportHeight(280);
         desplazamiento.setMinHeight(Region.USE_PREF_SIZE);
+        desplazamiento.setMaxHeight(Region.USE_PREF_SIZE);
+
         VBox.setVgrow(desplazamiento, Priority.NEVER);
-        javafx.application.Platform.runLater(() -> {
-            datos.applyCss();
-            datos.autosize();
-            double alto = Math.ceil(datos.prefHeight(-1)) + 8;
-            desplazamiento.setPrefViewportHeight(alto);
-            desplazamiento.requestLayout();
-        });
 
         ScrollBar barraHorizontal = new ScrollBar();
         barraHorizontal.setOrientation(Orientation.HORIZONTAL);
