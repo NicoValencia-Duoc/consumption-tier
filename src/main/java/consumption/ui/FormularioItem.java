@@ -158,7 +158,8 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         agregarFilaCondicional("INICIO", conSinRegistro(inicio, sinInicio), CON_AVANCE);
         agregarFilaCondicional("TERMINO", conSinRegistro(termino, sinTermino), CON_TERMINO);
         repeticiones.setPrefColumnCount(5);
-        agregarFilaCondicional("VECES CONSUMIDO", repeticiones, CON_AVANCE);        termino.setMinimo(() -> inicio.valorProperty().get());
+        agregarFilaCondicional("VECES CONSUMIDO", repeticiones, CON_AVANCE);
+        termino.setMinimo(() -> inicio.valorProperty().get());
         inicio.valorProperty().addListener((obs, antes, ahora) -> { modificado = true; revisarFechas(); });
         termino.valorProperty().addListener((obs, antes, ahora) -> { modificado = true; revisarFechas(); });
 

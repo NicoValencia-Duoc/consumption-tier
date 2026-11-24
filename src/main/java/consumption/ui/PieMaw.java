@@ -1,6 +1,8 @@
 package consumption.ui;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.collections.ListChangeListener;
 import javafx.geometry.Pos;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
@@ -26,6 +28,7 @@ public class PieMaw extends VBox {
     private final Label nivel = new Label();
     private final Label porcentaje = new Label();
     private final HBox barra = new HBox(2);
+    private Runnable redistribuir = () -> {};
 
     public PieMaw(ReproductorMusica reproductor) {
         super(0);
@@ -164,11 +167,24 @@ public class PieMaw extends VBox {
         filaExtra.getStyleClass().add("pie-fila");
         filaExtra.setPadding(new Insets(0, 12, 0, 0));
         getChildren().addAll(linea, fila, filaMusica, filaHambre, filaExtra);
-        widthProperty().addListener((obs, anterior, ancho) ->
-                distribuirPie(ancho.doubleValue(), fila, filaMusica, filaHambre, filaExtra,
-                        estado, centro, controles, hambre, izquierda));
-        distribuirPie(1200, fila, filaMusica, filaHambre, filaExtra,
-                estado, centro, controles, hambre, izquierda);
+        izquierda.setWrapText(true);
+        HBox[] filas = {fila, filaMusica, filaHambre, filaExtra};
+        HBox[] bloques = {estado, centro, controles, hambre};
+        redistribuir = () -> {
+            applyCss();
+            double anchoTitulo = cancion.prefWidth(-1) + 4;
+            tituloVisible.setPrefWidth(anchoTitulo);
+            centro.setPrefWidth(anchoTitulo + 10 + tiempo.getPrefWidth());
+            distribuirPie(filas, bloques);
+        };
+        widthProperty().addListener((obs, anterior, ancho) -> redistribuir.run());
+        reproductor.tituloProperty().addListener((obs, anterior, nuevo) -> Platform.runLater(redistribuir));
+        sceneProperty().addListener((obs, anterior, escena) -> {
+            if (escena == null) return;
+            escena.getStylesheets().addListener((ListChangeListener<String>) cambio -> Platform.runLater(redistribuir));
+            Platform.runLater(redistribuir);
+        });
+        redistribuir.run();
 
         if (!reproductor.hayMusica()) {
             linea.setDisable(true);
@@ -179,43 +195,49 @@ public class PieMaw extends VBox {
         }
     }
 
+    private static final double SEPARACION = 10;
+    private static final int[][][] DISPOSICIONES = {
+            {{0, 1, 2, 3}},
+            {{0}, {1, 2, 3}},
+            {{0, 3}, {1, 2}},
+            {{0}, {1, 2}, {3}},
+            {{0, 3}, {1}, {2}},
+            {{0}, {1}, {2}, {3}}
+    };
     private int distribucionActual = -1;
 
-    private void distribuirPie(double ancho, HBox fila, HBox filaMusica, HBox filaHambre,
-                               HBox filaExtra, HBox estado, HBox centro, HBox controles, HBox hambre,
-                               Label textoEstado) {
-        int modo = ancho >= 1650 ? 0 : ancho >= 950 ? 1 : ancho >= 680 ? 2 : 3;
-        if (modo == distribucionActual) return;
-        distribucionActual = modo;
-        fila.getChildren().clear();
-        filaMusica.getChildren().clear();
-        filaHambre.getChildren().clear();
-        filaExtra.getChildren().clear();
-        if (modo == 0) {
-            textoEstado.setWrapText(false);
-            fila.getChildren().addAll(estado, centro, controles, hambre);
-        } else if (modo == 1) {
-            textoEstado.setWrapText(true);
-            fila.getChildren().add(estado);
-            filaMusica.getChildren().addAll(centro, controles, hambre);
-        } else {
-            textoEstado.setWrapText(true);
-            fila.getChildren().add(estado);
-            if (modo == 2) {
-                filaMusica.getChildren().addAll(centro, controles);
-                filaHambre.getChildren().add(hambre);
-            } else {
-                filaMusica.getChildren().add(centro);
-                filaHambre.getChildren().add(controles);
-                filaExtra.getChildren().add(hambre);
-            }
+    private void distribuirPie(HBox[] filas, HBox[] bloques) {
+        double ancho = getWidth() > 0 ? getWidth() : 1200;
+        double disponible = ancho - getInsets().getLeft() - getInsets().getRight()
+                - filas[0].getInsets().getLeft() - filas[0].getInsets().getRight();
+        double[] medidas = new double[bloques.length];
+        for (int i = 0; i < bloques.length; i++) medidas[i] = bloques[i].prefWidth(-1);
+
+        int elegida = DISPOSICIONES.length - 1;
+        for (int d = 0; d < DISPOSICIONES.length; d++) {
+            if (caben(DISPOSICIONES[d], medidas, disponible)) { elegida = d; break; }
         }
-        filaMusica.setManaged(modo != 0);
-        filaMusica.setVisible(modo != 0);
-        filaHambre.setManaged(modo >= 2);
-        filaHambre.setVisible(modo >= 2);
-        filaExtra.setManaged(modo == 3);
-        filaExtra.setVisible(modo == 3);
+        if (elegida == distribucionActual) return;
+        distribucionActual = elegida;
+
+        for (HBox fila : filas) fila.getChildren().clear();
+        int[][] filasElegidas = DISPOSICIONES[elegida];
+        for (int r = 0; r < filas.length; r++) {
+            boolean usada = r < filasElegidas.length;
+            if (usada) for (int indice : filasElegidas[r]) filas[r].getChildren().add(bloques[indice]);
+            filas[r].setManaged(usada);
+            filas[r].setVisible(usada);
+        }
+    }
+
+    private static boolean caben(int[][] disposicion, double[] medidas, double disponible) {
+        for (int[] fila : disposicion) {
+            if (fila.length == 1) continue;
+            double suma = SEPARACION * (fila.length - 1);
+            for (int indice : fila) suma += medidas[indice];
+            if (suma > disponible) return false;
+        }
+        return true;
     }
 
     public void actualizar(int devorados, int sinDevorar) {
@@ -241,6 +263,7 @@ public class PieMaw extends VBox {
             segmento.getStyleClass().remove("pie-segmento-lleno");
             if (i < llenos) segmento.getStyleClass().add("pie-segmento-lleno");
         }
+        redistribuir.run();
     }
 
     private static Node crearIconoPlay() {

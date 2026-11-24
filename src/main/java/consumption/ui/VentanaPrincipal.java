@@ -61,7 +61,7 @@ public class VentanaPrincipal extends VBox {
 
     private void actualizarTitulo() {
         alCambiarTitulo.accept("THE MAW · " + consumption.model.NivelMaw.de(items).name()
-                + " · " + diasRachaMostrados + " " + (diasRachaMostrados == 1 ? "DÍA" : "DÍAS"));
+                + " · " + diasRachaMostrados + " " + (diasRachaMostrados == 1 ? "DIA" : "DIAS"));
     }
 
     public void setAlCambiarEscala(Runnable accion) { alCambiarEscala = accion; }

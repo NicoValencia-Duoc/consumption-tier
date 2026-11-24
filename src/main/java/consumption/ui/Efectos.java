@@ -36,8 +36,8 @@ public final class Efectos {
     }
 
     public static void escanear(StackPane raiz) {
-        if (!ACTIVOS || Boolean.TRUE.equals(raiz.getProperties().get("c30ScanActive"))) return;
-        raiz.getProperties().put("c30ScanActive", true);
+        if (!ACTIVOS || Boolean.TRUE.equals(raiz.getProperties().get("escaneoActivo"))) return;
+        raiz.getProperties().put("escaneoActivo", true);
         Pane capa = new Pane();
         capa.setManaged(false);
         capa.setMouseTransparent(true);
@@ -45,13 +45,13 @@ public final class Efectos {
         raiz.widthProperty().addListener((obs, oldV, newV) -> capa.resize(newV.doubleValue(), raiz.getHeight()));
         raiz.heightProperty().addListener((obs, oldV, newV) -> capa.resize(raiz.getWidth(), newV.doubleValue()));
         Region estela = new Region();
-        estela.getStyleClass().add("efecto-estela-c30");
+        estela.getStyleClass().add("efecto-estela");
         estela.setPrefHeight(80);
         estela.setMinHeight(80);
         estela.setMaxHeight(80);
         estela.prefWidthProperty().bind(capa.widthProperty());
         Region nucleo = new Region();
-        nucleo.getStyleClass().add("efecto-barrido-c30");
+        nucleo.getStyleClass().add("efecto-barrido");
         nucleo.setPrefHeight(11);
         nucleo.setMinHeight(11);
         nucleo.setMaxHeight(11);
@@ -105,18 +105,14 @@ public final class Efectos {
             nucleo.prefWidthProperty().unbind();
 
             raiz.getChildren().remove(capa);
-            raiz.getProperties().put("c30ScanActive", false);
+            raiz.getProperties().put("escaneoActivo", false);
             if (raiz.getScene() != null && raiz.getScene().getWindow() != null && raiz.getScene().getWindow().isShowing()) {
                 double minutos = 5 + java.util.concurrent.ThreadLocalRandom.current().nextDouble(10);
-                String prueba = System.getProperty("c30.scan.testSeconds");
-                Duration demora = (prueba != null && prueba.equals("30"))
-                        ? Duration.seconds(30) : Duration.minutes(minutos);
-                System.out.println("[C30-SCAN] Próximo escaneo en " + demora.toSeconds() + " segundos");
-                PauseTransition espera = new PauseTransition(demora);
+                PauseTransition espera = new PauseTransition(Duration.minutes(minutos));
                 espera.setOnFinished(evento -> {
                     if (raiz.getScene() != null && raiz.getScene().getWindow() != null && raiz.getScene().getWindow().isShowing()) escanear(raiz);
                 });
-                raiz.getProperties().put("c30NextScan", espera);
+                raiz.getProperties().put("proximoEscaneo", espera);
                 espera.play();
             }
         });

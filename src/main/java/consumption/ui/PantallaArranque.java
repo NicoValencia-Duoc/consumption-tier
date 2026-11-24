@@ -6,9 +6,7 @@ import javafx.scene.shape.Polyline;
 import javafx.scene.shape.StrokeLineJoin;
 import javafx.scene.Group;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.layout.Region;
 import java.util.Random;
-import javafx.scene.layout.Pane;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.*;
@@ -53,7 +51,7 @@ public final class PantallaArranque {
             borde.setFill(null);
             borde.setStrokeWidth(3.3);
             borde.setStrokeLineJoin(StrokeLineJoin.ROUND);
-            borde.getStyleClass().add("mandibula-neon-c30");
+            borde.getStyleClass().add("mandibula-neon");
             borde.setEffect(new DropShadow(19, Color.web("#c43cff", .75)));
             mordida.getChildren().add(borde);
         }
@@ -83,7 +81,7 @@ public final class PantallaArranque {
         Rectangle[] esquirlas = new Rectangle[90];
         for (int i = 0; i < esquirlas.length; i++) {
             Rectangle r = new Rectangle(7 + azar.nextInt(17), 3 + azar.nextInt(7));
-            r.getStyleClass().add("fragmento-mordida-c30");
+            r.getStyleClass().add("fragmento-mordida");
             r.setOpacity(0);
             esquirlas[i] = r;
             fragmentos.getChildren().add(r);

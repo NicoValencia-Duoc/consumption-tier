@@ -108,7 +108,7 @@ public class ReproductorMusica {
         Pista pista = cola.get(indice);
         try {
             URL url = ReproductorMusica.class.getResource(CARPETA + pista.archivo());
-            if (url == null) throw new IOException("No se encontró " + pista.archivo());
+            if (url == null) throw new IOException("No se encontro " + pista.archivo());
 
             MediaPlayer nuevo = new MediaPlayer(new Media(url.toExternalForm()));
             jugador = nuevo;
@@ -211,7 +211,7 @@ public class ReproductorMusica {
                 if (!pista.archivo().isEmpty()) lista.add(pista);
             }
         } catch (IOException e) {
-            System.err.println("No se pudo leer la lista de música: " + e.getMessage());
+            System.err.println("No se pudo leer la lista de musica: " + e.getMessage());
         }
         return lista;
     }

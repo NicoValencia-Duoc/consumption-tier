@@ -70,7 +70,7 @@ public final class DialogoOpciones {
             porcentaje.setTranslateX(0);
             porcentaje.setOpacity(1);
             porcentaje.setEffect(null);
-            porcentaje.getStyleClass().remove("opciones-valor-glitch-c30");
+            porcentaje.getStyleClass().remove("opciones-valor-glitch");
         });
         final Timeline[] glitchActual = {null};
         Slider escala = new Slider(90, 115, preferencias.getEscalaTexto());
@@ -100,8 +100,8 @@ public final class DialogoOpciones {
             }
             limpiarGlitch.stop();
             if (glitchActual[0] != null) glitchActual[0].stop();
-            porcentaje.getStyleClass().remove("opciones-valor-glitch-c30");
-            porcentaje.getStyleClass().add("opciones-valor-glitch-c30");
+            porcentaje.getStyleClass().remove("opciones-valor-glitch");
+            porcentaje.getStyleClass().add("opciones-valor-glitch");
             porcentaje.setText(previo + " %");
             porcentaje.setOpacity(0.22);
             glitchActual[0] = new Timeline(

@@ -707,25 +707,19 @@
 .scroll-bar.estadisticas-barra-horizontal .thumb:pressed {
     -fx-background-color: -c-acento;
 }
-/* C30.D: barrido transitorio; respeta el color de acento del tema activo. */
-.efecto-barrido-c30 {
-    -fx-background-color: linear-gradient(to bottom, transparent 0%, -c-acento 42%, -c-acento 55%, transparent 100%);
-    -fx-effect: dropshadow(gaussian, -c-acento, 22, 0.7, 0, 0);
-}
+/* Mandibulas luminosas de la pantalla de arranque, ligadas al acento del tema. */
+.mandibula-neon { -fx-stroke: -c-acento; }
 
-/* C30.C: mandibulas luminosas ligadas al acento del tema. */
-.mandibula-neon-c30 { -fx-stroke: -c-acento; }
-
-/* C30: nucleo fino, estela cromatica y fragmentos de mordida. */
-.efecto-barrido-c30 {
+/* Escaneo: nucleo fino, estela cromatica y fragmentos de mordida; todo con el acento del tema. */
+.efecto-barrido {
     -fx-background-color: linear-gradient(to bottom, transparent 0%, -c-acento 38%, -c-acento 62%, transparent 100%);
     -fx-effect: dropshadow(gaussian, -c-acento, 14, 0.45, 0, 0);
 }
-.efecto-estela-c30 { -fx-opacity: 0.55; }
-.fragmento-mordida-c30 {
+.efecto-estela { -fx-opacity: 0.55; }
+.fragmento-mordida {
     -fx-fill: -c-acento;
     -fx-effect: dropshadow(gaussian, -c-acento, 7, 0.6, 0, 0);
 }
 
-/* C30.F: lectura de escala con destello del acento del tema */
-.opciones-valor-glitch-c30 { -fx-text-fill: -c-acento; -fx-font-weight: bold; }
+/* Lectura de escala (OPCIONES) con destello del acento del tema */
+.opciones-valor-glitch { -fx-text-fill: -c-acento; -fx-font-weight: bold; }

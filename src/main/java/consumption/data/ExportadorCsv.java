@@ -35,7 +35,7 @@ public class ExportadorCsv {
         }
         try {
             BarreraEscritura.conBloqueo(() -> {
-                if (Files.exists(consumption.data.Rutas.BASE.resolve("diario-restauracion-c14/active"))) throw new IOException("Recuperación pendiente");
+                if (Files.exists(consumption.data.Rutas.BASE.resolve("diario-restauracion-c14/active"))) throw new IOException("Recuperacion pendiente");
                 Path parent = destino.toAbsolutePath().getParent();
                 Path tmp = Files.createTempFile(parent, "the-maw-export-", ".tmp");
                 try {
