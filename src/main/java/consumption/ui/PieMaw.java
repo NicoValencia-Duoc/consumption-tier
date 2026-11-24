@@ -1,6 +1,7 @@
 package consumption.ui;
 
 import javafx.application.Platform;
+import consumption.model.NivelMaw;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Pos;
@@ -241,15 +242,15 @@ public class PieMaw extends VBox {
     }
 
     public void actualizar(int devorados, int sinDevorar) {
-        NivelMaw actual = NivelMaw.de(devorados);
+        NivelMaw actual = NivelMaw.porCantidad(devorados);
         int avance = actual.progreso(devorados);
 
         izquierda.setText("THE MAW TE OBSERVA · " + devorados
                 + (devorados == 1 ? " DEVORADO" : " DEVORADOS") + " · " + sinDevorar + " SIN DEVORAR");
-        nivel.setText(actual.name());
+        nivel.setText(actual.etiqueta());
         porcentaje.setText(avance + "%");
 
-        boolean exceso = devorados > 100;
+        boolean exceso = actual == NivelMaw.DEIDAD;
         barra.getStyleClass().remove("pie-hambre-exceso");
         porcentaje.getStyleClass().remove("pie-porcentaje-exceso");
         if (exceso) {

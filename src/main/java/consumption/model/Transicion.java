@@ -65,6 +65,7 @@ public enum Transicion {
                 }
                 item.setPorcentaje(Math.max(100, item.getPorcentaje()));
                 item.setVecesConsumido(veces + 1);
+                item.agregarFechaTermino(hoy);
             }
             case REPETIR -> {
                 if (item.getFechaPrimeraFinalizacion() != null) {

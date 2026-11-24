@@ -23,8 +23,9 @@ public final class RachaMaw {
         Set<LocalDate> fechas = new HashSet<>();
         for (ItemConsumption item : items) {
             if (item == null) continue;
-            LocalDate primera = item.getFechaPrimeraFinalizacion();
-            if (primera != null && !primera.isAfter(hoy)) fechas.add(primera);
+            for (LocalDate fecha : item.getFechasTermino()) {
+                if (!fecha.isAfter(hoy)) fechas.add(fecha);
+            }
         }
         LocalDate cursor = fechas.contains(hoy) ? hoy : hoy.minusDays(1);
         int consecutivos = 0;

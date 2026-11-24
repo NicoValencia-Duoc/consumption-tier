@@ -1,7 +1,9 @@
 package consumption.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.TreeSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,7 @@ public abstract class ItemConsumption {
     private LocalDate fechaInicio;
     private LocalDate fechaTermino;
     private LocalDate fechaPrimeraFinalizacion;
+    private List<LocalDate> fechasTermino;
     private String comentario = "";
     private Map<String, Double> criterios = new LinkedHashMap<>();
     private boolean favorito;
@@ -38,11 +41,13 @@ public abstract class ItemConsumption {
 
     public record EstadoAnterior(Estado estado, double porcentaje, LocalDate inicio,
                                  LocalDate termino, boolean sinInicio, boolean sinTermino,
-                                 Integer consumos, int repeticiones, LocalDate primeraFinalizacion) {}
+                                 Integer consumos, int repeticiones, LocalDate primeraFinalizacion,
+                                 List<LocalDate> fechasTermino) {}
 
     public EstadoAnterior capturarEstado() {
         return new EstadoAnterior(estado, porcentaje, fechaInicio, fechaTermino,
-                sinFechaInicio, sinFechaTermino, vecesConsumido, vecesRepetido, fechaPrimeraFinalizacion);
+                sinFechaInicio, sinFechaTermino, vecesConsumido, vecesRepetido, fechaPrimeraFinalizacion,
+                fechasTermino == null ? null : new ArrayList<>(fechasTermino));
     }
 
     public void restaurarEstado(EstadoAnterior anterior) {
@@ -55,6 +60,7 @@ public abstract class ItemConsumption {
         this.vecesConsumido = anterior.consumos();
         this.vecesRepetido = anterior.repeticiones();
         this.fechaPrimeraFinalizacion = anterior.primeraFinalizacion();
+        this.fechasTermino = anterior.fechasTermino() == null ? null : new ArrayList<>(anterior.fechasTermino());
     }
     public abstract String getTipo();
     public abstract String getLetra();
@@ -98,6 +104,25 @@ public abstract class ItemConsumption {
     }
     public void setFechaPrimeraFinalizacion(LocalDate fecha) {
         this.fechaPrimeraFinalizacion = fecha;
+    }
+    public List<LocalDate> getFechasTermino() {
+        TreeSet<LocalDate> fechas = new TreeSet<>();
+        if (fechasTermino != null) {
+            for (LocalDate fecha : fechasTermino) {
+                if (fecha != null) fechas.add(fecha);
+            }
+        }
+        LocalDate primera = getFechaPrimeraFinalizacion();
+        if (primera != null) fechas.add(primera);
+        return List.copyOf(fechas);
+    }
+    public void agregarFechaTermino(LocalDate fecha) {
+        if (fecha == null) return;
+        if (fechasTermino == null) fechasTermino = new ArrayList<>();
+        fechasTermino.add(fecha);
+    }
+    public void setFechasTermino(List<LocalDate> fechas) {
+        this.fechasTermino = fechas == null ? null : new ArrayList<>(fechas);
     }
     public LocalDate getFechaTermino() {
         return fechaTermino;
