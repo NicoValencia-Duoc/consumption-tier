@@ -64,7 +64,7 @@ public class PaginaEstadisticas extends VBox {
                 {"TERMINADOS", String.valueOf(r.terminados())},
                 {"EN PROGRESO", String.valueOf(r.enProgreso())},
                 {"ABANDONADOS", String.valueOf(r.abandonados())},
-                {"SIN DEVORAR", String.valueOf(r.pendientes())},
+                {"PENDIENTES", String.valueOf(r.pendientes())},
                 {"NOTA PROMEDIO", r.notaPromedio() > 0 ? Formato.decimal(r.notaPromedio()) : "-"},
                 {"MEJOR VALORADO", r.mejor()},
                 {etiquetaExtra, valorExtra}};

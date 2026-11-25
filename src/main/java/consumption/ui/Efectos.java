@@ -50,6 +50,14 @@ public final class Efectos {
         return preferencias == null || (preferencias.isEfectosActivos() && preferencias.isEfectoGlitch());
     }
 
+    public static boolean accionesPermitidas() {
+        return preferencias == null || (preferencias.isEfectosActivos() && preferencias.isEfectoAcciones());
+    }
+
+    public static boolean sonidosPermitidos() {
+        return preferencias == null || preferencias.isEfectoSonidos();
+    }
+
     public static boolean arranquePermitido() {
         return preferencias == null || (preferencias.isEfectosActivos() && preferencias.isEfectoArranque());
     }
@@ -65,7 +73,7 @@ public final class Efectos {
         boolean corriendo = Boolean.TRUE.equals(raiz.getProperties().get("escaneoActivo"));
         Object espera = raiz.getProperties().get("proximoEscaneo");
         boolean enEspera = espera instanceof Animation a && a.getStatus() == Animation.Status.RUNNING;
-        if (!corriendo && !enEspera) escanear(raiz);
+        if (!corriendo && !enEspera) programarEscaneo(raiz);
     }
 
     private static void cancelarEscaneo(StackPane raiz) {
@@ -73,6 +81,8 @@ public final class Efectos {
         if (espera instanceof Animation a) a.stop();
         Object animacion = raiz.getProperties().remove("animacionEscaneo");
         if (animacion instanceof Animation a) a.stop();
+        Object soltar = raiz.getProperties().remove("soltarEscaneo");
+        if (soltar instanceof Runnable r) r.run();
         Object capa = raiz.getProperties().remove("capaEscaneo");
         if (capa instanceof Node n) raiz.getChildren().remove(n);
         raiz.getProperties().put("escaneoActivo", false);
@@ -96,9 +106,14 @@ public final class Efectos {
         });
     }
 
+    private static final java.util.Map<String, Color> COLORES_TEMA = new java.util.HashMap<>();
+
     private static Color colorTema(Node nodo, String clase, String respaldo) {
         try {
             Scene escena = nodo.getScene();
+            String clave = clase + "|" + (escena == null ? "" : escena.getStylesheets());
+            Color guardado = COLORES_TEMA.get(clave);
+            if (guardado != null) return guardado;
             if (escena != null && escena.getRoot() instanceof Pane raiz) {
                 Region sonda = new Region();
                 sonda.getStyleClass().add(clase);
@@ -109,6 +124,7 @@ public final class Efectos {
                     sonda.applyCss();
                     if (sonda.getBackground() != null && !sonda.getBackground().getFills().isEmpty()
                             && sonda.getBackground().getFills().get(0).getFill() instanceof Color color) {
+                        COLORES_TEMA.put(clave, color);
                         return color;
                     }
                 } finally {
@@ -126,8 +142,12 @@ public final class Efectos {
         capa.setManaged(false);
         capa.setMouseTransparent(true);
         capa.resize(raiz.getWidth(), raiz.getHeight());
-        raiz.widthProperty().addListener((obs, oldV, newV) -> capa.resize(newV.doubleValue(), raiz.getHeight()));
-        raiz.heightProperty().addListener((obs, oldV, newV) -> capa.resize(raiz.getWidth(), newV.doubleValue()));
+        javafx.beans.value.ChangeListener<Number> alAncho =
+                (obs, oldV, newV) -> capa.resize(newV.doubleValue(), raiz.getHeight());
+        javafx.beans.value.ChangeListener<Number> alAlto =
+                (obs, oldV, newV) -> capa.resize(raiz.getWidth(), newV.doubleValue());
+        raiz.widthProperty().addListener(alAncho);
+        raiz.heightProperty().addListener(alAlto);
         Region estela = new Region();
         estela.getStyleClass().add("efecto-estela");
         estela.setPrefHeight(80);
@@ -146,6 +166,13 @@ public final class Efectos {
         DoubleProperty avance = new SimpleDoubleProperty(0);
         nucleo.translateYProperty().bind(avance.multiply(raiz.heightProperty().subtract(11)));
         raiz.getProperties().put("capaEscaneo", capa);
+        Runnable soltar = () -> {
+            raiz.widthProperty().removeListener(alAncho);
+            raiz.heightProperty().removeListener(alAlto);
+            nucleo.translateYProperty().unbind();
+            estela.translateYProperty().unbind();
+        };
+        raiz.getProperties().put("soltarEscaneo", soltar);
         javafx.beans.property.BooleanProperty descendiendo = new javafx.beans.property.SimpleBooleanProperty(true);
         estela.translateYProperty().bind(javafx.beans.binding.Bindings.createDoubleBinding(
                 () -> nucleo.getTranslateY() + (descendiendo.get() ? -80 : 11),
@@ -181,23 +208,29 @@ public final class Efectos {
                 new javafx.animation.SequentialTransition(tramoBajada, tramoSubida);
         raiz.getProperties().put("animacionEscaneo", animacion);
         animacion.setOnFinished(e -> {
-            estela.translateYProperty().unbind();
+            soltar.run();
+            raiz.getProperties().remove("soltarEscaneo");
             estela.prefWidthProperty().unbind();
             nucleo.prefWidthProperty().unbind();
 
             raiz.getChildren().remove(capa);
             raiz.getProperties().put("escaneoActivo", false);
-            if (escaneoPermitido() && raiz.getScene() != null && raiz.getScene().getWindow() != null && raiz.getScene().getWindow().isShowing()) {
-                double minutos = 5 + java.util.concurrent.ThreadLocalRandom.current().nextDouble(10);
-                PauseTransition espera = new PauseTransition(Duration.minutes(minutos));
-                espera.setOnFinished(evento -> {
-                    if (raiz.getScene() != null && raiz.getScene().getWindow() != null && raiz.getScene().getWindow().isShowing()) escanear(raiz);
-                });
-                raiz.getProperties().put("proximoEscaneo", espera);
-                espera.play();
-            }
+            programarEscaneo(raiz);
         });
         animacion.play();
+    }
+
+    private static void programarEscaneo(StackPane raiz) {
+        if (!escaneoPermitido() || raiz.getScene() == null || raiz.getScene().getWindow() == null
+                || !raiz.getScene().getWindow().isShowing()) return;
+        double minutos = 5 + java.util.concurrent.ThreadLocalRandom.current().nextDouble(10);
+        PauseTransition espera = new PauseTransition(Duration.minutes(minutos));
+        espera.setOnFinished(evento -> {
+            if (raiz.getScene() != null && raiz.getScene().getWindow() != null
+                    && raiz.getScene().getWindow().isShowing()) escanear(raiz);
+        });
+        raiz.getProperties().put("proximoEscaneo", espera);
+        espera.play();
     }
 
     public static Parent capa(Parent contenido) {

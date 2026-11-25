@@ -134,7 +134,9 @@ public class App extends Application {
         consumption.model.NivelMaw nivelArranque = consumption.model.NivelMaw.de(items);
         int diasArranque = consumption.model.RachaMaw.dias(items, java.time.LocalDate.now());
         ArranqueTerminal.Datos datosArranque = new ArranqueTerminal.Datos(
-                items.size(), repositorio.cantidadRechazados(), nivelArranque.etiqueta(),
+                (int) items.stream().filter(i -> i.getEstado() != consumption.model.Estado.PENDIENTE).count(),
+                (int) items.stream().filter(i -> i.getEstado() == consumption.model.Estado.PENDIENTE).count(),
+                nivelArranque.etiqueta(),
                 nivelArranque.progreso(consumption.model.NivelMaw.contarTerminados(items)),
                 diasArranque, consumption.model.RachaMaw.tier(diasArranque));
         Efectos.configurar(preferencias);

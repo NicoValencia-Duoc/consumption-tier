@@ -23,7 +23,7 @@ import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
 public final class ArranqueTerminal {
-    public record Datos(int registros, int rechazados, String nivel, int hambre,
+    public record Datos(int activos, int pendientes, String nivel, int hambre,
                         int dias, RachaMaw.TierRacha tier) {}
 
     private static final String CLAVE = "arranqueTerminal";
@@ -88,9 +88,12 @@ public final class ArranqueTerminal {
         marca.setOpacity(0);
 
         Linea lectura = new Linea("> LEYENDO datos.json ........ ", "OK");
-        Linea registros = new Linea("> ", plural(datos.registros(), "REGISTRO", "REGISTROS"),
-                " · ", plural(datos.rechazados(), "RECHAZADO", "RECHAZADOS"));
-        Linea nivel = new Linea("> NIVEL ", datos.nivel(), " · HAMBRE ");
+        Linea registros = new Linea("> ", plural(datos.activos(), "ENTIDAD ACTIVA", "ENTIDADES ACTIVAS"),
+                " · ", plural(datos.pendientes(), "PENDIENTE", "PENDIENTES"));
+        Linea nivel = new Linea("> NIVEL ", datos.nivel());
+        Linea hambre = new Linea("> HAMBRE");
+        hambre.setMinWidth(120);
+        hambre.setPrefWidth(120);
         Linea racha = new Linea("> RACHA ", plural(datos.dias(), "DIA", "DIAS"));
 
         HBox led = new HBox(3);
@@ -106,10 +109,10 @@ public final class ArranqueTerminal {
         porcentaje.getStyleClass().add("arranque-valor");
         led.setOpacity(0);
         porcentaje.setOpacity(0);
-        HBox filaNivel = new HBox(6, nivel, led, porcentaje);
-        filaNivel.setAlignment(Pos.CENTER_LEFT);
+        HBox filaHambre = new HBox(10, hambre, led, porcentaje);
+        filaHambre.setAlignment(Pos.CENTER_LEFT);
 
-        VBox bloque = new VBox(6, lectura, registros, filaNivel, racha);
+        VBox bloque = new VBox(6, lectura, registros, nivel, filaHambre, racha);
         bloque.setAlignment(Pos.CENTER_LEFT);
         bloque.setMinWidth(540);
         bloque.setPrefWidth(540);
@@ -144,14 +147,15 @@ public final class ArranqueTerminal {
                 new KeyFrame(Duration.millis(120), e -> { marca.setOpacity(0.7); marca.setTranslateX(8); }),
                 new KeyFrame(Duration.millis(210), e -> { marca.setOpacity(0.12); marca.setTranslateX(-4); }),
                 new KeyFrame(Duration.millis(330), e -> { marca.setOpacity(1); marca.setTranslateX(0); }),
-                new KeyFrame(Duration.millis(2900), e -> { led.setOpacity(1); porcentaje.setOpacity(1); }),
+                new KeyFrame(Duration.millis(3150), e -> { led.setOpacity(1); porcentaje.setOpacity(1); }),
                 new KeyFrame(Duration.millis(INICIO_BARRIDO_MS), e -> barrido.setOpacity(1), new KeyValue(visible, 1)),
                 new KeyFrame(Duration.millis(INICIO_BARRIDO_MS + DURACION_BARRIDO_MS),
                         new KeyValue(visible, 0, Interpolator.EASE_IN)));
         escribir(secuencia, lectura, 450, 1250);
         escribir(secuencia, registros, 1350, 2050);
-        escribir(secuencia, nivel, 2150, 2850);
-        escribir(secuencia, racha, 3000, 3500);
+        escribir(secuencia, nivel, 2150, 2650);
+        escribir(secuencia, hambre, 2750, 3150);
+        escribir(secuencia, racha, 3300, 3800);
 
         Runnable terminar = () -> {
             cubierta.setClip(null);

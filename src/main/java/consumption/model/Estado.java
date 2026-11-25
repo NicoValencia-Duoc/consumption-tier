@@ -4,7 +4,7 @@ public enum Estado {
     TERMINADO("TERMINADO", "estado-terminado"),
     EN_PROGRESO("EN PROGRESO", "estado-progreso"),
     ABANDONADO("ABANDONADO", "estado-abandonado"),
-    PENDIENTE("SIN DEVORAR", "estado-pendiente");
+    PENDIENTE("PENDIENTE", "estado-pendiente");
 
     private final String etiqueta;
     private final String claseCss;

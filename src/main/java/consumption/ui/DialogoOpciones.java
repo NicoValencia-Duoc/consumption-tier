@@ -20,7 +20,7 @@ public final class DialogoOpciones {
                                Runnable refrescarEscala, Runnable abrirPapelera,
                                Runnable abrirDatos, Runnable revisarPortadas,
                                Runnable crearRespaldo, Runnable restaurarRespaldo,
-                               RepositorioJson repositorio) {
+                               Runnable abrirRechazados, RepositorioJson repositorio) {
         Dialog<Void> dialogo = new Dialog<>();
         dialogo.initOwner(propietario);
         dialogo.setTitle("THE MAW — OPCIONES");
@@ -145,7 +145,11 @@ public final class DialogoOpciones {
                 preferencias::isEfectoGlitch, preferencias::setEfectoGlitch);
         CheckBox efectoArranque = casillaEfecto("PANTALLA DE ARRANQUE", propietario, hojas, preferencias,
                 preferencias::isEfectoArranque, preferencias::setEfectoArranque);
-        VBox partesEfectos = new VBox(8, efectoCrt, efectoEscaneo, efectoGlitch, efectoArranque);
+        CheckBox efectoAcciones = casillaEfecto("ANIMACIONES DE ACCIONES", propietario, hojas, preferencias,
+                preferencias::isEfectoAcciones, preferencias::setEfectoAcciones);
+        CheckBox efectoSonidos = casillaEfecto("SONIDOS DE INTERFAZ", propietario, hojas, preferencias,
+                preferencias::isEfectoSonidos, preferencias::setEfectoSonidos);
+        VBox partesEfectos = new VBox(8, efectoCrt, efectoEscaneo, efectoGlitch, efectoArranque, efectoAcciones);
         partesEfectos.setPadding(new Insets(0, 0, 0, 22));
         partesEfectos.disableProperty().bind(efectosGeneral.selectedProperty().not());
         Label avisoEfectos = new Label("LA PANTALLA DE ARRANQUE SE APLICA LA PROXIMA VEZ QUE ABRAS THE MAW");
@@ -172,26 +176,12 @@ public final class DialogoOpciones {
                 : rechazados + " REGISTROS CONSERVADOS SIN CARGAR");
         estado.setWrapText(true);
         Label aclaracion = new Label("Los registros rechazados permanecen en datos.json. "
-                + "Consultar o exportar no modifica el archivo original.");
+                + "Exportar no modifica el archivo original. Desde REVISAR Y RECUPERAR puedes "
+                + "corregir un registro o descartarlo (se guarda antes una copia).");
         aclaracion.getStyleClass().add("subtitulo");
         aclaracion.setWrapText(true);
-        Button detalles = Terminal.corchetes(new Button("VER MOTIVOS"));
-        detalles.getStyleClass().addAll("pestana", "boton-accion");
+        Button detalles = accion("REVISAR Y RECUPERAR", dialogo, abrirRechazados);
         detalles.setDisable(rechazados == 0);
-        detalles.setOnAction(e -> {
-            Alert detalle = new Alert(Alert.AlertType.INFORMATION);
-            detalle.initOwner(propietario);
-            detalle.setTitle("THE MAW — INTEGRIDAD DE DATOS");
-            detalle.setHeaderText("REGISTROS RECHAZADOS (SOLO LECTURA)");
-            TextArea textoMotivos = new TextArea(String.join("\n", repositorio.getAvisosCarga()));
-            textoMotivos.setEditable(false);
-            textoMotivos.setWrapText(true);
-            textoMotivos.setPrefColumnCount(65);
-            textoMotivos.setPrefRowCount(12);
-            detalle.getDialogPane().setContent(textoMotivos);
-            detalle.getDialogPane().getStylesheets().setAll(hojas);
-            detalle.showAndWait();
-        });
         Button exportar = Terminal.corchetes(new Button("EXPORTAR JSON"));
         exportar.getStyleClass().addAll("pestana", "boton-accion");
         exportar.setDisable(rechazados == 0);
@@ -209,6 +199,7 @@ public final class DialogoOpciones {
                         "Copia exportada. datos.json no fue modificado.", ButtonType.OK);
                 exito.initOwner(propietario);
                 exito.getDialogPane().getStylesheets().setAll(hojas);
+                Terminal.dialogo(exito, "EXPORTACION COMPLETA", null, null);
                 exito.showAndWait();
             } catch (RuntimeException ex) {
                 Alert error = new Alert(Alert.AlertType.ERROR,
@@ -216,6 +207,7 @@ public final class DialogoOpciones {
                                 + ex.getMessage(), ButtonType.OK);
                 error.initOwner(propietario);
                 error.getDialogPane().getStylesheets().setAll(hojas);
+                Terminal.dialogo(error, "EXPORTACION FALLIDA", null, null);
                 error.showAndWait();
             }
         });
@@ -244,7 +236,7 @@ public final class DialogoOpciones {
         VBox controlEscala = new VBox(2, contenedorEscala, marcasEscala);
         controlEscala.setMinWidth(0);
         VBox cuerpo = new VBox(13, visual, tabla, tarjetas, filaTexto, controlEscala,
-                explicacion, new Separator(), efectos, efectosGeneral, partesEfectos, avisoEfectos,
+                explicacion, new Separator(), efectos, efectosGeneral, partesEfectos, efectoSonidos, avisoEfectos,
                 new Separator(), mantenimiento, herramientas,
                 new Separator(), integridad, estado, aclaracion, accionesIntegridad);
         cuerpo.setPadding(new Insets(14));

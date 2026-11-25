@@ -40,6 +40,8 @@ public class Preferencias {
     private boolean efectoEscaneo = true;
     private boolean efectoGlitch = true;
     private boolean efectoArranque = true;
+    private boolean efectoAcciones = true;
+    private boolean efectoSonidos = true;
 
     public boolean isTablaCompacta() { return tablaCompacta; }
     public void setTablaCompacta(boolean v) { tablaCompacta = v; }
@@ -55,6 +57,10 @@ public class Preferencias {
     public void setEfectoGlitch(boolean v) { efectoGlitch = v; }
     public boolean isEfectoArranque() { return efectoArranque; }
     public void setEfectoArranque(boolean v) { efectoArranque = v; }
+    public boolean isEfectoAcciones() { return efectoAcciones; }
+    public void setEfectoAcciones(boolean v) { efectoAcciones = v; }
+    public boolean isEfectoSonidos() { return efectoSonidos; }
+    public void setEfectoSonidos(boolean v) { efectoSonidos = v; }
     public int getEscalaTexto() { return Math.max(90, Math.min(115, escalaTexto == 0 ? 100 : escalaTexto)); }
     public void setEscalaTexto(int v) { escalaTexto = Math.max(90, Math.min(115, v)); }
 

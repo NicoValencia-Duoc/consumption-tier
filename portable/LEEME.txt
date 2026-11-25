@@ -1,0 +1,27 @@
+THE MAW
+=======
+
+Biblioteca personal de juegos, libros, peliculas y series.
+
+COMO ABRIRLA
+  No necesita instalacion ni Java. Descomprime la carpeta completa y abre
+  ConsumptionTier.exe (no muevas el .exe fuera de su carpeta).
+
+DONDE SE GUARDAN TUS DATOS
+  C:\Users\<tu usuario>\consumption-personal
+    datos.json         tu biblioteca
+    imagenes\          portadas que elegiste
+    respaldos\         copias automaticas
+    descartados\       registros que descartaste (copia de seguridad)
+  Actualizar o borrar la carpeta de la app no toca esa carpeta.
+
+RESPALDOS
+  OPCIONES > CREAR RESPALDO guarda un .zip con tus datos e imagenes.
+  OPCIONES > RESTAURAR RESPALDO los devuelve.
+
+SI ALGO FALLA
+  Conserva la carpeta consumption-personal y no borres datos.json.
+  Los registros que la app no pudo leer no se pierden: aparecen en
+  OPCIONES > INTEGRIDAD DE DATOS > REVISAR Y RECUPERAR.
+
+La musica incluida conserva la licencia de cada autor (ver README).

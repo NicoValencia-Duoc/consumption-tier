@@ -1,6 +1,6 @@
 # THE MAW
 
-**Versión 0.9.8.2**
+**Versión 0.9.8.3.1**
 
 THE MAW es una aplicación de escritorio desarrollada con **Java 21, JavaFX y Maven** para organizar y registrar juegos, libros, películas y series.
 
@@ -92,7 +92,7 @@ src/main/java/consumption/
 ├── data/    RepositorioJson, GestorImagenes, ExportadorCsv, RespaldoZip, Preferencias, Rutas
 └── ui/      ventana principal, tablas, formularios, detalle, estadísticas, reproductor
 src/main/resources/consumption/
-├── base.css, noche.css, dia.css
+├── base.css, estilo.css, texto-NNN.css, temas/ (un css por tema)
 ├── iconos/, fuentes/, musica/
 ```
 

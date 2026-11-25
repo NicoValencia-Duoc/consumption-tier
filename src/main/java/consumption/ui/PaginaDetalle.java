@@ -96,7 +96,7 @@ public class PaginaDetalle extends VBox{
         Button editar = Terminal.corchetes(new Button("EDITAR"));
         editar.getStyleClass().add("pestana");
         editar.setOnAction(e -> alEditar.run());
-        Button copiar = Terminal.corchetes(new Button("COPIAR DETALLES"));
+        Button copiar = Terminal.corchetes(new Button("COPIAR FICHA"));
         copiar.getStyleClass().add("pestana");
         copiar.setOnAction(e -> {
             ClipboardContent portapapeles = new ClipboardContent();

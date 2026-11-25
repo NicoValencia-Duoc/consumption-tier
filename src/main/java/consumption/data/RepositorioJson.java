@@ -27,6 +27,35 @@ public class RepositorioJson {
     private final List<String> avisos = new ArrayList<>();
     private boolean cargaCompletada = false;
 
+    public static final class Rechazado {
+        private final String categoria;
+        private final JsonElement elemento;
+        private final String motivo;
+
+        private Rechazado(String categoria, JsonElement elemento, String motivo) {
+            this.categoria = categoria;
+            this.elemento = elemento;
+            this.motivo = motivo;
+        }
+
+        public String getCategoria() { return categoria; }
+        public String getMotivo() { return motivo; }
+
+        public String getResumen() {
+            if (elemento.isJsonObject() && elemento.getAsJsonObject().has("titulo")) {
+                JsonElement titulo = elemento.getAsJsonObject().get("titulo");
+                if (titulo.isJsonPrimitive()) return titulo.getAsString();
+            }
+            return motivo.contains(":") ? motivo.substring(0, motivo.indexOf(':')) : motivo;
+        }
+
+        public String getTexto() {
+            return new GsonBuilder().setPrettyPrinting().create().toJson(elemento);
+        }
+    }
+
+    private final List<Rechazado> detalleRechazados = new ArrayList<>();
+
     public int cantidadRechazados() {
         return conservados.entrySet().stream()
                 .filter(e -> e.getValue().isJsonArray())
@@ -81,12 +110,74 @@ public class RepositorioJson {
         }
     }
 
+    public List<Rechazado> getRechazados() {
+        return List.copyOf(detalleRechazados);
+    }
+
+    public ItemConsumption interpretar(Rechazado rechazado, String texto) {
+        Class<? extends ItemConsumption> tipo = switch (rechazado.categoria) {
+            case "juegos" -> Juego.class;
+            case "libros" -> Libro.class;
+            case "peliculas" -> Pelicula.class;
+            case "series" -> Serie.class;
+            default -> throw new IllegalArgumentException("Categoria desconocida: " + rechazado.categoria);
+        };
+        JsonElement elemento;
+        try {
+            elemento = JsonParser.parseString(texto);
+        } catch (JsonParseException ex) {
+            throw new IllegalArgumentException("JSON mal formado: " + mensaje(ex));
+        }
+        if (!elemento.isJsonObject()) throw new IllegalArgumentException("No es un objeto JSON");
+        try {
+            ItemConsumption item = gson.fromJson(elemento, tipo);
+            validar(item);
+            return item;
+        } catch (RuntimeException ex) {
+            throw new IllegalArgumentException(mensaje(ex));
+        }
+    }
+
+    public void quitarRechazado(Rechazado rechazado) {
+        JsonArray lista = conservados.getAsJsonArray(rechazado.categoria);
+        if (lista == null || !lista.remove(rechazado.elemento)) {
+            throw new IllegalStateException("El registro ya no esta pendiente.");
+        }
+        detalleRechazados.remove(rechazado);
+    }
+
+    public void reponerRechazado(Rechazado rechazado) {
+        JsonArray lista = conservados.getAsJsonArray(rechazado.categoria);
+        if (lista == null) {
+            lista = new JsonArray();
+            conservados.add(rechazado.categoria, lista);
+        }
+        lista.add(rechazado.elemento);
+        if (!detalleRechazados.contains(rechazado)) detalleRechazados.add(rechazado);
+    }
+
+    public Path guardarCopiaDescartado(Rechazado rechazado) {
+        try {
+            Path carpeta = Rutas.BASE.resolve("descartados");
+            Files.createDirectories(carpeta);
+            String sello = java.time.LocalDateTime.now()
+                    .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss_SSS"));
+            Path destino = carpeta.resolve("descartado-" + rechazado.categoria + "-" + sello + ".json");
+            Files.writeString(destino, rechazado.getTexto(), StandardCharsets.UTF_8,
+                    StandardOpenOption.CREATE_NEW);
+            return destino;
+        } catch (IOException ex) {
+            throw new IllegalStateException("No se pudo guardar la copia del registro: " + ex.getMessage(), ex);
+        }
+    }
+
     public List<String> getAvisosCarga() {
         return List.copyOf(avisos);
     }
 
     public List<ItemConsumption> cargar() {
         avisos.clear();
+        detalleRechazados.clear();
         conservados.entrySet().clear();
         cargaCompletada = false;
         if (!Files.exists(ARCHIVO)) {
@@ -145,9 +236,11 @@ public class RepositorioJson {
                 validar(item);
                 destino.add(item);
             } catch (RuntimeException ex) {
-                rechazados.add(elemento.deepCopy());
-                avisos.add(nombre + " [registro " + posicion + "]: "
-                        + mensaje(ex));
+                JsonElement copia = elemento.deepCopy();
+                rechazados.add(copia);
+                String motivo = mensaje(ex);
+                avisos.add(nombre + " [registro " + posicion + "]: " + motivo);
+                detalleRechazados.add(new Rechazado(nombre, copia, "registro " + posicion + ": " + motivo));
             }
         }
         conservados.add(nombre, rechazados);

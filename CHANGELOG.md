@@ -1,5 +1,26 @@
 # Historial de cambios — THE MAW
 
+## [0.9.8.3.1] — 2026-11-24
+
+### Añadido
+- Niveles de THE MAW por ítems terminados alguna vez, de SIN NIVEL a DEIDAD (100), con la barra de HAMBRE en el color de exceso al llegar a DEIDAD.
+- Racha de días que cuenta las repeticiones (lista de fechas de término por ítem) y color de la racha en la marca.
+- Pantalla de arranque de terminal con datos reales (registros, rechazados, nivel, hambre, racha) que usa el tema activo.
+- Interruptores de efectos en OPCIONES: general, filtro CRT, escaneo, glitch y pantalla de arranque.
+- Reformateo a coma de los decimales escritos con punto.
+- Registros rechazados: se pueden revisar, corregir y recuperar, o descartar (con copia en `consumption-personal/descartados`).
+- Botón COPIAR FICHA en el detalle (antes COPIAR DETALLES).
+
+### Mejorado
+- Pie con las cuatro zonas siempre visibles: la disposición se elige midiendo el contenido.
+- El primer ítem de un nivel ya muestra avance en HAMBRE.
+- Quitar la fecha de término de un ítem terminado ya no deja la fecha anterior en la racha.
+- Escaneo: la altura sigue a la ventana; el glitch usa colores del tema.
+
+### Mantenimiento
+- Tildes y restos de depuración eliminados de textos y consola.
+- Versiones alineadas entre `pom.xml`, `empaquetar.bat` y README.
+
 ## [0.9.3] — 2026-11-17
 
 ### Añadido

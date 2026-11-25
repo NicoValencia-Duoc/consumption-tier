@@ -47,6 +47,9 @@ public class VentanaPrincipal extends VBox {
     private String pestanaActual = "INICIO";
     private final Aviso aviso = new Aviso();
     private final Papelera papelera = new Papelera();
+    private final Pane capaEfectos = new Pane();
+    private AccionesVisuales acciones;
+    private NivelMaw nivelMostrado;
     private final PieMaw pie;
     private Runnable alCambiarEscala = () -> {};
     private final Timeline relojRacha = new Timeline(new KeyFrame(Duration.seconds(30), e -> verificarCambioDeDia()));
@@ -79,7 +82,10 @@ public class VentanaPrincipal extends VBox {
         cabecera = new Cabecera(this::mostrar, alElegirTema, preferencias, this::abrirOpciones);
         cabecera.setViewOrder(-1);
 
-        StackPane zona = new StackPane(contenido, aviso);
+        capaEfectos.setMouseTransparent(true);
+        capaEfectos.setPickOnBounds(false);
+        acciones = new AccionesVisuales(capaEfectos, contenido);
+        StackPane zona = new StackPane(contenido, capaEfectos, aviso);
         zona.setMinHeight(0);
         contenido.setMinHeight(0);
         VBox.setVgrow(zona, Priority.ALWAYS);
@@ -111,7 +117,12 @@ public class VentanaPrincipal extends VBox {
         DialogoOpciones.mostrar(getScene().getWindow(), getScene().getStylesheets(),
                 preferencias, () -> mostrar(pestanaActual), alCambiarEscala,
                 this::abrirPapelera, this::abrirCarpetaDatos, this::revisarPortadasHuerfanas,
-                this::crearRespaldo, this::restaurarRespaldo, repositorio);
+                this::crearRespaldo, this::restaurarRespaldo, this::abrirRechazados, repositorio);
+    }
+
+    private void abrirRechazados() {
+        DialogoRechazados.mostrar(getScene().getWindow(), getScene().getStylesheets(),
+                repositorio, items, () -> mostrar(pestanaActual));
     }
 
     private void mostrar(String pestana) {
@@ -135,6 +146,16 @@ public class VentanaPrincipal extends VBox {
         actualizarContadores();
         actualizarRacha();
         actualizarTitulo();
+        verificarNivel();
+    }
+
+    private void verificarNivel() {
+        NivelMaw actual = NivelMaw.de(items);
+        NivelMaw anterior = nivelMostrado;
+        nivelMostrado = actual;
+        if (anterior != null && actual.ordinal() > anterior.ordinal()) {
+            acciones.subirNivel(anterior, actual);
+        }
     }
 
     private void actualizarRacha() {
@@ -245,6 +266,7 @@ public class VentanaPrincipal extends VBox {
             abrir(editor, seleccionado).ifPresent(editado -> {
                 if (guardarFormulario(editor, seleccionado, editado)) {
                     aviso.mostrar("REGISTRO ACTUALIZADO");
+                    acciones.destacar(editado, false);
                 }
             });
         });
@@ -280,6 +302,7 @@ public class VentanaPrincipal extends VBox {
     }
 
     private void avisarGuardado(ItemConsumption item) {
+        acciones.destacar(item, item.getEstado() == Estado.TERMINADO);
         if (item.getEstado() == Estado.PENDIENTE) {
             aviso.mostrar("PENDIENTE GUARDADO");
             return;
@@ -309,6 +332,7 @@ public class VentanaPrincipal extends VBox {
         abrir(formulario, anterior).ifPresent(editado -> {
             if (guardarFormulario(formulario, anterior, editado)) {
                 aviso.mostrar("REGISTRO ACTUALIZADO");
+                acciones.destacar(editado, false);
             }
         });
     }
@@ -584,6 +608,7 @@ public class VentanaPrincipal extends VBox {
         List<ItemConsumption> lote = new ArrayList<>(seleccion);
         if (lote.isEmpty() || !confirmarEliminar(lote)) return;
 
+        List<javafx.geometry.Bounds> zonasEliminadas = acciones.capturar(lote);
         Set<String> nuevosIds;
         try {
             nuevosIds = EliminacionTransaccional.ejecutar(items, lote, repositorio, papelera);
@@ -600,6 +625,7 @@ public class VentanaPrincipal extends VBox {
                     "Los registros se eliminaron, pero no se pudo actualizar la pantalla: "
                             + ex.getMessage());
         }
+        acciones.corromper(zonasEliminadas);
         aviso.mostrarConDeshacer(
                 ReglasAcciones.textoEliminado(lote.size()),
                 () -> {

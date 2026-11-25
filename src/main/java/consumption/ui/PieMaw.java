@@ -246,7 +246,8 @@ public class PieMaw extends VBox {
         int avance = actual.progreso(devorados);
 
         izquierda.setText("THE MAW TE OBSERVA · " + devorados
-                + (devorados == 1 ? " DEVORADO" : " DEVORADOS") + " · " + sinDevorar + " SIN DEVORAR");
+                + (devorados == 1 ? " DEVORADO" : " DEVORADOS") + " · " + sinDevorar
+                + (sinDevorar == 1 ? " PENDIENTE" : " PENDIENTES"));
         nivel.setText(actual.etiqueta());
         porcentaje.setText(avance + "%");
 

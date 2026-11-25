@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 public class PaginaInicio extends VBox {
 
     private static final String[] FILTROS =
-            {"TODO", "JUEGOS", "LIBROS", "PELICULAS", "SERIES", "FAVORITOS", "SIN DEVORAR"};
+            {"TODO", "JUEGOS", "LIBROS", "PELICULAS", "SERIES", "FAVORITOS", "PENDIENTES"};
 
     private final boolean tarjetasCompactas;
     private final List<ItemConsumption> items;
@@ -188,6 +188,7 @@ public class PaginaInicio extends VBox {
         galeria.getChildren().clear();
         for (ItemConsumption i : visibles) {
             TarjetaItem tarjeta = new TarjetaItem(i, tarjetasCompactas);
+            tarjeta.setUserData(i);
             tarjeta.setCursor(Cursor.HAND);
             tarjeta.setOnMouseClicked(e -> {
                 if (e.getButton() == MouseButton.PRIMARY) alAbrir.accept(i);
@@ -208,7 +209,7 @@ public class PaginaInicio extends VBox {
 
         long pendientes = visibles.stream().filter(i -> i.getEstado() == Estado.PENDIENTE).count();
         String texto = visibles.size() + (visibles.size() == 1 ? " ITEM" : " ITEMS");
-        if (pendientes > 0) texto += " · " + pendientes + " SIN DEVORAR";
+        if (pendientes > 0) texto += " · " + pendientes + (pendientes == 1 ? " PENDIENTE" : " PENDIENTES");
         subtitulo.setText("// " + texto);
 
         boolean sinNada = items.isEmpty();
@@ -225,7 +226,7 @@ public class PaginaInicio extends VBox {
         return switch (filtroActual) {
             case "JUEGOS", "LIBROS", "PELICULAS", "SERIES" -> i.getTipo().equals(filtroActual);
             case "FAVORITOS" -> i.isFavorito();
-            case "SIN DEVORAR" -> i.getEstado() == Estado.PENDIENTE;
+            case "PENDIENTES" -> i.getEstado() == Estado.PENDIENTE;
             default -> true;
         };
     }
