@@ -707,18 +707,35 @@
 .scroll-bar.estadisticas-barra-horizontal .thumb:pressed {
     -fx-background-color: -c-acento;
 }
-/* Mandibulas luminosas de la pantalla de arranque, ligadas al acento del tema. */
-.mandibula-neon { -fx-stroke: -c-acento; }
-
-/* Escaneo: nucleo fino, estela cromatica y fragmentos de mordida; todo con el acento del tema. */
+/* Escaneo: nucleo fino y estela cromatica; todo con el acento del tema. */
 .efecto-barrido {
     -fx-background-color: linear-gradient(to bottom, transparent 0%, -c-acento 38%, -c-acento 62%, transparent 100%);
     -fx-effect: dropshadow(gaussian, -c-acento, 14, 0.45, 0, 0);
 }
 .efecto-estela { -fx-opacity: 0.55; }
-.fragmento-mordida {
-    -fx-fill: -c-acento;
-    -fx-effect: dropshadow(gaussian, -c-acento, 7, 0.6, 0, 0);
+
+/* Arranque de terminal: todo con variables del tema; la marca lleva contorno oscuro. */
+.arranque-cubierta { -fx-background-color: -c-bg; }
+.arranque-marca {
+    -fx-font-family: 'Orbitron';
+    -fx-font-size: 76px;
+    -fx-font-weight: bold;
+    -fx-stroke: #09090c;
+    -fx-stroke-width: 1.4;
+}
+.arranque-marca-base { -fx-fill: -c-acento; }
+.arranque-texto { -fx-font-family: 'Share Tech Mono'; -fx-font-size: 18px; -fx-fill: -c-mt; }
+.arranque-valor { -fx-font-family: 'Share Tech Mono'; -fx-font-size: 18px; -fx-fill: -c-tx; }
+.arranque-led {
+    -fx-min-width: 22; -fx-pref-width: 22; -fx-max-width: 22;
+    -fx-min-height: 10; -fx-pref-height: 10; -fx-max-height: 10;
+    -fx-border-color: -c-mt;
+    -fx-border-width: 1;
+}
+.arranque-led-on { -fx-background-color: -c-acento; -fx-border-color: -c-acento; }
+.arranque-linea {
+    -fx-background-color: -c-acento;
+    -fx-effect: dropshadow(gaussian, -c-acento, 14, 0.45, 0, 0);
 }
 
 /* Lectura de escala (OPCIONES) con destello del acento del tema */

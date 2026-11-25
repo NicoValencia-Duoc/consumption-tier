@@ -131,7 +131,14 @@ public class App extends Application {
         reproductor.volumenProperty().set(preferencias.getVolumen());
 
         ventana = new VentanaPrincipal(items, repositorio, this::elegirTema, reproductor, preferencias);
-        javafx.scene.layout.StackPane raizArranque = PantallaArranque.preparar(Efectos.capa(ventana));
+        consumption.model.NivelMaw nivelArranque = consumption.model.NivelMaw.de(items);
+        int diasArranque = consumption.model.RachaMaw.dias(items, java.time.LocalDate.now());
+        ArranqueTerminal.Datos datosArranque = new ArranqueTerminal.Datos(
+                items.size(), repositorio.cantidadRechazados(), nivelArranque.etiqueta(),
+                nivelArranque.progreso(consumption.model.NivelMaw.contarTerminados(items)),
+                diasArranque, consumption.model.RachaMaw.tier(diasArranque));
+        javafx.scene.layout.StackPane raizArranque = ArranqueTerminal.preparar(
+                Efectos.capa(ventana), datosArranque, ventana::notificarIntegridadSiCambio);
         javafx.geometry.Rectangle2D areaInicial = javafx.stage.Screen.getPrimary().getVisualBounds();
         scena = new Scene(raizArranque, areaInicial.getWidth(), areaInicial.getHeight());
         aplicarTema();
@@ -147,10 +154,8 @@ public class App extends Application {
         GeometriaVentana.aplicar(stage, preferencias);
         Terminal.registrarVentanaPrincipal(stage);
         stage.show();
-        PantallaArranque.iniciar(raizArranque);
+        ArranqueTerminal.iniciar(raizArranque);
         GeometriaVentana.registrar(stage, preferencias);
-
-        ventana.notificarIntegridadSiCambio();
     }
 
     @Override

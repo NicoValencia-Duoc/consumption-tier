@@ -15,9 +15,10 @@ public enum NivelMaw {
     public String etiqueta() { return this == SIN_NIVEL ? "SIN NIVEL" : name(); }
 
     public int progreso(long terminados) {
+        if (this == SIN_NIVEL) return 0;
         if (this == DEIDAD) return 100;
         long ancho = values()[ordinal() + 1].minimo - minimo;
-        long avance = Math.max(0, Math.min(ancho, terminados - minimo));
+        long avance = Math.max(0, Math.min(ancho, terminados - minimo + 1));
         return (int) (avance * 100 / ancho);
     }
 

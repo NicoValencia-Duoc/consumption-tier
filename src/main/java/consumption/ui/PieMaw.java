@@ -1,7 +1,7 @@
 package consumption.ui;
 
-import javafx.application.Platform;
 import consumption.model.NivelMaw;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Pos;

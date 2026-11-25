@@ -36,10 +36,10 @@ class NivelMawTest {
     @Test
     void progresoDentroDeCadaNivel() {
         assertEquals(0, NivelMaw.SIN_NIVEL.progreso(0));
-        assertEquals(0, NivelMaw.HAMBRIENTA.progreso(1));
-        assertEquals(48, NivelMaw.DESPIERTA.progreso(37));
-        assertEquals(0, NivelMaw.VORAZ.progreso(50));
-        assertEquals(96, NivelMaw.VORAZ.progreso(74));
+        assertEquals(4, NivelMaw.HAMBRIENTA.progreso(1));
+        assertEquals(52, NivelMaw.DESPIERTA.progreso(37));
+        assertEquals(4, NivelMaw.VORAZ.progreso(50));
+        assertEquals(100, NivelMaw.VORAZ.progreso(74));
         assertEquals(100, NivelMaw.DEIDAD.progreso(100));
         assertEquals(100, NivelMaw.DEIDAD.progreso(250));
     }

@@ -27,6 +27,7 @@ public class FormularioJuego extends FormularioItem<Juego> {
         agregarFila("DESARROLLADOR", desarrollador);
         agregarFila("AÑO", anio);
         agregarFila("HORAS JUGADAS", horas);
+        normalizarDecimal(horas);
     }
 
     @Override protected void cargarPropios(Juego j) {

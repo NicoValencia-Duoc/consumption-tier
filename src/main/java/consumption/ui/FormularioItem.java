@@ -1167,6 +1167,8 @@ public abstract class FormularioItem<T extends ItemConsumption> {
             if (e == Estado.TERMINADO && fin != null && !fin.equals(terminoAnterior)) {
                 if (terminoAnterior != null) fechas.remove(terminoAnterior);
                 fechas.add(fin);
+            } else if (e == Estado.TERMINADO && fin == null && terminoAnterior != null) {
+                fechas.remove(terminoAnterior);
             }
             prueba.setFechasTermino(fechas);
             prueba.setNumero(existente.getNumero());
@@ -1230,5 +1232,17 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         } catch (NumberFormatException ex) {
             throw new ErrorCampo(f, campo + " debe ser un numero.");
         }
+    }
+
+    protected void normalizarDecimal(TextField f) {
+        f.focusedProperty().addListener((obs, antes, ahora) -> {
+            if (ahora) return;
+            String texto = f.getText().trim();
+            if (texto.isEmpty()) return;
+            try {
+                Double.parseDouble(texto.replace(',', '.'));
+                f.setText(texto.replace('.', ','));
+            } catch (NumberFormatException ex) {}
+        });
     }
 }
