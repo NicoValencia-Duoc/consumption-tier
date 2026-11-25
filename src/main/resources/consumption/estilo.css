@@ -713,6 +713,9 @@
     -fx-effect: dropshadow(gaussian, -c-acento, 14, 0.45, 0, 0);
 }
 .efecto-estela { -fx-opacity: 0.55; }
+/* Sondas del glitch: Efectos.java solo lee estos colores, no se dibujan. */
+.efecto-glitch-a { -fx-background-color: -c-g; }
+.efecto-glitch-b { -fx-background-color: -c-r; }
 
 /* Arranque de terminal: todo con variables del tema; la marca lleva contorno oscuro. */
 .arranque-cubierta { -fx-background-color: -c-bg; }

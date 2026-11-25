@@ -133,6 +133,25 @@ public final class DialogoOpciones {
         HBox.setHgrow(flexible, Priority.ALWAYS);
         filaTexto.getChildren().add(1, flexible);
 
+        Label efectos = new Label("// EFECTOS");
+        efectos.getStyleClass().add("opciones-seccion");
+        CheckBox efectosGeneral = casillaEfecto("EFECTOS VISUALES (GENERAL)", propietario, hojas, preferencias,
+                preferencias::isEfectosActivos, preferencias::setEfectosActivos);
+        CheckBox efectoCrt = casillaEfecto("FILTRO CRT (VIÑETA Y LINEAS)", propietario, hojas, preferencias,
+                preferencias::isEfectoCrt, preferencias::setEfectoCrt);
+        CheckBox efectoEscaneo = casillaEfecto("ESCANEO PERIODICO", propietario, hojas, preferencias,
+                preferencias::isEfectoEscaneo, preferencias::setEfectoEscaneo);
+        CheckBox efectoGlitch = casillaEfecto("GLITCH AL PASAR EL MOUSE", propietario, hojas, preferencias,
+                preferencias::isEfectoGlitch, preferencias::setEfectoGlitch);
+        CheckBox efectoArranque = casillaEfecto("PANTALLA DE ARRANQUE", propietario, hojas, preferencias,
+                preferencias::isEfectoArranque, preferencias::setEfectoArranque);
+        VBox partesEfectos = new VBox(8, efectoCrt, efectoEscaneo, efectoGlitch, efectoArranque);
+        partesEfectos.setPadding(new Insets(0, 0, 0, 22));
+        partesEfectos.disableProperty().bind(efectosGeneral.selectedProperty().not());
+        Label avisoEfectos = new Label("LA PANTALLA DE ARRANQUE SE APLICA LA PROXIMA VEZ QUE ABRAS THE MAW");
+        avisoEfectos.getStyleClass().add("subtitulo");
+        avisoEfectos.setWrapText(true);
+
         Label mantenimiento = new Label("// DATOS Y MANTENIMIENTO");
         mantenimiento.getStyleClass().add("opciones-seccion");
         Button papelera = accion("PAPELERA", dialogo, abrirPapelera);
@@ -225,7 +244,8 @@ public final class DialogoOpciones {
         VBox controlEscala = new VBox(2, contenedorEscala, marcasEscala);
         controlEscala.setMinWidth(0);
         VBox cuerpo = new VBox(13, visual, tabla, tarjetas, filaTexto, controlEscala,
-                explicacion, new Separator(), mantenimiento, herramientas,
+                explicacion, new Separator(), efectos, efectosGeneral, partesEfectos, avisoEfectos,
+                new Separator(), mantenimiento, herramientas,
                 new Separator(), integridad, estado, aclaracion, accionesIntegridad);
         cuerpo.setPadding(new Insets(14));
         ScrollPane scroll = new ScrollPane(cuerpo);
@@ -255,6 +275,27 @@ public final class DialogoOpciones {
         error.setHeaderText(null);
         error.getDialogPane().getStylesheets().setAll(hojas);
         error.showAndWait();
+    }
+
+    private static CheckBox casillaEfecto(String texto, Window propietario, List<String> hojas,
+                                          Preferencias preferencias,
+                                          java.util.function.BooleanSupplier leer,
+                                          java.util.function.Consumer<Boolean> escribir) {
+        CheckBox casilla = new CheckBox(texto);
+        casilla.setSelected(leer.getAsBoolean());
+        casilla.setOnAction(e -> {
+            boolean anterior = leer.getAsBoolean();
+            try {
+                escribir.accept(casilla.isSelected());
+                preferencias.guardar();
+            } catch (RuntimeException ex) {
+                escribir.accept(anterior);
+                casilla.setSelected(anterior);
+                errorGuardado(propietario, hojas, ex);
+            }
+            Efectos.actualizar();
+        });
+        return casilla;
     }
 
     private static Button accion(String nombre, Dialog<?> dialogo, Runnable accion) {

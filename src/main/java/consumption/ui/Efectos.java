@@ -1,12 +1,20 @@
 package consumption.ui;
 
+import consumption.data.Preferencias;
+import javafx.animation.Animation;
 import javafx.animation.PauseTransition;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
@@ -17,26 +25,102 @@ import javafx.scene.layout.StackPane;
 
 public final class Efectos {
 
-    public static final boolean ACTIVOS = true;
+    private static final BooleanProperty CRT_VISIBLE = new SimpleBooleanProperty(true);
+    private static Preferencias preferencias;
+    private static StackPane raizEscaneo;
+
+    public static void configurar(Preferencias prefs) {
+        preferencias = prefs;
+        CRT_VISIBLE.set(crtPermitido());
+    }
+
+    public static void registrarRaiz(StackPane raiz) {
+        raizEscaneo = raiz;
+    }
+
+    public static boolean crtPermitido() {
+        return preferencias == null || (preferencias.isEfectosActivos() && preferencias.isEfectoCrt());
+    }
+
+    public static boolean escaneoPermitido() {
+        return preferencias == null || (preferencias.isEfectosActivos() && preferencias.isEfectoEscaneo());
+    }
+
+    public static boolean glitchPermitido() {
+        return preferencias == null || (preferencias.isEfectosActivos() && preferencias.isEfectoGlitch());
+    }
+
+    public static boolean arranquePermitido() {
+        return preferencias == null || (preferencias.isEfectosActivos() && preferencias.isEfectoArranque());
+    }
+
+    public static void actualizar() {
+        CRT_VISIBLE.set(crtPermitido());
+        StackPane raiz = raizEscaneo;
+        if (raiz == null) return;
+        if (!escaneoPermitido()) {
+            cancelarEscaneo(raiz);
+            return;
+        }
+        boolean corriendo = Boolean.TRUE.equals(raiz.getProperties().get("escaneoActivo"));
+        Object espera = raiz.getProperties().get("proximoEscaneo");
+        boolean enEspera = espera instanceof Animation a && a.getStatus() == Animation.Status.RUNNING;
+        if (!corriendo && !enEspera) escanear(raiz);
+    }
+
+    private static void cancelarEscaneo(StackPane raiz) {
+        Object espera = raiz.getProperties().remove("proximoEscaneo");
+        if (espera instanceof Animation a) a.stop();
+        Object animacion = raiz.getProperties().remove("animacionEscaneo");
+        if (animacion instanceof Animation a) a.stop();
+        Object capa = raiz.getProperties().remove("capaEscaneo");
+        if (capa instanceof Node n) raiz.getChildren().remove(n);
+        raiz.getProperties().put("escaneoActivo", false);
+    }
 
     private Efectos() {
     }
 
     public static void glitchAlPasar(Node nodo) {
-        if (!ACTIVOS) return;
-        DropShadow cian = new DropShadow(BlurType.ONE_PASS_BOX, Color.web("#2fd8ff"), 0, 0, 2, 0);
-        DropShadow rojo = new DropShadow(BlurType.ONE_PASS_BOX, Color.web("#ff2a3d"), 0, 0, -2, 0);
-        rojo.setInput(cian);
         PauseTransition fin = new PauseTransition(Duration.millis(150));
         fin.setOnFinished(e -> nodo.setEffect(null));
-        nodo.setOnMouseEntered(e -> {
+        nodo.addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
+            if (!glitchPermitido()) return;
+            DropShadow cian = new DropShadow(BlurType.ONE_PASS_BOX,
+                    colorTema(nodo, "efecto-glitch-a", "#2fd8ff"), 0, 0, 2, 0);
+            DropShadow rojo = new DropShadow(BlurType.ONE_PASS_BOX,
+                    colorTema(nodo, "efecto-glitch-b", "#ff2a3d"), 0, 0, -2, 0);
+            rojo.setInput(cian);
             nodo.setEffect(rojo);
             fin.playFromStart();
         });
     }
 
+    private static Color colorTema(Node nodo, String clase, String respaldo) {
+        try {
+            Scene escena = nodo.getScene();
+            if (escena != null && escena.getRoot() instanceof Pane raiz) {
+                Region sonda = new Region();
+                sonda.getStyleClass().add(clase);
+                sonda.setManaged(false);
+                sonda.setMouseTransparent(true);
+                raiz.getChildren().add(sonda);
+                try {
+                    sonda.applyCss();
+                    if (sonda.getBackground() != null && !sonda.getBackground().getFills().isEmpty()
+                            && sonda.getBackground().getFills().get(0).getFill() instanceof Color color) {
+                        return color;
+                    }
+                } finally {
+                    raiz.getChildren().remove(sonda);
+                }
+            }
+        } catch (RuntimeException ex) {}
+        return Color.web(respaldo);
+    }
+
     public static void escanear(StackPane raiz) {
-        if (!ACTIVOS || Boolean.TRUE.equals(raiz.getProperties().get("escaneoActivo"))) return;
+        if (!escaneoPermitido() || Boolean.TRUE.equals(raiz.getProperties().get("escaneoActivo"))) return;
         raiz.getProperties().put("escaneoActivo", true);
         Pane capa = new Pane();
         capa.setManaged(false);
@@ -59,7 +143,9 @@ public final class Efectos {
         capa.getChildren().addAll(estela, nucleo);
         capa.setPickOnBounds(false);
         raiz.getChildren().add(capa);
-        double altura = Math.max(1, raiz.getHeight() - 11);
+        DoubleProperty avance = new SimpleDoubleProperty(0);
+        nucleo.translateYProperty().bind(avance.multiply(raiz.heightProperty().subtract(11)));
+        raiz.getProperties().put("capaEscaneo", capa);
         javafx.beans.property.BooleanProperty descendiendo = new javafx.beans.property.SimpleBooleanProperty(true);
         estela.translateYProperty().bind(javafx.beans.binding.Bindings.createDoubleBinding(
                 () -> nucleo.getTranslateY() + (descendiendo.get() ? -80 : 11),
@@ -73,32 +159,27 @@ public final class Efectos {
             estela.setStyle("-fx-background-color: linear-gradient(to bottom, -c-acento, transparent);");
         };
         nucleo.setOpacity(0); estela.setOpacity(0);
-        Timeline tramoBajada1 = new Timeline(
+        Timeline tramoBajada = new Timeline(
                 new KeyFrame(Duration.ZERO, e -> bajada.run(),
-                        new KeyValue(nucleo.translateYProperty(), 0),
+                        new KeyValue(avance, 0),
                         new KeyValue(nucleo.opacityProperty(), 0), new KeyValue(estela.opacityProperty(), 0)),
                 new KeyFrame(Duration.millis(150),
                         new KeyValue(nucleo.opacityProperty(), .8), new KeyValue(estela.opacityProperty(), .55)),
                 new KeyFrame(Duration.millis(2000),
-                        new KeyValue(nucleo.translateYProperty(), altura))
+                        new KeyValue(avance, 1))
         );
         Timeline tramoSubida = new Timeline(
                 new KeyFrame(Duration.ZERO, e -> subida.run(),
-                        new KeyValue(nucleo.translateYProperty(), altura)),
-                new KeyFrame(Duration.millis(2000),
-                        new KeyValue(nucleo.translateYProperty(), 0))
-        );
-        Timeline tramoBajada2 = new Timeline(
-                new KeyFrame(Duration.ZERO, e -> bajada.run(),
-                        new KeyValue(nucleo.translateYProperty(), 0)),
+                        new KeyValue(avance, 1)),
                 new KeyFrame(Duration.millis(1850),
-                        new KeyValue(nucleo.translateYProperty(), altura)),
+                        new KeyValue(avance, 0)),
                 new KeyFrame(Duration.millis(2000),
                         new KeyValue(nucleo.opacityProperty(), 0),
                         new KeyValue(estela.opacityProperty(), 0))
         );
         javafx.animation.SequentialTransition animacion =
-                new javafx.animation.SequentialTransition(tramoBajada1, tramoSubida, tramoBajada2);
+                new javafx.animation.SequentialTransition(tramoBajada, tramoSubida);
+        raiz.getProperties().put("animacionEscaneo", animacion);
         animacion.setOnFinished(e -> {
             estela.translateYProperty().unbind();
             estela.prefWidthProperty().unbind();
@@ -106,7 +187,7 @@ public final class Efectos {
 
             raiz.getChildren().remove(capa);
             raiz.getProperties().put("escaneoActivo", false);
-            if (raiz.getScene() != null && raiz.getScene().getWindow() != null && raiz.getScene().getWindow().isShowing()) {
+            if (escaneoPermitido() && raiz.getScene() != null && raiz.getScene().getWindow() != null && raiz.getScene().getWindow().isShowing()) {
                 double minutos = 5 + java.util.concurrent.ThreadLocalRandom.current().nextDouble(10);
                 PauseTransition espera = new PauseTransition(Duration.minutes(minutos));
                 espera.setOnFinished(evento -> {
@@ -120,14 +201,14 @@ public final class Efectos {
     }
 
     public static Parent capa(Parent contenido) {
-        if (!ACTIVOS) return contenido;
-
         Region vineta = new Region();
         vineta.getStyleClass().add("efecto-vineta");
         Region lineas = new Region();
         lineas.getStyleClass().add("efecto-lineas");
         vineta.setMouseTransparent(true);
         lineas.setMouseTransparent(true);
+        vineta.visibleProperty().bind(CRT_VISIBLE);
+        lineas.visibleProperty().bind(CRT_VISIBLE);
 
         return new StackPane(contenido, vineta, lineas);
     }

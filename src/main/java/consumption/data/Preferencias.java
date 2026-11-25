@@ -35,11 +35,26 @@ public class Preferencias {
     private boolean tablaCompacta = false;
     private boolean tarjetasCompactas = false;
     private int escalaTexto = 100;
+    private boolean efectosActivos = true;
+    private boolean efectoCrt = true;
+    private boolean efectoEscaneo = true;
+    private boolean efectoGlitch = true;
+    private boolean efectoArranque = true;
 
     public boolean isTablaCompacta() { return tablaCompacta; }
     public void setTablaCompacta(boolean v) { tablaCompacta = v; }
     public boolean isTarjetasCompactas() { return tarjetasCompactas; }
     public void setTarjetasCompactas(boolean v) { tarjetasCompactas = v; }
+    public boolean isEfectosActivos() { return efectosActivos; }
+    public void setEfectosActivos(boolean v) { efectosActivos = v; }
+    public boolean isEfectoCrt() { return efectoCrt; }
+    public void setEfectoCrt(boolean v) { efectoCrt = v; }
+    public boolean isEfectoEscaneo() { return efectoEscaneo; }
+    public void setEfectoEscaneo(boolean v) { efectoEscaneo = v; }
+    public boolean isEfectoGlitch() { return efectoGlitch; }
+    public void setEfectoGlitch(boolean v) { efectoGlitch = v; }
+    public boolean isEfectoArranque() { return efectoArranque; }
+    public void setEfectoArranque(boolean v) { efectoArranque = v; }
     public int getEscalaTexto() { return Math.max(90, Math.min(115, escalaTexto == 0 ? 100 : escalaTexto)); }
     public void setEscalaTexto(int v) { escalaTexto = Math.max(90, Math.min(115, v)); }
 

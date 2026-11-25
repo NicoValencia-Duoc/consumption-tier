@@ -28,6 +28,9 @@ public final class ArranqueTerminal {
 
     private static final String CLAVE = "arranqueTerminal";
     private static final int SEGMENTOS = 10;
+    private static final String CLAVE_OMITIR = "arranqueTerminalOmitir";
+    private static final int INICIO_BARRIDO_MS = 5000;
+    private static final int DURACION_BARRIDO_MS = 800;
 
     private ArranqueTerminal() {}
 
@@ -71,6 +74,7 @@ public final class ArranqueTerminal {
 
     public static StackPane preparar(Parent aplicacion, Datos datos, Runnable alTerminar) {
         StackPane raiz = new StackPane(aplicacion);
+        Efectos.registrarRaiz(raiz);
 
         Text marca = new Text("THE MAW");
         marca.getStyleClass().add("arranque-marca");
@@ -140,26 +144,33 @@ public final class ArranqueTerminal {
                 new KeyFrame(Duration.millis(120), e -> { marca.setOpacity(0.7); marca.setTranslateX(8); }),
                 new KeyFrame(Duration.millis(210), e -> { marca.setOpacity(0.12); marca.setTranslateX(-4); }),
                 new KeyFrame(Duration.millis(330), e -> { marca.setOpacity(1); marca.setTranslateX(0); }),
-                new KeyFrame(Duration.millis(1500), e -> { led.setOpacity(1); porcentaje.setOpacity(1); }),
-                new KeyFrame(Duration.millis(2000), e -> barrido.setOpacity(1), new KeyValue(visible, 1)),
-                new KeyFrame(Duration.millis(2800), new KeyValue(visible, 0, Interpolator.EASE_IN)));
-        escribir(secuencia, lectura, 350, 700);
-        escribir(secuencia, registros, 700, 1100);
-        escribir(secuencia, nivel, 1100, 1500);
-        escribir(secuencia, racha, 1550, 1850);
+                new KeyFrame(Duration.millis(2900), e -> { led.setOpacity(1); porcentaje.setOpacity(1); }),
+                new KeyFrame(Duration.millis(INICIO_BARRIDO_MS), e -> barrido.setOpacity(1), new KeyValue(visible, 1)),
+                new KeyFrame(Duration.millis(INICIO_BARRIDO_MS + DURACION_BARRIDO_MS),
+                        new KeyValue(visible, 0, Interpolator.EASE_IN)));
+        escribir(secuencia, lectura, 450, 1250);
+        escribir(secuencia, registros, 1350, 2050);
+        escribir(secuencia, nivel, 2150, 2850);
+        escribir(secuencia, racha, 3000, 3500);
 
-        secuencia.setOnFinished(e -> {
+        Runnable terminar = () -> {
             cubierta.setClip(null);
             raiz.getChildren().removeAll(cubierta, barrido);
             if (alTerminar != null) alTerminar.run();
             Efectos.escanear(raiz);
-        });
+        };
+        secuencia.setOnFinished(e -> terminar.run());
+        raiz.getProperties().put(CLAVE_OMITIR, terminar);
         raiz.getProperties().put(CLAVE, secuencia);
         return raiz;
     }
 
     public static void iniciar(StackPane raiz) {
-        ((Timeline) raiz.getProperties().get(CLAVE)).play();
+        if (Efectos.arranquePermitido()) {
+            ((Timeline) raiz.getProperties().get(CLAVE)).play();
+            return;
+        }
+        javafx.application.Platform.runLater((Runnable) raiz.getProperties().get(CLAVE_OMITIR));
     }
 
     private static void escribir(Timeline secuencia, Linea destino, int desdeMs, int hastaMs) {
