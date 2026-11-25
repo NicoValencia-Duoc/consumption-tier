@@ -140,6 +140,7 @@ public class App extends Application {
                 nivelArranque.progreso(consumption.model.NivelMaw.contarTerminados(items)),
                 diasArranque, consumption.model.RachaMaw.tier(diasArranque));
         Efectos.configurar(preferencias);
+        Sonidos.instalar();
         javafx.scene.layout.StackPane raizArranque = ArranqueTerminal.preparar(
                 Efectos.capa(ventana), datosArranque, ventana::notificarIntegridadSiCambio);
         javafx.geometry.Rectangle2D areaInicial = javafx.stage.Screen.getPrimary().getVisualBounds();

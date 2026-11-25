@@ -144,9 +144,9 @@ public final class ArranqueTerminal {
 
         Timeline secuencia = new Timeline();
         secuencia.getKeyFrames().addAll(
-                new KeyFrame(Duration.millis(120), e -> { marca.setOpacity(0.7); marca.setTranslateX(8); }),
+                new KeyFrame(Duration.millis(120), e -> { Sonidos.glitch(); marca.setOpacity(0.7); marca.setTranslateX(8); }),
                 new KeyFrame(Duration.millis(210), e -> { marca.setOpacity(0.12); marca.setTranslateX(-4); }),
-                new KeyFrame(Duration.millis(330), e -> { marca.setOpacity(1); marca.setTranslateX(0); }),
+                new KeyFrame(Duration.millis(330), e -> { Sonidos.glitch(); marca.setOpacity(1); marca.setTranslateX(0); }),
                 new KeyFrame(Duration.millis(3150), e -> { led.setOpacity(1); porcentaje.setOpacity(1); }),
                 new KeyFrame(Duration.millis(INICIO_BARRIDO_MS), e -> barrido.setOpacity(1), new KeyValue(visible, 1)),
                 new KeyFrame(Duration.millis(INICIO_BARRIDO_MS + DURACION_BARRIDO_MS),

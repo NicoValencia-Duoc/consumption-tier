@@ -96,6 +96,7 @@ public final class Efectos {
         fin.setOnFinished(e -> nodo.setEffect(null));
         nodo.addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
             if (!glitchPermitido()) return;
+            Sonidos.glitch();
             DropShadow cian = new DropShadow(BlurType.ONE_PASS_BOX,
                     colorTema(nodo, "efecto-glitch-a", "#2fd8ff"), 0, 0, 2, 0);
             DropShadow rojo = new DropShadow(BlurType.ONE_PASS_BOX,
@@ -138,6 +139,7 @@ public final class Efectos {
     public static void escanear(StackPane raiz) {
         if (!escaneoPermitido() || Boolean.TRUE.equals(raiz.getProperties().get("escaneoActivo"))) return;
         raiz.getProperties().put("escaneoActivo", true);
+        Sonidos.glitch();
         Pane capa = new Pane();
         capa.setManaged(false);
         capa.setMouseTransparent(true);
