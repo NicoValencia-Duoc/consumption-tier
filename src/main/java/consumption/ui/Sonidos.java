@@ -92,22 +92,27 @@ public final class Sonidos {
 
     private static void alPulsar(MouseEvent evento) {
         if (!(evento.getTarget() instanceof Node objetivo)) return;
+        java.util.List<ClasificadorSonidos.Rasgos> cadena = new java.util.ArrayList<>();
         for (Node actual = objetivo; actual != null; actual = actual.getParent()) {
-            if (actual.isDisabled()) return;
-            if (actual instanceof ButtonBase || actual instanceof ComboBoxBase<?> || actual instanceof Slider
-                    || actual.getStyleClass().contains("column-header")) {
-                if (actual.getStyleClass().contains("boton-peligro")) peligro(); else clic();
-                return;
-            }
-            if (actual.getStyleClass().contains("menu-item")) { menu(); return; }
-            if (actual instanceof IndexedCell<?> celda) {
-                if (!celda.isEmpty()) fila();
-                return;
-            }
-            if (actual.getStyleClass().contains("tarjeta") || actual.getCursor() == Cursor.HAND) {
-                fila();
-                return;
-            }
+            var clases = actual.getStyleClass();
+            boolean celda = actual instanceof IndexedCell<?>;
+            cadena.add(new ClasificadorSonidos.Rasgos(
+                    actual.isDisabled(),
+                    actual instanceof ButtonBase || actual instanceof ComboBoxBase<?> || actual instanceof Slider,
+                    clases.contains("column-header"),
+                    clases.contains("boton-peligro"),
+                    clases.contains("menu-item"),
+                    celda,
+                    celda && ((IndexedCell<?>) actual).isEmpty(),
+                    clases.contains("tarjeta"),
+                    actual.getCursor() == Cursor.HAND));
+        }
+        switch (ClasificadorSonidos.clasificar(cadena)) {
+            case CLIC -> clic();
+            case PELIGRO -> peligro();
+            case MENU -> menu();
+            case FILA -> fila();
+            case NINGUNO -> { }
         }
     }
 

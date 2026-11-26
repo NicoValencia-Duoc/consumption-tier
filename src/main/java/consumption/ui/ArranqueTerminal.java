@@ -9,8 +9,13 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.input.InputEvent;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -29,6 +34,7 @@ public final class ArranqueTerminal {
     private static final String CLAVE = "arranqueTerminal";
     private static final int SEGMENTOS = 10;
     private static final String CLAVE_OMITIR = "arranqueTerminalOmitir";
+    private static final String CLAVE_SALTAR = "arranqueTerminalSaltar";
     private static final int INICIO_BARRIDO_MS = 5000;
     private static final int DURACION_BARRIDO_MS = 800;
 
@@ -159,20 +165,49 @@ public final class ArranqueTerminal {
         escribir(secuencia, hambre, 2750, 3150);
         escribir(secuencia, racha, 3300, 3800);
 
+        boolean[] cerrado = {false};
+        Runnable[] retirarFiltros = {() -> { }};
         Runnable terminar = () -> {
+            if (cerrado[0]) return;
+            cerrado[0] = true;
+            retirarFiltros[0].run();
             cubierta.setClip(null);
             raiz.getChildren().removeAll(cubierta, barrido);
             if (alTerminar != null) alTerminar.run();
             Efectos.escanear(raiz);
         };
         secuencia.setOnFinished(e -> terminar.run());
+        EventHandler<InputEvent> saltar = evento -> {
+            if (!ReglasArranque.omitible(secuencia.getCurrentTime().toMillis())) return;
+            evento.consume();
+            secuencia.stop();
+            terminar.run();
+        };
+        raiz.getProperties().put(CLAVE_SALTAR, new Object[] {saltar, retirarFiltros});
         raiz.getProperties().put(CLAVE_OMITIR, terminar);
         raiz.getProperties().put(CLAVE, secuencia);
         return raiz;
     }
 
+    @SuppressWarnings("unchecked")
+    private static void instalarSalto(StackPane raiz) {
+        Object[] salto = (Object[]) raiz.getProperties().get(CLAVE_SALTAR);
+        EventHandler<InputEvent> saltar = (EventHandler<InputEvent>) salto[0];
+        Runnable[] retirarFiltros = (Runnable[]) salto[1];
+        Scene escena = raiz.getScene();
+        raiz.addEventFilter(MouseEvent.MOUSE_PRESSED, saltar);
+        if (escena != null) escena.addEventFilter(KeyEvent.KEY_PRESSED, saltar);
+        else raiz.addEventFilter(KeyEvent.KEY_PRESSED, saltar);
+        retirarFiltros[0] = () -> {
+            raiz.removeEventFilter(MouseEvent.MOUSE_PRESSED, saltar);
+            if (escena != null) escena.removeEventFilter(KeyEvent.KEY_PRESSED, saltar);
+            else raiz.removeEventFilter(KeyEvent.KEY_PRESSED, saltar);
+        };
+    }
+
     public static void iniciar(StackPane raiz) {
         if (Efectos.arranquePermitido()) {
+            instalarSalto(raiz);
             ((Timeline) raiz.getProperties().get(CLAVE)).play();
             return;
         }
