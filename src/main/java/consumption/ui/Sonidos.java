@@ -33,6 +33,7 @@ public final class Sonidos {
     private static final byte[] CLIC = SintesisSonidos.tecla(14, 0.22, 1900);
     private static final byte[] MENU = SintesisSonidos.tecla(10, 0.16, 2600);
     private static final byte[] FILA = SintesisSonidos.tecla(22, 0.20, 520);
+    private static final byte[] TIC = SintesisSonidos.tecla(8, 0.09, 3200);
     private static final byte[] PELIGRO = secuencia(new double[][] {{330, 40}, {247, 70}});
     private static final byte[] ABANDONAR = secuencia(new double[][] {
             {392, 70}, {0, 25}, {294, 70}, {0, 25}, {196, 170}});
@@ -41,6 +42,8 @@ public final class Sonidos {
     private static final String MARCA = "the-maw.sonidos-instalado";
     private static boolean instalado;
     private static long ultimoGlitch;
+    private static long ultimoTic;
+    private static final long INTERVALO_TIC_NS = 60_000_000L;
     private Sonidos() { }
 
     public static void guardar() { reproducir(GUARDAR); }
@@ -56,6 +59,8 @@ public final class Sonidos {
     public static void menu() { reproducir(MENU); }
 
     public static void fila() { reproducir(FILA); }
+
+    public static void tic() { reproducir(TIC); }
 
     public static void peligro() { reproducir(PELIGRO); }
 
@@ -88,6 +93,16 @@ public final class Sonidos {
         if (escena == null || Boolean.TRUE.equals(escena.getProperties().get(MARCA))) return;
         escena.getProperties().put(MARCA, Boolean.TRUE);
         escena.addEventFilter(MouseEvent.MOUSE_PRESSED, Sonidos::alPulsar);
+        escena.addEventFilter(MouseEvent.MOUSE_ENTERED_TARGET, Sonidos::alEntrar);
+    }
+
+    private static void alEntrar(MouseEvent evento) {
+        if (!(evento.getTarget() instanceof ButtonBase boton)) return;
+        if (!ClasificadorSonidos.suenaAlPasar(true, boton.isDisabled())) return;
+        long ahora = System.nanoTime();
+        if (!ClasificadorSonidos.intervaloCumplido(ahora, ultimoTic, INTERVALO_TIC_NS)) return;
+        ultimoTic = ahora;
+        tic();
     }
 
     private static void alPulsar(MouseEvent evento) {

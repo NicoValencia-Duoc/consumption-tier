@@ -6,10 +6,12 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
+import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.HBox;
@@ -223,6 +225,22 @@ public final class AccionesVisuales {
         if (nodo instanceof TableView<?> tabla) {
             int indice = tabla.getItems().indexOf(item);
             if (indice >= 0) tabla.scrollTo(Math.max(0, indice - 2));
+        } else {
+            desplazarEnScroll(item);
+        }
+    }
+
+    private void desplazarEnScroll(ItemConsumption item) {
+        Node destino = buscarNodo(item);
+        if (destino == null) return;
+        for (Node padre = destino.getParent(); padre != null; padre = padre.getParent()) {
+            if (padre instanceof ScrollPane panel && panel.getContent() != null) {
+                Bounds zona = panel.getContent().sceneToLocal(destino.localToScene(destino.getBoundsInLocal()));
+                if (zona == null) return;
+                panel.setVvalue(ReglasAcciones.posicionDesplazamiento(zona.getMinY(), zona.getHeight(),
+                        panel.getViewportBounds().getHeight(), panel.getContent().getLayoutBounds().getHeight()));
+                return;
+            }
         }
     }
 
@@ -248,8 +266,11 @@ public final class AccionesVisuales {
         if (nodo == null || nodo.getScene() == null || !nodo.isVisible()) return null;
         Bounds zona = capa.sceneToLocal(nodo.localToScene(nodo.getBoundsInLocal()));
         if (zona == null || zona.getWidth() < 1 || zona.getHeight() < 1) return null;
-        boolean dentro = zona.getMinX() >= -1 && zona.getMinY() >= -1
-                && zona.getMaxX() <= capa.getWidth() + 1 && zona.getMaxY() <= capa.getHeight() + 1;
-        return dentro ? zona : null;
+        double minX = Math.max(zona.getMinX(), 0);
+        double minY = Math.max(zona.getMinY(), 0);
+        double maxX = Math.min(zona.getMaxX(), capa.getWidth());
+        double maxY = Math.min(zona.getMaxY(), capa.getHeight());
+        if (maxX - minX < 1 || maxY - minY < zona.getHeight() * 0.5) return null;
+        return new BoundingBox(minX, minY, maxX - minX, maxY - minY);
     }
 }

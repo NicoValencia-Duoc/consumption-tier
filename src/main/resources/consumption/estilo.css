@@ -785,5 +785,29 @@
     -fx-effect: dropshadow(gaussian, -c-acento, 14, 0.45, 0, 0);
 }
 
+/* ESTADISTICAS (cápsula 32): paneles y graficos LED. Tamanos de texto en em: siguen la escala de OPCIONES. */
+.panel-estadistica { -fx-background-color: -c-pn; -fx-border-color: -c-ln; -fx-border-width: 1; }
+.panel-estadistica-cuerpo { -fx-padding: 12 14 12 14; }
+.panel-esquina {
+    -fx-min-width: 9; -fx-pref-width: 9; -fx-max-width: 9;
+    -fx-min-height: 9; -fx-pref-height: 9; -fx-max-height: 9;
+    -fx-border-color: -c-acento;
+}
+.panel-esquina-sup { -fx-border-width: 2 2 0 0; }
+.panel-esquina-inf { -fx-border-width: 0 2 2 0; }
+.led-e { -fx-background-color: -c-ln; }
+.led-e-on { -fx-background-color: -c-acento; }
+.led-e-actual { -fx-background-color: -c-y; }
+.led-guia {
+    -fx-border-color: -c-mt transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-border-style: dashed;
+    -fx-opacity: 0.55;
+}
+.grafico-valor { -fx-text-fill: -c-tx; -fx-font-size: 0.95em; }
+.grafico-eje { -fx-text-fill: -c-mt; -fx-font-size: 0.65em; }
+.grafico-mini-valor { -fx-text-fill: -c-tx; -fx-font-size: 0.6em; }
+.grafico-mini-etiqueta { -fx-text-fill: -c-mt; -fx-font-size: 0.6em; }
+
 /* Lectura de escala (OPCIONES) con destello del acento del tema */
 .opciones-valor-glitch { -fx-text-fill: -c-acento; -fx-font-weight: bold; }

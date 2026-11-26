@@ -46,6 +46,13 @@ public final class ReglasAcciones {
         };
     }
 
+    public static double posicionDesplazamiento(double y, double alto, double alturaVista, double alturaContenido) {
+        double recorrido = alturaContenido - alturaVista;
+        if (recorrido <= 0) return 0;
+        double deseado = y - (alturaVista - alto) / 2.0;
+        return Math.max(0, Math.min(1, deseado / recorrido));
+    }
+
     private static String corto(String titulo) {
         return titulo.length() <= LARGO_TITULO ? titulo : titulo.substring(0, LARGO_TITULO - 3) + "...";
     }

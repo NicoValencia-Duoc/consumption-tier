@@ -22,4 +22,12 @@ final class ClasificadorSonidos {
         }
         return Tipo.NINGUNO;
     }
+
+    static boolean suenaAlPasar(boolean esBoton, boolean deshabilitado) {
+        return esBoton && !deshabilitado;
+    }
+
+    static boolean intervaloCumplido(long ahoraNs, long ultimoNs, long minimoNs) {
+        return ahoraNs - ultimoNs >= minimoNs;
+    }
 }

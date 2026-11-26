@@ -51,6 +51,7 @@ public class VentanaPrincipal extends VBox {
     private final Pane capaEfectos = new Pane();
     private AccionesVisuales acciones;
     private NivelMaw nivelMostrado;
+    private boolean celebrarNivel;
     private final PieMaw pie;
     private Runnable alCambiarEscala = () -> {};
     private final Timeline relojRacha = new Timeline(new KeyFrame(Duration.seconds(30), e -> verificarCambioDeDia()));
@@ -142,7 +143,7 @@ public class VentanaPrincipal extends VBox {
             case "PELICULAS" -> paginaPeliculas();
             case "SERIES" -> paginaSeries();
             case "PENDIENTES" -> paginaPendientes();
-            case "ESTADISTICAS" -> new PaginaEstadisticas(items);
+            case "ESTADISTICAS" -> new PaginaEstadisticas(items, preferencias.getEscalaTexto());
             default -> paginaInicio();
         };
         contenido.getChildren().setAll(pagina);
@@ -156,7 +157,7 @@ public class VentanaPrincipal extends VBox {
         NivelMaw actual = NivelMaw.de(items);
         NivelMaw anterior = nivelMostrado;
         nivelMostrado = actual;
-        if (anterior != null && actual.ordinal() > anterior.ordinal()) {
+        if (celebrarNivel && anterior != null && actual.ordinal() > anterior.ordinal()) {
             acciones.subirNivel(anterior, actual);
         }
     }
@@ -438,12 +439,15 @@ public class VentanaPrincipal extends VBox {
 
         formulario.confirmarPortadaGuardada();
         formulario.confirmarBorradorGuardado();
+        celebrarNivel = true;
         try {
             mostrar(pestanaActual);
         } catch (RuntimeException ex) {
             avisar(Alert.AlertType.WARNING,
                     "El registro se guardo correctamente, pero no se pudo "
                             + "actualizar la pantalla: " + ex.getMessage());
+        } finally {
+            celebrarNivel = false;
         }
 
         return true;
@@ -534,6 +538,7 @@ public class VentanaPrincipal extends VBox {
             return;
         }
 
+        celebrarNivel = transicion == Transicion.TERMINAR;
         try {
             if (transicion == Transicion.TERMINAR) {
                 editarParaCalificar(item);
@@ -552,6 +557,8 @@ public class VentanaPrincipal extends VBox {
             avisar(Alert.AlertType.WARNING,
                     "El cambio de estado se guardo correctamente, pero no se pudo "
                             + "completar la actualizacion de pantalla: " + ex.getMessage());
+        } finally {
+            celebrarNivel = false;
         }
     }
 
