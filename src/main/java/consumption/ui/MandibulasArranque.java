@@ -29,7 +29,9 @@ final class MandibulasArranque extends Pane {
     private final Group superior = new Group();
     private final Group inferior = new Group();
     private final DoubleProperty caida = new SimpleDoubleProperty(0);
+    private final DoubleProperty entrada = new SimpleDoubleProperty(1);
     private double caidaMaxima;
+    private double recorridoEntrada;
 
     MandibulasArranque() {
         setMouseTransparent(true);
@@ -37,15 +39,19 @@ final class MandibulasArranque extends Pane {
         getChildren().addAll(superior, inferior);
         widthProperty().addListener((obs, antes, ahora) -> rehacer());
         heightProperty().addListener((obs, antes, ahora) -> rehacer());
-        caida.addListener((obs, antes, ahora) -> mover(ahora.doubleValue()));
+        caida.addListener((obs, antes, ahora) -> mover());
+        entrada.addListener((obs, antes, ahora) -> mover());
     }
 
     void programar(Timeline linea) {
-        amago(linea, 700);
-        titilar(linea, 1500);
-        amago(linea, 2200);
-        titilar(linea, 2900);
-        amago(linea, 3600);
+        linea.getKeyFrames().addAll(
+                new KeyFrame(Duration.millis(400), new KeyValue(entrada, 1)),
+                new KeyFrame(Duration.millis(1000), new KeyValue(entrada, 0, Interpolator.EASE_OUT)));
+        amago(linea, 1400);
+        titilar(linea, 2100);
+        amago(linea, 2700);
+        titilar(linea, 3300);
+        amago(linea, 3900);
     }
 
     private void amago(Timeline linea, int inicio) {
@@ -67,9 +73,10 @@ final class MandibulasArranque extends Pane {
         }
     }
 
-    private void mover(double valor) {
-        superior.setTranslateY(valor * caidaMaxima);
-        inferior.setTranslateY(-valor * caidaMaxima);
+    private void mover() {
+        double desplazamiento = caida.get() * caidaMaxima - entrada.get() * recorridoEntrada;
+        superior.setTranslateY(desplazamiento);
+        inferior.setTranslateY(-desplazamiento);
     }
 
     private void rehacer() {
@@ -80,11 +87,12 @@ final class MandibulasArranque extends Pane {
         double diente = (espacio - BANDA - MARGEN) / (LARGO_MAXIMO + FACTOR_CAIDA);
         diente = Math.max(18, Math.min(90, diente));
         caidaMaxima = diente * FACTOR_CAIDA;
+        recorridoEntrada = BANDA + diente * LARGO_MAXIMO + 12;
         int cantidad = Math.max(4, (int) Math.round(ancho / PASO));
         double paso = ancho / cantidad;
         construir(superior, true, ancho, alto, cantidad, paso, diente, new Random(7));
         construir(inferior, false, ancho, alto, cantidad, paso, diente, new Random(19));
-        mover(caida.get());
+        mover();
     }
 
     private void construir(Group grupo, boolean arriba, double ancho, double alto, int cantidad,
@@ -96,9 +104,11 @@ final class MandibulasArranque extends Pane {
 
         Path forma = new Path();
         forma.getStyleClass().add("arranque-mandibula");
-        forma.getElements().add(new MoveTo(0, origen - signo * 8));
-        forma.getElements().add(new LineTo(ancho, origen - signo * 8));
-        forma.getElements().add(new LineTo(ancho, nace));
+        double fuera = paso * 2;
+        double lejos = origen - signo * alto * 0.5;
+        forma.getElements().add(new MoveTo(-fuera, lejos));
+        forma.getElements().add(new LineTo(ancho + fuera, lejos));
+        forma.getElements().add(new LineTo(ancho + fuera, nace));
         for (int i = cantidad; i >= 0; i--) {
             double x = desfase + i * paso;
             double largo = diente * (0.55 + 0.9 * azar.nextDouble());
@@ -109,7 +119,7 @@ final class MandibulasArranque extends Pane {
             forma.getElements().add(new QuadCurveTo(x - paso * 0.08, nace + signo * largo * 0.35,
                     x - paso * 0.18, nace));
         }
-        forma.getElements().add(new LineTo(0, nace));
+        forma.getElements().add(new LineTo(-fuera, nace));
         forma.getElements().add(new ClosePath());
 
         grupo.getChildren().setAll(forma);
