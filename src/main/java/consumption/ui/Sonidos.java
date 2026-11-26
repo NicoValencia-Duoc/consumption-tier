@@ -34,6 +34,8 @@ public final class Sonidos {
     private static final byte[] MENU = SintesisSonidos.tecla(10, 0.16, 2600);
     private static final byte[] FILA = SintesisSonidos.tecla(22, 0.20, 520);
     private static final byte[] PELIGRO = secuencia(new double[][] {{330, 40}, {247, 70}});
+    private static final byte[] ABANDONAR = secuencia(new double[][] {
+            {392, 70}, {0, 25}, {294, 70}, {0, 25}, {196, 170}});
     private static final byte[][] GLITCH = {
             SintesisSonidos.bzz(95, 0.10, 1), SintesisSonidos.bzz(80, 0.10, 2), SintesisSonidos.bzz(110, 0.10, 3)};
     private static final String MARCA = "the-maw.sonidos-instalado";
@@ -56,6 +58,8 @@ public final class Sonidos {
     public static void fila() { reproducir(FILA); }
 
     public static void peligro() { reproducir(PELIGRO); }
+
+    public static void abandonar() { reproducir(ABANDONAR); }
 
     public static void glitch() {
         long ahora = System.nanoTime();

@@ -102,7 +102,7 @@ public class PaginaDetalle extends VBox{
             ClipboardContent portapapeles = new ClipboardContent();
             portapapeles.putString(textoParaCopiar(item));
             boolean correcto = Clipboard.getSystemClipboard().setContent(portapapeles);
-            aviso.setText(correcto ? "DETALLES COPIADOS" : "NO SE PUDO COPIAR");
+            aviso.setText(correcto ? "FICHA COPIADA" : "NO SE PUDO COPIAR");
         });
         HBox botones = new HBox(10, volver, editar, guardar, copiar, contador, aviso);
         botones.setAlignment(Pos.CENTER_LEFT);

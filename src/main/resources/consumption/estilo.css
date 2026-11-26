@@ -735,6 +735,20 @@
     -fx-effect: dropshadow(gaussian, -c-acento, 12, 0.35, 0, 0);
 }
 .efecto-banda-sub { -fx-font-family: 'Share Tech Mono'; -fx-font-size: 13px; -fx-fill: -c-mt; }
+.efecto-abandono {
+    -fx-background-color: -c-bg;
+    -fx-border-color: -c-acento transparent -c-acento transparent;
+    -fx-border-width: 2 0 2 0;
+}
+.efecto-abandono-titulo {
+    -fx-font-family: 'Orbitron';
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-fill: -c-acento;
+    -fx-effect: dropshadow(gaussian, -c-acento, 10, 0.35, 0, 0);
+}
+.efecto-abandono-tarjeta .efecto-abandono-titulo { -fx-font-size: 18px; }
+.efecto-abandono-tarjeta .efecto-banda-sub { -fx-font-size: 11px; }
 /* Sondas del glitch: Efectos.java solo lee estos colores, no se dibujan. */
 .efecto-glitch-a { -fx-background-color: -c-g; }
 .efecto-glitch-b { -fx-background-color: -c-r; }

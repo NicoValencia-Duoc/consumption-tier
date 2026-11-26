@@ -59,7 +59,6 @@ public final class Papelera {
         if (ids.isEmpty()) return;
         List<Entrada> nuevas = new ArrayList<>(entradas);
         nuevas.removeIf(e -> ids.contains(e.id()));
-        if (Boolean.getBoolean("maw.c16.failRetirar")) throw new IllegalStateException("C16 injected failure after datos.json write");
         guardar(nuevas);
         entradas.clear();
         entradas.addAll(nuevas);

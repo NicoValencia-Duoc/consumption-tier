@@ -754,8 +754,12 @@ public class VentanaPrincipal extends VBox {
                 aviso.mostrar(ReglasAcciones.textoAviso(transicion));
             }
 
-            if (desdeDetalle) verDetalle(vigente(item, numero));
-            else mostrar(pestanaActual);
+            if (desdeDetalle) {
+                verDetalle(vigente(item, numero));
+            } else {
+                mostrar(pestanaActual);
+                if (transicion == Transicion.ABANDONAR) acciones.abandonar(vigente(item, numero));
+            }
         } catch (RuntimeException ex) {
             avisar(Alert.AlertType.WARNING,
                     "El cambio de estado se guardo correctamente, pero no se pudo "

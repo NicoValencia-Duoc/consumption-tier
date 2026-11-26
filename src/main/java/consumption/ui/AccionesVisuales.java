@@ -12,6 +12,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
@@ -25,6 +26,7 @@ import java.util.function.Consumer;
 public final class AccionesVisuales {
     private static final int INTENTOS = 8;
     private static final double ALTO_BANDA = 84;
+    private static final double ALTO_BANDA_TARJETA = 70;
 
     private final Pane capa;
     private final Node contenido;
@@ -106,6 +108,54 @@ public final class AccionesVisuales {
             banda.layoutYProperty().unbind();
             capa.getChildren().remove(banda);
         });
+        linea.play();
+    }
+
+    public void abandonar(ItemConsumption item) {
+        Sonidos.abandonar();
+        if (!Efectos.accionesPermitidas()) return;
+        esperarNodo(item, 0, this::bandaAbandono);
+    }
+
+    private void bandaAbandono(Bounds zona) {
+        boolean fila = zona.getWidth() > zona.getHeight() * 3;
+        double alto = fila ? zona.getHeight() : ALTO_BANDA_TARJETA;
+        Text titulo = new Text("ABANDONADO");
+        titulo.getStyleClass().add("efecto-abandono-titulo");
+        Text subtitulo = new Text("> THE MAW SUELTA LA PRESA");
+        subtitulo.getStyleClass().add("efecto-banda-sub");
+        subtitulo.setOpacity(0);
+        Pane banda;
+        if (fila) {
+            HBox horizontal = new HBox(14, titulo, subtitulo);
+            horizontal.setAlignment(Pos.CENTER);
+            banda = horizontal;
+        } else {
+            VBox vertical = new VBox(2, titulo, subtitulo);
+            vertical.setAlignment(Pos.CENTER);
+            banda = vertical;
+        }
+        banda.getStyleClass().add("efecto-abandono");
+        if (!fila) banda.getStyleClass().add("efecto-abandono-tarjeta");
+        banda.setMinSize(zona.getWidth(), alto);
+        banda.setPrefSize(zona.getWidth(), alto);
+        banda.setMaxSize(zona.getWidth(), alto);
+        banda.setLayoutX(zona.getMinX());
+        banda.setLayoutY(fila ? zona.getMinY() : zona.getMinY() + (zona.getHeight() - alto) / 2);
+        banda.setOpacity(0);
+        capa.getChildren().add(banda);
+        Timeline linea = new Timeline(
+                new KeyFrame(Duration.ZERO, new KeyValue(banda.opacityProperty(), 0)),
+                new KeyFrame(Duration.millis(200), new KeyValue(banda.opacityProperty(), 0.45)),
+                new KeyFrame(Duration.millis(500), e -> titulo.setText("AB▒NDONADO"),
+                        new KeyValue(banda.opacityProperty(), 0.95)),
+                new KeyFrame(Duration.millis(900), e -> {
+                    titulo.setText("ABANDONADO");
+                    subtitulo.setOpacity(1);
+                }),
+                new KeyFrame(Duration.millis(1700), new KeyValue(banda.opacityProperty(), 0.95)),
+                new KeyFrame(Duration.millis(2100), new KeyValue(banda.opacityProperty(), 0)));
+        linea.setOnFinished(e -> capa.getChildren().remove(banda));
         linea.play();
     }
 
