@@ -795,9 +795,52 @@
 }
 .panel-esquina-sup { -fx-border-width: 2 2 0 0; }
 .panel-esquina-inf { -fx-border-width: 0 2 2 0; }
-.led-e { -fx-background-color: -c-ln; }
-.led-e-on { -fx-background-color: -c-acento; }
-.led-e-actual { -fx-background-color: -c-y; }
+.led-e {
+    -fx-background-color: -c-ln;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-border-width: 0;
+}
+
+.led-e.led-e-on {
+    -fx-background-color: -c-acento;
+}
+
+.led-e.led-e-actual {
+    -fx-background-color: -c-y;
+}
+
+/* Segmentos encendidos por tier */
+
+.led-e.tier-s {
+    -fx-background-color: #ff2fa0;
+    -fx-border-width: 0;
+}
+
+.led-e.tier-a {
+    -fx-background-color: #ff8a1f;
+    -fx-border-width: 0;
+}
+
+.led-e.tier-b {
+    -fx-background-color: #fcee0a;
+    -fx-border-width: 0;
+}
+
+.led-e.tier-c {
+    -fx-background-color: #39ff88;
+    -fx-border-width: 0;
+}
+
+.led-e.tier-d {
+    -fx-background-color: #2fd8ff;
+    -fx-border-width: 0;
+}
+
+.led-e.tier-f {
+    -fx-background-color: #9b6bff;
+    -fx-border-width: 0;
+}
 .led-guia {
     -fx-border-color: -c-mt transparent transparent transparent;
     -fx-border-width: 1 0 0 0;
