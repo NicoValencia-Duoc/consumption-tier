@@ -772,6 +772,14 @@
     -fx-border-width: 1;
 }
 .arranque-led-on { -fx-background-color: -c-acento; -fx-border-color: -c-acento; }
+.arranque-mandibula {
+    -fx-fill: -c-pn;
+    -fx-stroke: -c-acento;
+    -fx-stroke-width: 1.6;
+    -fx-stroke-line-join: round;
+    -fx-effect: dropshadow(gaussian, -c-acento, 8, 0.35, 0, 0);
+}
+.arranque-mandibula-punto { -fx-fill: -c-acento; -fx-opacity: 0.8; }
 .arranque-linea {
     -fx-background-color: -c-acento;
     -fx-effect: dropshadow(gaussian, -c-acento, 14, 0.45, 0, 0);

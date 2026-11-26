@@ -120,7 +120,8 @@ public final class ArranqueTerminal {
         VBox centro = new VBox(26, marca, bloque);
         centro.setAlignment(Pos.CENTER);
 
-        StackPane cubierta = new StackPane(centro);
+        MandibulasArranque mandibulas = new MandibulasArranque();
+        StackPane cubierta = new StackPane(mandibulas, centro);
         cubierta.getStyleClass().add("arranque-cubierta");
         raiz.getChildren().add(cubierta);
 
@@ -151,6 +152,7 @@ public final class ArranqueTerminal {
                 new KeyFrame(Duration.millis(INICIO_BARRIDO_MS), e -> barrido.setOpacity(1), new KeyValue(visible, 1)),
                 new KeyFrame(Duration.millis(INICIO_BARRIDO_MS + DURACION_BARRIDO_MS),
                         new KeyValue(visible, 0, Interpolator.EASE_IN)));
+        mandibulas.programar(secuencia);
         escribir(secuencia, lectura, 450, 1250);
         escribir(secuencia, registros, 1350, 2050);
         escribir(secuencia, nivel, 2150, 2650);
