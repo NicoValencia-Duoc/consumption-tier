@@ -17,10 +17,18 @@ public class Serie extends ItemConsumption {
     private String origen = "";
 
     public Serie(String titulo, double nota, Estado estado, String creador, String genero, int anio, int temporadas, int episodios, String origen) {
+        this(titulo, nota, estado, creador, genero, anio, temporadas, episodios, origen, null, false);
+    }
 
+    public static Serie conGeneros(String titulo, double nota, Estado estado, String creador, List<ReferenciaGenero> referencias, int anio, int temporadas, int episodios, String origen) {
+        return new Serie(titulo, nota, estado, creador, null, anio, temporadas, episodios, origen, referencias, true);
+    }
+
+    private Serie(String titulo, double nota, Estado estado, String creador, String genero, int anio, int temporadas, int episodios, String origen, List<ReferenciaGenero> referencias, boolean migrado) {
         super(titulo, nota, estado);
         setCreador(creador);
-        setGenero(genero);
+        if (migrado) setGeneros(referencias);
+        else setGenero(genero);
         setAnio(anio);
         setTemporadas(temporadas);
         setEpisodios(episodios);

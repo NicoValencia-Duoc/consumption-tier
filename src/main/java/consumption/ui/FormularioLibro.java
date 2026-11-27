@@ -20,26 +20,29 @@ public class FormularioLibro extends FormularioItem<Libro> {
 
     @Override protected void agregarCamposPropios() {
         agregarFila("AUTORIA", autor);
-        agregarFila("GENERO", genero);
+        agregarCampoGenero(genero);
         agregarFila("PAGINAS", paginas);
         agregarFila("AÑO", anio);
     }
 
     @Override protected void cargarPropios(Libro l) {
         autor.setText(l.getAutor());
-        genero.setText(l.getGenero());
+        if (!usaGeneros()) genero.setText(l.getGenero());
         paginas.setText(String.valueOf(l.getPaginas()));
         anio.setText(String.valueOf(l.getAnio()));
     }
 
     @Override protected Libro crear(String titulo, double nota, Estado estado) {
+        if (usaGeneros()) return Libro.conGeneros(titulo, nota, estado, texto(autor), referenciasGenero(),
+                entero(paginas, "Las paginas"), entero(anio, "El año"));
         return new Libro(titulo, nota, estado, texto(autor), texto(genero),
                 entero(paginas, "Las paginas"), entero(anio, "El año"));
     }
 
     @Override protected void aplicarPropios(Libro l) {
         l.setAutor(texto(autor));
-        l.setGenero(texto(genero));
+        if (usaGeneros()) l.setGeneros(referenciasGenero());
+        else l.setGenero(texto(genero));
         l.setPaginas(entero(paginas, "Las paginas"));
         l.setAnio(entero(anio, "El año"));
     }

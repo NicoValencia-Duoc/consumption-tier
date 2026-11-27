@@ -45,6 +45,7 @@ public class VentanaPrincipal extends VBox {
     private final Cabecera cabecera;
     private final StackPane contenido = new StackPane();
     private String pestanaActual = "INICIO";
+    private GraficosEstadisticas.FiltroGenero filtroRanking = GraficosEstadisticas.FiltroGenero.TODOS;
     private final Aviso aviso = new Aviso();
     private final Papelera papelera = new Papelera();
     private final AccionesDatos datos;
@@ -143,7 +144,8 @@ public class VentanaPrincipal extends VBox {
             case "PELICULAS" -> paginaPeliculas();
             case "SERIES" -> paginaSeries();
             case "PENDIENTES" -> paginaPendientes();
-            case "ESTADISTICAS" -> new PaginaEstadisticas(items, preferencias.getEscalaTexto());
+            case "ESTADISTICAS" -> new PaginaEstadisticas(items, preferencias.getEscalaTexto(), repositorio.usaGeneros(),
+                    filtroRanking, f -> filtroRanking = f);
             default -> paginaInicio();
         };
         contenido.getChildren().setAll(pagina);
@@ -194,11 +196,15 @@ public class VentanaPrincipal extends VBox {
         return (int) items.stream().filter(tipo::isInstance).count();
     }
 
+    private BibliotecaGeneros bibliotecaParaVista() {
+        return repositorio.usaGeneros() ? repositorio.bibliotecaGeneros() : null;
+    }
+
     private Node paginaJuegos() {
         List<Juego> juegos = items.stream().filter(Juego.class::isInstance).map(Juego.class::cast).toList();
-        PaginaTabla<Juego> p = new PaginaTabla<>("JUEGOS", juegos, preferencias);
+        PaginaTabla<Juego> p = new PaginaTabla<>("JUEGOS", juegos, preferencias, bibliotecaParaVista());
         p.agregarColumna("plataforma", "PLATAFORMA", Juego::getPlataforma, true);
-        p.agregarColumna("genero", "GENERO", Juego::getGenero, true);
+        p.agregarColumna("genero", "GENERO", Juego::generosTexto, true);
         p.agregarColumna("desarrollador", "DESARROLLADORA", Juego::getDesarrollador, false);
         p.agregarColumna("anio", "AÑO", Juego::getAnio, false);
         p.agregarColumna("horas", "HORAS", Juego::getHorasJugadas, false);
@@ -208,9 +214,9 @@ public class VentanaPrincipal extends VBox {
 
     private Node paginaLibros() {
         List<Libro> libros = items.stream().filter(Libro.class::isInstance).map(Libro.class::cast).toList();
-        PaginaTabla<Libro> p = new PaginaTabla<>("LIBROS", libros, preferencias);
+        PaginaTabla<Libro> p = new PaginaTabla<>("LIBROS", libros, preferencias, bibliotecaParaVista());
         p.agregarColumna("autor", "AUTORIA", Libro::getAutor, true);
-        p.agregarColumna("genero", "GENERO", Libro::getGenero, true);
+        p.agregarColumna("genero", "GENERO", Libro::generosTexto, true);
         p.agregarColumna("paginas", "PAGINAS", Libro::getPaginas, false);
         p.agregarColumna("anio", "AÑO", Libro::getAnio, false);
         conectar(p, FormularioLibro::new);
@@ -219,9 +225,9 @@ public class VentanaPrincipal extends VBox {
 
     private Node paginaPeliculas() {
         List<Pelicula> peliculas = items.stream().filter(Pelicula.class::isInstance).map(Pelicula.class::cast).toList();
-        PaginaTabla<Pelicula> p = new PaginaTabla<>("PELICULAS", peliculas, preferencias);
+        PaginaTabla<Pelicula> p = new PaginaTabla<>("PELICULAS", peliculas, preferencias, bibliotecaParaVista());
         p.agregarColumna("director", "DIRIGIDA POR", Pelicula::getDirector, true);
-        p.agregarColumna("genero", "GENERO", Pelicula::getGenero, true);
+        p.agregarColumna("genero", "GENERO", Pelicula::generosTexto, true);
         p.agregarColumna("duracion", "DURACION (MIN)", Pelicula::getDuracionMin, false);
         p.agregarColumna("anio", "AÑO", Pelicula::getAnio, false);
         conectar(p, FormularioPelicula::new);
@@ -230,9 +236,9 @@ public class VentanaPrincipal extends VBox {
 
     private Node paginaSeries() {
         List<Serie> series = items.stream().filter(Serie.class::isInstance).map(Serie.class::cast).toList();
-        PaginaTabla<Serie> p = new PaginaTabla<>("SERIES", series, preferencias);
+        PaginaTabla<Serie> p = new PaginaTabla<>("SERIES", series, preferencias, bibliotecaParaVista());
         p.agregarColumna("creador", "CREADOR", Serie::getCreador, true);
-        p.agregarColumna("genero", "GENERO", Serie::getGenero, true);
+        p.agregarColumna("genero", "GENERO", Serie::generosTexto, true);
         p.agregarColumna("temporadas", "TEMPORADAS", Serie::getTemporadas, false);
         p.agregarColumna("episodios", "EPISODIOS", Serie::getEpisodios, false);
         p.agregarColumna("anio", "AÑO", Serie::getAnio, false);
@@ -244,9 +250,9 @@ public class VentanaPrincipal extends VBox {
     private Node paginaPendientes() {
         List<ItemConsumption> pendientes = items.stream()
                 .filter(i -> i.getEstado() == Estado.PENDIENTE).toList();
-        PaginaTabla<ItemConsumption> p = new PaginaTabla<>("PENDIENTES", pendientes, preferencias);
+        PaginaTabla<ItemConsumption> p = new PaginaTabla<>("PENDIENTES", pendientes, preferencias, bibliotecaParaVista());
         p.agregarColumna("tipo", "TIPO", i -> Nombres.singular(i.getTipo()), true);
-        p.agregarColumna("genero", "GENERO", ItemConsumption::getGenero, true);
+        p.agregarColumna("genero", "GENERO", ItemConsumption::generosTexto, true);
         conectarComunes(p);
         p.setAlAgregar(this::agregarPendiente);
         p.setAlEditar(this::editarPendiente);
@@ -342,7 +348,7 @@ public class VentanaPrincipal extends VBox {
     }
 
     private PaginaInicio paginaInicio() {
-        PaginaInicio inicio = new PaginaInicio(items, this::verDetalle, this::agregarDeTipo, preferencias.isTarjetasCompactas());
+        PaginaInicio inicio = new PaginaInicio(items, this::verDetalle, this::agregarDeTipo, preferencias.isTarjetasCompactas(), repositorio.usaGeneros());
         inicio.setAlEditar(item -> editarCon(formularioPara(item), item));
         inicio.setAlFavorito(this::alternarFavorito);
         inicio.setAlEliminar(this::eliminarLote);
@@ -495,13 +501,28 @@ public class VentanaPrincipal extends VBox {
                 ReglasAcciones.textoEliminado(lote.size()),
                 () -> {
                     try {
-                        DiarioRestauracion.ejecutar(() -> {
+                        if (repositorio.usaGeneros()) {
+                            List<Papelera.RecuperacionLote> recuperaciones = new ArrayList<>();
+                            for (var entrada : papelera.listar()) {
+                                if (!nuevosIds.contains(entrada.id())) continue;
+                                var plan = repositorio.prepararRecuperacion(entrada.item());
+                                var autorizados = DialogoRecuperacionGeneros.elegir(
+                                        getScene().getWindow(), hojas(), entrada.item().getTitulo(), plan);
+                                if (autorizados.isEmpty()) return;
+                                recuperaciones.add(new Papelera.RecuperacionLote(entrada, plan, autorizados.get()));
+                            }
+                            if (recuperaciones.size() != nuevosIds.size())
+                                throw new IllegalStateException("El lote de papelera cambio.");
+                            papelera.recuperarLoteConGeneros(recuperaciones, items, repositorio);
+                        } else {
+                            DiarioRestauracion.ejecutar(() -> {
                             List<ItemConsumption> nuevos = new ArrayList<>(items);
                             nuevos.addAll(lote);
                             repositorio.guardar(nuevos);
                             papelera.retirar(nuevosIds);
                         });
-                        items.addAll(lote);
+                            items.addAll(lote);
+                        }
                     } catch (Exception ex) {
                         avisar(Alert.AlertType.ERROR,
                                 "No se completo DESHACER. Cierra THE MAW para evitar operaciones "
@@ -596,6 +617,7 @@ public class VentanaPrincipal extends VBox {
 
     private <T extends ItemConsumption> Optional<T> abrir(FormularioItem<T> formulario, T existente) {
         formulario.setComprobadorDuplicado(this::existeDuplicado);
+        if (repositorio.usaGeneros()) formulario.configurarGeneros(repositorio, items, () -> mostrar(pestanaActual));
         return formulario.mostrar(existente, hojas());
     }
 }

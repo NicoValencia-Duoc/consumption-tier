@@ -5,6 +5,12 @@ import consumption.data.ExportadorCsv;
 import consumption.data.GestorImagenes;
 import consumption.data.Preferencias;
 import consumption.model.Estado;
+import consumption.model.AmbitoGenero;
+import consumption.model.BibliotecaGeneros;
+import consumption.model.ConsultaGeneros;
+import consumption.model.NombreGenero;
+import consumption.model.ReferenciaGenero;
+import consumption.model.TagGenero;
 import consumption.model.Formato;
 import consumption.model.ItemConsumption;
 import consumption.model.Transicion;
@@ -71,6 +77,11 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
     private final CampoBusqueda buscador = new CampoBusqueda();
     private final ComboBox<String> filtroEstado = new ComboBox<>();
     private final ComboBox<String> filtroGenero = new ComboBox<>();
+    private final MenuButton filtroGeneros = new MenuButton("TODOS");
+    private final boolean modoGeneros;
+    private final java.util.Map<String, CheckBox> opcionesGeneros = new java.util.LinkedHashMap<>();
+    private final java.util.Map<String, TagGenero> tagsFiltro = new java.util.LinkedHashMap<>();
+    private final Set<String> seleccionGeneros = new HashSet<>();
     private final CheckBox soloFavoritos = new CheckBox("★ SOLO FAVORITOS");
 
     private final MenuButton mas = new MenuButton("⋯");
@@ -107,6 +118,11 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
     private Consumer<List<T>> alFavoritosEnLote;
 
     public PaginaTabla(String nombreTipo, List<T> items, Preferencias preferencias) {
+        this(nombreTipo, items, preferencias, null);
+    }
+
+    public PaginaTabla(String nombreTipo, List<T> items, Preferencias preferencias, BibliotecaGeneros biblioteca) {
+        this.modoGeneros = biblioteca != null;
         this.nombreTipo = nombreTipo;
         this.preferencias = preferencias;
         this.recordado = preferencias.estadoTabla(nombreTipo);
@@ -223,10 +239,13 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         for (Estado e : Estado.values()) filtroEstado.getItems().add(e.getEtiqueta());
         filtroEstado.setValue("TODOS");
 
-        filtroGenero.getItems().add("TODOS");
-        items.stream().map(ItemConsumption::getGenero).distinct()
-                .sorted(String.CASE_INSENSITIVE_ORDER).forEach(filtroGenero.getItems()::add);
-        filtroGenero.setValue("TODOS");
+        if (modoGeneros) prepararFiltroGeneros(biblioteca);
+        else {
+            filtroGenero.getItems().add("TODOS");
+            items.stream().map(ItemConsumption::getGenero).distinct()
+                    .sorted(String.CASE_INSENSITIVE_ORDER).forEach(filtroGenero.getItems()::add);
+            filtroGenero.setValue("TODOS");
+        }
 
         buscador.textProperty().addListener((obs, antes, ahora) -> aplicarFiltros());
         filtroEstado.setOnAction(e -> {
@@ -243,7 +262,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         });
 
         HBox filtros = new HBox(10, buscador, new Label("ESTADO"), filtroEstado,
-                new Label("GENERO"), filtroGenero, soloFavoritos);
+                new Label("GENERO"), modoGeneros ? filtroGeneros : filtroGenero, soloFavoritos);
         filtros.setAlignment(Pos.CENTER_LEFT);
 
         TableColumn<T, Object> colNumero = columna(ID_NUMERO, "ID", i -> Numeracion.etiqueta(i.getNumero()));
@@ -381,7 +400,8 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         if (filtroEstado.getItems().contains(recordado.getFiltroEstado())) {
             filtroEstado.setValue(recordado.getFiltroEstado());
         }
-        if (filtroGenero.getItems().contains(recordado.getFiltroGenero())) {
+        if (modoGeneros) restaurarFiltroGeneros();
+        else if (filtroGenero.getItems().contains(recordado.getFiltroGenero())) {
             filtroGenero.setValue(recordado.getFiltroGenero());
         }
         soloFavoritos.setSelected(recordado.isSoloFavoritos());
@@ -401,6 +421,8 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
 
         construirMenu();
         restaurando = false;
+        if (modoGeneros && (recordado.getFiltrosGeneros() == null
+                || !new java.util.HashSet<>(recordado.getFiltrosGeneros()).equals(seleccionGeneros))) guardarFiltros();
     }
 
     private void construirMenu() {
@@ -448,7 +470,8 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
     private void guardarFiltros() {
         if (restaurando) return;
         recordado.setFiltroEstado(filtroEstado.getValue());
-        recordado.setFiltroGenero(filtroGenero.getValue());
+        if (modoGeneros) recordado.setFiltrosGeneros(seleccionGeneros.stream().sorted().toList());
+        else recordado.setFiltroGenero(filtroGenero.getValue());
         recordado.setSoloFavoritos(soloFavoritos.isSelected());
         preferencias.guardar();
     }
@@ -646,15 +669,79 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         }
     }
 
+    private void prepararFiltroGeneros(BibliotecaGeneros biblioteca) {
+        filtroGeneros.getStyleClass().addAll("filtro", "a2-button");
+        filtroGeneros.setMinWidth(Region.USE_PREF_SIZE);
+        Terminal.corchetes(filtroGeneros);
+        MenuItem limpiar = new MenuItem("TODOS (LIMPIAR)");
+        limpiar.setOnAction(e -> {
+            seleccionGeneros.clear();
+            opcionesGeneros.values().forEach(c -> c.setSelected(false));
+            cambioFiltroGeneros();
+        });
+        filtroGeneros.getItems().add(limpiar);
+        boolean mixto = "PENDIENTES".equals(nombreTipo);
+        for (AmbitoGenero ambito : AmbitoGenero.values()) {
+            if (!mixto && ambito != AmbitoGenero.deTipo(nombreTipo)) continue;
+            for (TagGenero tag : biblioteca.activos(ambito)) {
+                String id = tag.id().toString();
+                String nombre = NombreGenero.mostrar(tag.nombre());
+                CheckBox opcion = new CheckBox(mixto ? nombre + " · " + ambito.etiqueta() : nombre);
+                opcion.setWrapText(true);
+                opcion.setMaxWidth(300);
+                opcion.setOnAction(e -> {
+                    if (opcion.isSelected()) seleccionGeneros.add(id);
+                    else seleccionGeneros.remove(id);
+                    cambioFiltroGeneros();
+                });
+                filtroGeneros.getItems().add(new CustomMenuItem(opcion, false));
+                opcionesGeneros.put(id, opcion);
+                tagsFiltro.put(id, tag);
+            }
+        }
+    }
+
+    private void restaurarFiltroGeneros() {
+        seleccionGeneros.clear();
+        List<String> ids = recordado.getFiltrosGeneros();
+        if (ids != null) ids.stream().filter(tagsFiltro::containsKey).forEach(seleccionGeneros::add);
+        else if (!"TODOS".equals(recordado.getFiltroGenero())) {
+            var compatibles = tagsFiltro.values().stream().filter(t -> t.clave().equals(
+                    NombreGenero.clave(recordado.getFiltroGenero()))).toList();
+            // Una preferencia antigua mixta ambigua no identifica una biblioteca.
+            if (compatibles.size() == 1) seleccionGeneros.add(compatibles.getFirst().id().toString());
+        }
+        opcionesGeneros.forEach((id, c) -> c.setSelected(seleccionGeneros.contains(id)));
+        actualizarTextoFiltroGeneros();
+    }
+
+    private void actualizarTextoFiltroGeneros() {
+        filtroGeneros.setText(seleccionGeneros.isEmpty() ? "TODOS" : seleccionGeneros.size() + " SEL.");
+        filtroGeneros.setTooltip(seleccionGeneros.isEmpty() ? null : new Tooltip(tagsFiltro.entrySet().stream()
+                .filter(e -> seleccionGeneros.contains(e.getKey()))
+                .map(e -> NombreGenero.mostrar(e.getValue().nombre()) + " · " + e.getValue().ambito().etiqueta())
+                .collect(java.util.stream.Collectors.joining("\n"))));
+    }
+
+    private void cambioFiltroGeneros() {
+        actualizarTextoFiltroGeneros();
+        aplicarFiltros();
+        guardarFiltros();
+    }
+
     private void aplicarFiltros() {
         String texto = buscador.getText().trim().toLowerCase();
         String estado = filtroEstado.getValue();
         String genero = filtroGenero.getValue();
+        ConsultaGeneros consulta = ConsultaGeneros.analizar(modoGeneros ? buscador.getText() : "");
+        buscador.consultaInvalida(modoGeneros && !consulta.valida());
 
         filtrada.setPredicate(i ->
-                (texto.isEmpty() || i.getTitulo().toLowerCase().contains(texto))
+                (modoGeneros ? consulta.coincideTabla(i) : (texto.isEmpty() || i.getTitulo().toLowerCase().contains(texto)))
                         && (estado == null || estado.equals("TODOS") || i.getEstado().getEtiqueta().equals(estado))
-                        && (genero == null || genero.equals("TODOS") || i.getGenero().equals(genero))
+                        && (modoGeneros ? (seleccionGeneros.isEmpty() || i.getGeneros().stream()
+                        .anyMatch(r -> seleccionGeneros.contains(r.id().toString())))
+                        : (genero == null || genero.equals("TODOS") || i.getGenero().equals(genero)))
                         && (!soloFavoritos.isSelected() || i.isFavorito()));
 
         marcados.retainAll(new HashSet<>(filtrada));
@@ -720,6 +807,11 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
             boolean visiblePorDefecto) {
 
         TableColumn<T, Object> nueva = columna(id, titulo, extractor);
+        if (modoGeneros && "genero".equals(id)) {
+            nueva.setCellValueFactory(d -> new ReadOnlyObjectWrapper<>(new GenerosCelda(d.getValue().getGeneros())));
+            nueva.setComparator(Comparator.comparing(Object::toString, String.CASE_INSENSITIVE_ORDER));
+            nueva.setCellFactory(c -> new CeldaGeneros());
+        }
 
         if ("director".equals(id)) {
             nueva.setMinWidth(130);
@@ -735,6 +827,33 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         }
     }
 
+    private record GenerosCelda(List<ReferenciaGenero> referencias) {
+        private GenerosCelda { referencias = List.copyOf(referencias); }
+        @Override public String toString() {
+            return referencias.stream().map(ReferenciaGenero::nombre).collect(java.util.stream.Collectors.joining(", "));
+        }
+    }
+
+    private class CeldaGeneros extends TableCell<T, Object> {
+        CeldaGeneros() {
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+            setAlignment(Pos.CENTER_LEFT);
+        }
+        @Override protected void updateItem(Object valor, boolean vacio) {
+            super.updateItem(valor, vacio);
+            if (getGraphic() instanceof ChipsGeneros previo) previo.prefWidthProperty().unbind();
+            setText(null);
+            setGraphic(null);
+            setTooltip(null);
+            if (vacio || !(valor instanceof GenerosCelda datos) || datos.referencias().isEmpty()) return;
+            ChipsGeneros chips = new ChipsGeneros(datos.referencias());
+            chips.prefWidthProperty().bind(Bindings.createDoubleBinding(() -> Math.max(0,
+                    getWidth() - getInsets().getLeft() - getInsets().getRight()), widthProperty(), insetsProperty()));
+            setGraphic(chips);
+            setTooltip(new Tooltip(datos.referencias().stream().map(r -> NombreGenero.mostrar(r.nombre()))
+                    .collect(java.util.stream.Collectors.joining("\n"))));
+        }
+    }
 
     private TableColumn<T, Object> columna(String id, String titulo, Function<T, Object> extractor) {
         TableColumn<T, Object> c = new TableColumn<>(titulo);

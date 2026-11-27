@@ -154,7 +154,7 @@ final class AccionesDatos {
 
         try {
             this.aviso.confirmarPendiente();
-            Path copiaEmergencia = RespaldoZip.restaurar(archivo.toPath());
+            Path copiaEmergencia = RespaldoZip.restaurar(archivo.toPath(), repositorio.usaGeneros());
             final List<ItemConsumption> cargados;
             try {
                 cargados = repositorio.cargar();
@@ -231,6 +231,22 @@ final class AccionesDatos {
 
         Papelera.Entrada entrada = elegido.get();
         ItemConsumption item = entrada.item();
+
+        if (repositorio.usaGeneros()) {
+            try {
+                var plan = repositorio.prepararRecuperacion(item);
+                var autorizados = DialogoRecuperacionGeneros.elegir(ventana.get(), hojas.get(), item.getTitulo(), plan);
+                if (autorizados.isEmpty()) return;
+                papelera.recuperarConGeneros(entrada, items, repositorio, plan, autorizados.get());
+            } catch (Exception ex) {
+                avisar(Alert.AlertType.ERROR, "No se completo RESTAURAR. Cierra THE MAW para evitar operaciones sobre datos posiblemente desactualizados: " + ex.getMessage());
+                javafx.application.Platform.exit();
+                return;
+            }
+            try { refrescar.run(); aviso.mostrar("REGISTRO RESTAURADO"); }
+            catch (RuntimeException ex) { avisar(Alert.AlertType.WARNING, "El registro se restauro, pero no se pudo actualizar la pantalla: " + ex.getMessage()); }
+            return;
+        }
 
         int numeroEnPapelera = item.getNumero();
         boolean ocupado = items.stream().anyMatch(i -> i.getNumero() == item.getNumero());

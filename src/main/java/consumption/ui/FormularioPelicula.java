@@ -19,26 +19,29 @@ public class FormularioPelicula extends FormularioItem<Pelicula> {
 
     @Override protected void agregarCamposPropios() {
         agregarFila("DIRIGIDA POR", director);
-        agregarFila("GENERO", genero);
+        agregarCampoGenero(genero);
         agregarFila("DURACION (MIN)", duracion);
         agregarFila("AÑO", anio);
     }
 
     @Override protected void cargarPropios(Pelicula p) {
         director.setText(p.getDirector());
-        genero.setText(p.getGenero());
+        if (!usaGeneros()) genero.setText(p.getGenero());
         duracion.setText(String.valueOf(p.getDuracionMin()));
         anio.setText(String.valueOf(p.getAnio()));
     }
 
     @Override protected Pelicula crear(String titulo, double nota, Estado estado) {
+        if (usaGeneros()) return Pelicula.conGeneros(titulo, nota, estado, texto(director), referenciasGenero(),
+                entero(duracion, "La duracion"), entero(anio, "El año"));
         return new Pelicula(titulo, nota, estado, texto(director), texto(genero),
                 entero(duracion, "La duracion"), entero(anio, "El año"));
     }
 
     @Override protected void aplicarPropios(Pelicula p) {
         p.setDirector(texto(director));
-        p.setGenero(texto(genero));
+        if (usaGeneros()) p.setGeneros(referenciasGenero());
+        else p.setGenero(texto(genero));
         p.setDuracionMin(entero(duracion, "La duracion"));
         p.setAnio(entero(anio, "El año"));
     }

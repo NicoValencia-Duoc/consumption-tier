@@ -10,6 +10,7 @@ import javafx.scene.layout.Priority;
 public class CampoBusqueda extends HBox {
 
     private final TextField campo = new TextField();
+    private final Label aviso = new Label("!");
 
     public CampoBusqueda() {
         super(6);
@@ -27,8 +28,15 @@ public class CampoBusqueda extends HBox {
             if (ahora) getStyleClass().add("campo-busqueda-foco");
         });
 
-        getChildren().addAll(signo, campo);
+        aviso.getStyleClass().add("consulta-generos-invalida");
+        aviso.setTooltip(new javafx.scene.control.Tooltip("CONSULTA DE GENERO INVALIDA"));
+        aviso.setAccessibleText("CONSULTA DE GENERO INVALIDA");
+        aviso.setVisible(false);
+        aviso.managedProperty().bind(aviso.visibleProperty());
+        getChildren().addAll(signo, campo, aviso);
     }
+
+    public void consultaInvalida(boolean invalida) { aviso.setVisible(invalida); }
 
     public StringProperty textProperty() {
         return campo.textProperty();

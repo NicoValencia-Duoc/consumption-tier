@@ -10,12 +10,15 @@ public class EstadoTabla {
     private String filtroEstado = "TODOS";
     private String filtroGenero = "TODOS";
     private boolean soloFavoritos;
+    private List<String> filtrosGeneros;
 
     public List<String> getColumnas() { return columnas; }
     public String getOrdenColumna() { return ordenColumna; }
     public boolean isOrdenAscendente() { return ordenAscendente; }
     public String getFiltroEstado() { return filtroEstado == null ? "TODOS" : filtroEstado; }
     public String getFiltroGenero() { return filtroGenero == null ? "TODOS" : filtroGenero; }
+    public List<String> getFiltrosGeneros() { return filtrosGeneros == null ? null : List.copyOf(filtrosGeneros); }
+    public void setFiltrosGeneros(List<String> v) { filtrosGeneros = List.copyOf(v); }
     public boolean isSoloFavoritos() { return soloFavoritos; }
 
     public void setColumnas(List<String> v) { this.columnas = v; }

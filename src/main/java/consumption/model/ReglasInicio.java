@@ -17,6 +17,7 @@ public final class ReglasInicio {
     }
 
     public static boolean coincideBusqueda(ItemConsumption item, String consulta) {
+        if (item.tieneGenerosMigrados()) return ConsultaGeneros.analizar(consulta).coincideInicio(item);
         String q = normalizar(consulta);
         if (q.isEmpty()) return true;
         String texto = normalizar(item.textoBusqueda());

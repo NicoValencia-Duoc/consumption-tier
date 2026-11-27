@@ -22,7 +22,7 @@ public class FormularioSerie extends FormularioItem<Serie> {
     @Override protected void agregarCamposPropios() {
         origen.setPromptText("OPCIONAL");
         agregarFila("CREADOR", creador);
-        agregarFila("GENERO", genero);
+        agregarCampoGenero(genero);
         agregarFila("AÑO DE ESTRENO", anio);
         agregarFila("TEMPORADAS", temporadas);
         agregarFila("EPISODIOS TOTALES", episodios);
@@ -31,7 +31,7 @@ public class FormularioSerie extends FormularioItem<Serie> {
 
     @Override protected void cargarPropios(Serie s) {
         creador.setText(s.getCreador());
-        genero.setText(s.getGenero());
+        if (!usaGeneros()) genero.setText(s.getGenero());
         anio.setText(String.valueOf(s.getAnio()));
         temporadas.setText(String.valueOf(s.getTemporadas()));
         episodios.setText(String.valueOf(s.getEpisodios()));
@@ -39,6 +39,9 @@ public class FormularioSerie extends FormularioItem<Serie> {
     }
 
     @Override protected Serie crear(String titulo, double nota, Estado estado) {
+        if (usaGeneros()) return Serie.conGeneros(titulo, nota, estado, texto(creador), referenciasGenero(),
+                entero(anio, "El año"), entero(temporadas, "Las temporadas"),
+                entero(episodios, "Los episodios"), texto(origen));
         return new Serie(titulo, nota, estado, texto(creador), texto(genero),
                 entero(anio, "El año"), entero(temporadas, "Las temporadas"),
                 entero(episodios, "Los episodios"), texto(origen));
@@ -46,7 +49,8 @@ public class FormularioSerie extends FormularioItem<Serie> {
 
     @Override protected void aplicarPropios(Serie s) {
         s.setCreador(texto(creador));
-        s.setGenero(texto(genero));
+        if (usaGeneros()) s.setGeneros(referenciasGenero());
+        else s.setGenero(texto(genero));
         s.setAnio(entero(anio, "El año"));
         s.setTemporadas(entero(temporadas, "Las temporadas"));
         s.setEpisodios(entero(episodios, "Los episodios"));

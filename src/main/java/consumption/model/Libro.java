@@ -14,10 +14,19 @@ public class Libro extends ItemConsumption{
     private int paginas;
     private int anio;
 
-    public Libro(String titulo, double nota, Estado estado, String autor, String genero, int paginas, int anio){
+    public Libro(String titulo, double nota, Estado estado, String autor, String genero, int paginas, int anio) {
+        this(titulo, nota, estado, autor, genero, paginas, anio, null, false);
+    }
+
+    public static Libro conGeneros(String titulo, double nota, Estado estado, String autor, List<ReferenciaGenero> referencias, int paginas, int anio) {
+        return new Libro(titulo, nota, estado, autor, null, paginas, anio, referencias, true);
+    }
+
+    private Libro(String titulo, double nota, Estado estado, String autor, String genero, int paginas, int anio, List<ReferenciaGenero> referencias, boolean migrado) {
         super(titulo, nota, estado);
         setAutor(autor);
-        setGenero(genero);
+        if (migrado) setGeneros(referencias);
+        else setGenero(genero);
         setPaginas(paginas);
         setAnio(anio);
     }

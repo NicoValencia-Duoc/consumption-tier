@@ -4,7 +4,8 @@ import consumption.model.*;
 import javafx.geometry.*;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollBar;
+import javafx.scene.control.Button;
+import java.util.function.Consumer;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
 
@@ -13,13 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PaginaEstadisticas extends VBox {
-    private static final int SEGMENTOS_TIER = 20;
-    private static final int SEGMENTOS_RANKING = 20;
-    private static final int FILAS_MINI = 6;
     private static final int TOPE_GENEROS = 10;
     private static final int MAX_ANIOS = 8;
     private static final double ALTO_BARRA_TIER = 190;
-    private static final double ALTO_BARRA_MINI = 56;
+    private static final double ALTO_BARRA_MINI = 48;
+    private static final double RESERVA_VALOR_TIER = 46;
+    private static final double MARGEN_EJE_TIER = 10;
+    private static final double RESERVA_VALOR_MINI = 22;
     private static final double RELLENO_DERECHO = 8;
     private static final double SEPARACION = ReglasEstadisticas.SEPARACION;
 
@@ -36,6 +37,12 @@ public class PaginaEstadisticas extends VBox {
     private ReglasEstadisticas.Modo modoActual;
 
     public PaginaEstadisticas(List<ItemConsumption> items, int escalaTexto) {
+        this(items, escalaTexto, false, GraficosEstadisticas.FiltroGenero.TODOS, f -> {});
+    }
+
+    public PaginaEstadisticas(List<ItemConsumption> items, int escalaTexto, boolean modoGeneros,
+                              GraficosEstadisticas.FiltroGenero filtroInicial,
+                              Consumer<GraficosEstadisticas.FiltroGenero> alElegirFiltro) {
         setSpacing(18);
         this.escalaTexto = escalaTexto;
         this.factor = ReglasEstadisticas.factorEscala(escalaTexto);
@@ -63,8 +70,10 @@ public class PaginaEstadisticas extends VBox {
         List<GraficosEstadisticas.Barra> anios = GraficosEstadisticas.porAnio(items, MAX_ANIOS);
         panelTiers = panel("DISTRIBUCION DE TIERS", "% DE LOS " + tiers.total() + " ITEMS CON NOTA",
                 construirTiers(tiers));
-        panelRanking = panel("RANKING POR GENERO", "TOP " + TOPE_GENEROS,
-                construirRanking(GraficosEstadisticas.rankingGeneros(items, TOPE_GENEROS)));
+        panelRanking = modoGeneros
+                ? panel("RANKING POR GENERO", null, rankingTags(items, filtroInicial, alElegirFiltro))
+                : panel("RANKING POR GENERO", "TOP " + TOPE_GENEROS + " · % DE LOS " + items.size() + " ITEMS",
+                construirRanking(GraficosEstadisticas.rankingGeneros(items, TOPE_GENEROS), items.size()));
         panelMeses = panel("DEVORADOS POR MES", "ULTIMOS 12",
                 construirMini(GraficosEstadisticas.porMes(items, hoy), 11));
         panelAnios = panel("ITEMS POR AÑO", "TERMINO",
@@ -183,26 +192,19 @@ public class PaginaEstadisticas extends VBox {
         return vacio;
     }
 
-    private static void fijarAlto(Region region, double alto) {
-        region.setMinHeight(alto);
-        region.setPrefHeight(alto);
-        region.setMaxHeight(alto);
-    }
-
     private Node construirTiers(GraficosEstadisticas.Distribucion distribucion) {
         GridPane rejilla = new GridPane();
         rejilla.setHgap(6);
         rejilla.setVgap(6);
         rejilla.getColumnConstraints().add(new ColumnConstraints());
-        SegmentosLed.Eje eje = new SegmentosLed.Eje(new double[] {1.0, 0.75, 0.5, 0.25},
-                new String[] {"100%", "75%", "50%", "25%"});
-        fijarAlto(eje, ALTO_BARRA_TIER);
-        rejilla.add(eje, 0, 1);
+        double reservaValor = RESERVA_VALOR_TIER * factor;
+        double margenEje = MARGEN_EJE_TIER * factor;
+        BarraContinua.Eje eje = new BarraContinua.Eje(ALTO_BARRA_TIER, reservaValor, margenEje);
+        rejilla.add(eje, 0, 0);
         int columna = 1;
         for (GraficosEstadisticas.BarraTier b : distribucion.barras()) {
             ColumnConstraints ancho = new ColumnConstraints();
             ancho.setHgrow(Priority.ALWAYS);
-            ancho.setMinWidth(0);
             ancho.setPrefWidth(60);
             rejilla.getColumnConstraints().add(ancho);
 
@@ -213,16 +215,12 @@ public class PaginaEstadisticas extends VBox {
             VBox cabecera = new VBox(0, porcentaje, cuenta);
             cabecera.setAlignment(Pos.CENTER);
 
-            SegmentosLed barra = new SegmentosLed(true, SEGMENTOS_TIER,
-                    ReglasEstadisticas.segmentosPorFraccion(b.porcentaje() / 100.0, SEGMENTOS_TIER),
-                    b.tier().getClaseCss(), 5, 10, 15);
-            fijarAlto(barra, ALTO_BARRA_TIER);
+            BarraContinua barra = BarraContinua.vertical(b.porcentaje() / 100.0, ALTO_BARRA_TIER,
+                    reservaValor, margenEje, cabecera, b.tier().getClaseCss(), true);
             EtiquetaTier letra = new EtiquetaTier(b.tier(), "tier-chico");
 
-            rejilla.add(cabecera, columna, 0);
-            rejilla.add(barra, columna, 1);
-            rejilla.add(letra, columna, 2);
-            GridPane.setHalignment(cabecera, HPos.CENTER);
+            rejilla.add(barra, columna, 0);
+            rejilla.add(letra, columna, 1);
             GridPane.setHalignment(letra, HPos.CENTER);
             GridPane.setMargin(barra, new Insets(0, 4, 0, 4));
             columna++;
@@ -230,13 +228,63 @@ public class PaginaEstadisticas extends VBox {
         return rejilla;
     }
 
-    private Node construirRanking(List<GraficosEstadisticas.Barra> datos) {
+    private Node rankingTags(List<ItemConsumption> items, GraficosEstadisticas.FiltroGenero inicial,
+                             Consumer<GraficosEstadisticas.FiltroGenero> alElegir) {
+        FlowPane selectores = new FlowPane(4, 4);
+        selectores.setMinWidth(0);
+        Label denominador = new Label();
+        denominador.getStyleClass().add("subtitulo");
+        denominador.setWrapText(true);
+        ScrollPane scroll = new ScrollPane();
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scroll.setMinWidth(0);
+        scroll.setPrefViewportHeight(300 * factor);
+        java.util.Map<GraficosEstadisticas.FiltroGenero, Button> botones = new java.util.EnumMap<>(GraficosEstadisticas.FiltroGenero.class);
+        Consumer<GraficosEstadisticas.FiltroGenero> actualizar = filtro -> {
+            var ranking = GraficosEstadisticas.rankingGeneros(items, filtro);
+            denominador.setText("% DE " + ranking.totalElegibles() + " ITEMS NO PENDIENTES CON GENEROS"
+                    + (filtro == GraficosEstadisticas.FiltroGenero.TODOS ? " · AMBITOS SEPARADOS" : ""));
+            var datos = ranking.barras().stream().map(b -> new GraficosEstadisticas.Barra(b.nombre(), b.cantidad())).toList();
+            var ambitos = ranking.barras().stream().map(b -> filtro == GraficosEstadisticas.FiltroGenero.TODOS
+                    ? b.ambito().etiqueta() : "").toList();
+            scroll.setContent(construirRanking(datos, ranking.totalElegibles(), ambitos));
+            scroll.setVvalue(0);
+            botones.forEach((f, b) -> {
+                b.getStyleClass().remove("ranking-genero-activo");
+                if (f == filtro) b.getStyleClass().add("ranking-genero-activo");
+            });
+            alElegir.accept(filtro);
+        };
+        for (var filtro : GraficosEstadisticas.FiltroGenero.values()) {
+            Button b = Terminal.corchetes(new Button(filtro.name()));
+            b.getStyleClass().addAll("pestana", "a2-button", "ranking-genero-selector");
+            b.setMinWidth(Region.USE_PREF_SIZE);
+            b.setOnAction(e -> actualizar.accept(filtro));
+            botones.put(filtro, b);
+            selectores.getChildren().add(b);
+        }
+        VBox ranking = new VBox(8, selectores, denominador, scroll);
+        ranking.getStyleClass().add("ranking-generos");
+        ranking.setMinWidth(0);
+        actualizar.accept(inicial);
+        return ranking;
+    }
+
+    private Node construirRanking(List<GraficosEstadisticas.Barra> datos, int totalItems) {
+        return construirRanking(datos, totalItems, List.of());
+    }
+
+    private Node construirRanking(List<GraficosEstadisticas.Barra> datos, int totalItems, List<String> ambitos) {
         if (datos.isEmpty()) return textoVacio();
-        int maximo = datos.get(0).valor();
+        int maximo = datos.stream().mapToInt(GraficosEstadisticas.Barra::valor).max().orElse(0);
         GridPane rejilla = new GridPane();
         rejilla.setHgap(12);
         rejilla.setVgap(10);
         ColumnConstraints nombres = new ColumnConstraints();
+        nombres.setMinWidth(60 * factor);
+        nombres.setPrefWidth(145 * factor);
         nombres.setMaxWidth(190 * factor);
         ColumnConstraints barras = new ColumnConstraints();
         barras.setHgrow(Priority.ALWAYS);
@@ -248,19 +296,28 @@ public class PaginaEstadisticas extends VBox {
         for (GraficosEstadisticas.Barra b : datos) {
             Label etiqueta = new Label(b.etiqueta());
             etiqueta.getStyleClass().add("subtitulo");
-            SegmentosLed led = new SegmentosLed(false, SEGMENTOS_RANKING,
-                    ReglasEstadisticas.segmentosPorFraccion(b.valor() / (double) maximo, SEGMENTOS_RANKING), null);
-            led.setMinHeight(12);
-            led.setPrefHeight(12);
-            led.setMaxHeight(12);
-            led.setMaxWidth(Double.MAX_VALUE);
-            Label cantidad = new Label(String.valueOf(b.valor()));
+            etiqueta.setWrapText(true);
+            etiqueta.setMinWidth(0);
+            etiqueta.setMaxWidth(Double.MAX_VALUE);
+            BarraContinua barra = BarraContinua.horizontal(
+                    maximo > 0 ? b.valor() / (double) maximo : 0, 12);
+            double porcentaje = totalItems > 0 ? b.valor() * 100.0 / totalItems : 0;
+            Label cantidad = new Label(b.valor() + " · " + Formato.decimal(porcentaje) + "%");
             cantidad.getStyleClass().add("grafico-valor");
-            rejilla.add(etiqueta, 0, fila);
-            rejilla.add(led, 1, fila);
+            cantidad.setMinWidth(Region.USE_PREF_SIZE);
+            Node nombre = etiqueta;
+            if (!ambitos.isEmpty() && !ambitos.get(fila).isEmpty()) {
+                Label ambito = new Label(ambitos.get(fila));
+                ambito.getStyleClass().add("ranking-genero-ambito");
+                ambito.setWrapText(true);
+                ambito.setMinWidth(0);
+                nombre = new VBox(1, etiqueta, ambito);
+            }
+            rejilla.add(nombre, 0, fila);
+            rejilla.add(barra, 1, fila);
             rejilla.add(cantidad, 2, fila);
-            GridPane.setValignment(etiqueta, VPos.CENTER);
-            GridPane.setValignment(led, VPos.CENTER);
+            GridPane.setValignment(nombre, VPos.CENTER);
+            GridPane.setValignment(barra, VPos.CENTER);
             GridPane.setValignment(cantidad, VPos.CENTER);
             fila++;
         }
@@ -269,27 +326,81 @@ public class PaginaEstadisticas extends VBox {
 
     private Node construirMini(List<GraficosEstadisticas.Barra> datos, int resaltado) {
         int maximo = datos.stream().mapToInt(GraficosEstadisticas.Barra::valor).max().orElse(0);
-        HBox fila = new HBox(3);
+        ColumnasMini fila = new ColumnasMini();
         for (int i = 0; i < datos.size(); i++) {
             GraficosEstadisticas.Barra b = datos.get(i);
             Label valor = new Label(String.valueOf(b.valor()));
             valor.getStyleClass().add("grafico-mini-valor");
             valor.setMinWidth(Region.USE_PREF_SIZE);
-            int llenos = maximo <= 0 ? 0
-                    : ReglasEstadisticas.segmentosPorFraccion(b.valor() / (double) maximo, FILAS_MINI);
-            SegmentosLed led = new SegmentosLed(true, FILAS_MINI, llenos, i == resaltado ? "led-e-actual" : null);
-            fijarAlto(led, ALTO_BARRA_MINI);
+            BarraContinua barra = BarraContinua.vertical(
+                    maximo > 0 ? b.valor() / (double) maximo : 0, ALTO_BARRA_MINI,
+                    RESERVA_VALOR_MINI * factor, 0, valor,
+                    i == resaltado ? "grafico-relleno-actual" : null, false);
             Label etiqueta = new Label(b.etiqueta());
             etiqueta.getStyleClass().add("grafico-mini-etiqueta");
             etiqueta.setMinWidth(Region.USE_PREF_SIZE);
-            VBox columna = new VBox(3, valor, led, etiqueta);
+            VBox columna = new VBox(3, barra, etiqueta);
             columna.setAlignment(Pos.CENTER);
-            columna.setPrefWidth(20);
             columna.setMaxWidth(Double.MAX_VALUE);
-            HBox.setHgrow(columna, Priority.ALWAYS);
+            VBox.setVgrow(barra, Priority.ALWAYS);
             fila.getChildren().add(columna);
         }
         return fila;
+    }
+
+    private static final class ColumnasMini extends Pane {
+        private static final double ESPACIO = 3;
+
+        @Override public Orientation getContentBias() { return Orientation.HORIZONTAL; }
+
+        private double anchoColumnaMinimo() {
+            return Math.max(20, Math.ceil(getManagedChildren().stream()
+                    .mapToDouble(n -> n.minWidth(-1)).max().orElse(0)));
+        }
+
+        private int columnas(double ancho) {
+            int total = getManagedChildren().size();
+            if (total == 0) return 1;
+            return Math.max(1, Math.min(total,
+                    (int) Math.floor((ancho + ESPACIO) / (anchoColumnaMinimo() + ESPACIO))));
+        }
+
+        private double anchoColumna(double ancho, int columnas) {
+            return Math.max(0, (ancho - (columnas - 1) * ESPACIO) / columnas);
+        }
+
+        private double altoFila(double anchoColumna) {
+            return Math.ceil(getManagedChildren().stream().mapToDouble(n -> n.prefHeight(anchoColumna)).max().orElse(0));
+        }
+
+        @Override protected double computeMinWidth(double alto) { return anchoColumnaMinimo(); }
+
+        @Override protected double computePrefWidth(double alto) {
+            int n = getManagedChildren().size();
+            return n == 0 ? 0 : n * anchoColumnaMinimo() + (n - 1) * ESPACIO;
+        }
+
+        @Override protected double computeMinHeight(double ancho) { return computePrefHeight(ancho); }
+
+        @Override protected double computePrefHeight(double ancho) {
+            if (getManagedChildren().isEmpty()) return 0;
+            double disponible = ancho < 0 ? computePrefWidth(-1) : ancho;
+            int columnas = columnas(disponible);
+            int filas = (getManagedChildren().size() + columnas - 1) / columnas;
+            return filas * altoFila(anchoColumna(disponible, columnas)) + (filas - 1) * ESPACIO;
+        }
+
+        @Override protected void layoutChildren() {
+            int columnas = columnas(getWidth());
+            double ancho = anchoColumna(getWidth(), columnas);
+            double alto = altoFila(ancho);
+            int i = 0;
+            for (Node nodo : getManagedChildren()) {
+                nodo.resizeRelocate((i % columnas) * (ancho + ESPACIO),
+                        (i / columnas) * (alto + ESPACIO), ancho, alto);
+                i++;
+            }
+        }
     }
 
     private Node filasResumen(Estadisticas.Resumen r, String etiquetaExtra, String valorExtra) {

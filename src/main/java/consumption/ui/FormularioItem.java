@@ -92,6 +92,45 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     private boolean irACriterios;
     private T resultado;
     private T original;
+    private consumption.data.RepositorioJson repositorioGeneros;
+    private List<ItemConsumption> itemsGeneros;
+    private Runnable refrescarGeneros = () -> {};
+    private CampoGeneros campoGeneros;
+    private TextField generoLegado;
+    private boolean preservarBorrador;
+
+    void configurarGeneros(consumption.data.RepositorioJson repositorio, List<ItemConsumption> items, Runnable refrescar) {
+        if (!repositorio.usaGeneros()) throw new IllegalArgumentException("Modo de generos inactivo.");
+        repositorioGeneros = repositorio; itemsGeneros = items; refrescarGeneros = refrescar;
+    }
+
+    protected final boolean usaGeneros() { return campoGeneros != null; }
+    protected final List<consumption.model.ReferenciaGenero> referenciasGenero() {
+        if (!usaGeneros()) throw new IllegalStateException("Campo de generos inactivo.");
+        return campoGeneros.referencias();
+    }
+
+    protected void agregarCampoGenero(TextField legado) {
+        if (repositorioGeneros == null) { agregarFila("GENERO", legado); return; }
+        generoLegado = legado;
+        var ambito = switch (nombreTipo()) {
+            case "JUEGO" -> consumption.model.AmbitoGenero.JUEGOS;
+            case "LIBRO" -> consumption.model.AmbitoGenero.LIBROS;
+            case "PELICULA", "SERIE" -> consumption.model.AmbitoGenero.AUDIOVISUAL;
+            default -> throw new IllegalArgumentException("Tipo sin biblioteca.");
+        };
+        campoGeneros = new CampoGeneros(repositorioGeneros, itemsGeneros, ambito,
+                original == null ? List.of() : original.getGeneros(),
+                () -> { modificado = true; guardarBorradorActual(); }, refrescarGeneros);
+        HBox.setHgrow(campoGeneros, Priority.ALWAYS);
+        agregarFila("GENERO", campoGeneros);
+    }
+
+    private void persistirBorrador() {
+        if (campoGeneros == null) BorradorFormulario.guardar(nombreTipo(), capturarCampos());
+        else BorradorFormulario.guardar(nombreTipo(), capturarCampos(), campoGeneros.referencias());
+    }
+
 
     private final TextField titulo = new TextField();
     private final ToggleGroup grupoEstado = new ToggleGroup();
@@ -202,6 +241,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         seccionActual.getChildren().add(contadorComentario);
 
         if (existente != null) cargar(existente);
+        if (generoLegado != null) generoLegado.clear();
         aplicarVisibilidad();
         actualizarNota();
         modificado = false;
@@ -319,7 +359,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
             demoraBorrador.stop();
             if (!descarteConfirmado && capturarBorrador
                     && modificado && original == null) {
-                try { BorradorFormulario.guardar(nombreTipo(), capturarCampos()); }
+                try { persistirBorrador(); }
                 catch (RuntimeException ex) {
                     mensaje.setText("!! BORRADOR NO GUARDADO: " + ex.getMessage());
                     System.err.println("Borrador pendiente: " + ex.getMessage());
@@ -338,7 +378,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     public void confirmarBorradorGuardado() {
         demoraBorrador.stop();
         capturarBorrador = false;
-        if (original == null) {
+        if (original == null && !preservarBorrador) {
             try {
                 BorradorFormulario.borrar(nombreTipo());
             } catch (RuntimeException ex) {
@@ -373,6 +413,10 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         try {
             Optional<BorradorFormulario.Datos> previo = BorradorFormulario.leer(nombreTipo());
             if (previo.isPresent()) {
+                if (campoGeneros == null && previo.get().generos != null) {
+                    preservarBorrador = true;
+                    throw new IllegalStateException("BORRADOR DE GENEROS: requiere el modo nuevo.");
+                }
                 boolean recuperar = preguntar(
                         "Hay un borrador de " + nombreTipo()
                                 + " sin guardar. ¿Quieres recuperar lo escrito?",
@@ -380,7 +424,17 @@ public abstract class FormularioItem<T extends ItemConsumption> {
                 if (recuperar) {
                     restaurandoBorrador = true;
                     try {
-                        aplicarBorrador(previo.get().campos);
+                        var borrador = previo.get();
+                        if (campoGeneros != null) {
+                            var plan = BorradorFormulario.prepararGeneros(borrador, repositorioGeneros.bibliotecaGeneros(),
+                                    borrador.campos.getOrDefault("GENERO#T0", ""));
+                            var elegidos = DialogoRecuperacionGeneros.elegir(dialogo.getDialogPane().getScene().getWindow(),
+                                    hojas, nombreTipo(), plan);
+                            if (elegidos.isEmpty()) { preservarBorrador = true; return; } // conserva borrador original
+                            campoGeneros.cargar(repositorioGeneros.recuperarGenerosBorrador(plan, elegidos.get(), itemsGeneros));
+                            try { refrescarGeneros.run(); } catch (RuntimeException ex) { System.err.println("Generos recuperados; refresco pendiente: " + ex.getMessage()); }
+                        }
+                        aplicarBorrador(borrador.campos);
                     } finally {
                         restaurandoBorrador = false;
                     }
@@ -421,7 +475,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         demoraBorrador.setOnFinished(ev -> {
             if (!capturarBorrador || restaurandoBorrador || original != null) return;
             try {
-                BorradorFormulario.guardar(nombreTipo(), capturarCampos());
+                persistirBorrador();
             } catch (RuntimeException ex) {
                 mensaje.setText("!! BORRADOR NO GUARDADO: " + ex.getMessage());
             }
@@ -432,6 +486,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     private Map<String, String> capturarCampos() {
         Map<String, String> datos = new LinkedHashMap<>();
         for (Fila fila : filas) {
+            if (fila.campo() == campoGeneros) continue;
             List<TextInputControl> entradas = new ArrayList<>();
             List<CheckBox> casillas = new ArrayList<>();
             buscarControles(fila.campo(), entradas, casillas);
@@ -474,6 +529,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         }
 
         for (Fila fila : filas) {
+            if (fila.campo() == campoGeneros) continue;
             List<TextInputControl> entradas = new ArrayList<>();
             List<CheckBox> casillas = new ArrayList<>();
             buscarControles(fila.campo(), entradas, casillas);
@@ -509,7 +565,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
     }
 
     private void borrarBorradorSiNuevo() {
-        if (original == null) {
+        if (original == null && !preservarBorrador) {
             BorradorFormulario.borrar(nombreTipo());
         }
     }

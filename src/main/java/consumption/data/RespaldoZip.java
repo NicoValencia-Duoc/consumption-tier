@@ -57,14 +57,17 @@ public class RespaldoZip {
 
     private static final DateTimeFormatter SELLO = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss_SSS");
 
-    public static Path restaurar(Path origen) throws IOException {
+    public static Path restaurar(Path origen) throws IOException { return restaurar(origen, false); }
+
+    public static Path restaurar(Path origen, boolean generos) throws IOException {
+        if (generos) Rutas.exigirOrigenEnsayo(origen);
         return RecuperacionDatos.ejecutarProtegido(() -> {
             DiarioZipImagenes.recuperarPendiente();
-            return restaurarInterno(origen);
+            return restaurarInterno(origen, generos);
         });
     }
 
-    private static Path restaurarInterno(Path origen) throws IOException {
+    private static Path restaurarInterno(Path origen, boolean generos) throws IOException {
         Map<String, byte[]> contenido = new LinkedHashMap<>();
         Set<String> nombres = new HashSet<>();
         long total = 0;
@@ -94,7 +97,8 @@ public class RespaldoZip {
         if (datos == null) {
             throw new IOException("El archivo no es un respaldo valido (falta datos.json).");
         }
-        RecuperacionDatos.comprobarContenido(datos);
+        if (generos) datos = RepositorioJson.prepararRespaldoGeneros(datos);
+        else RecuperacionDatos.comprobarContenido(datos);
 
         Files.createDirectories(Rutas.BASE);
         Path copiaEmergencia = null;

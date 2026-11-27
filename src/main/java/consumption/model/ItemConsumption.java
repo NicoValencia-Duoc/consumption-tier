@@ -7,6 +7,9 @@ import java.util.TreeSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.HashSet;
+import java.util.Objects;
 
 public abstract class ItemConsumption {
 
@@ -31,6 +34,7 @@ public abstract class ItemConsumption {
     private boolean sinFechaInicio;
     private boolean sinFechaTermino;
     private int numero;
+    private transient List<ReferenciaGenero> generos;
 
     public ItemConsumption(String titulo, double nota, Estado estado){
 
@@ -65,6 +69,29 @@ public abstract class ItemConsumption {
     public abstract String getTipo();
     public abstract String getLetra();
     public abstract String getGenero();
+
+    public String generosTexto() {
+        return tieneGenerosMigrados() ? getGeneros().stream().map(ReferenciaGenero::nombre)
+                .collect(java.util.stream.Collectors.joining(", ")) : java.util.Objects.toString(getGenero(), "");
+    }
+
+    public boolean tieneGenerosMigrados() { return generos != null; }
+
+    public List<ReferenciaGenero> getGeneros() {
+        return generos == null ? List.of() : generos;
+    }
+
+    public void setGeneros(List<ReferenciaGenero> referencias) {
+        Objects.requireNonNull(referencias, "referencias");
+        var identidades = new HashSet<UUID>();
+        for (ReferenciaGenero referencia : referencias) {
+            Objects.requireNonNull(referencia, "Referencia de genero vacia.");
+            if (!identidades.add(referencia.id()))
+                throw new IllegalArgumentException("Referencia de genero duplicada.");
+        }
+        this.generos = List.copyOf(referencias);
+    }
+
 
     public int getNumero() {
         return numero;
@@ -262,7 +289,7 @@ public abstract class ItemConsumption {
     }
 
     public String textoBusqueda() {
-        return unir(titulo, getGenero(), comentario);
+        return unir(titulo, tieneGenerosMigrados() ? "" : getGenero(), comentario);
     }
 
     protected static String unir(String... partes) {

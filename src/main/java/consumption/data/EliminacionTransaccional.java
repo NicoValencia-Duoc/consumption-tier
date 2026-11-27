@@ -37,6 +37,7 @@ public final class EliminacionTransaccional {
                 repositorio.guardar(restantes);
             });
         } catch (Exception fallo) {
+            repositorio.invalidarCargaGeneros();
             try {
                 papelera.recargar();
             } catch (RuntimeException recarga) {

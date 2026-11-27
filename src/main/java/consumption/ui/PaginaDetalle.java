@@ -116,6 +116,18 @@ public class PaginaDetalle extends VBox{
         if (imagen != null) portada.setImage(imagen);
 
         VBox datos = new VBox(8, titulo, resumen);
+        if (item.tieneGenerosMigrados()) {
+            Label etiqueta = new Label("GENEROS");
+            etiqueta.getStyleClass().add("subtitulo");
+            datos.setMinWidth(0);
+            HBox.setHgrow(datos, Priority.ALWAYS);
+            datos.getChildren().add(etiqueta);
+            if (item.getGeneros().isEmpty()) {
+                Label sinGeneros = new Label("SIN GENEROS");
+                sinGeneros.getStyleClass().add("subtitulo");
+                datos.getChildren().add(sinGeneros);
+            } else datos.getChildren().add(ChipsGeneros.detalle(item.getGeneros()));
+        }
         String textoDias = ReglasInicio.textoDias(item, LocalDate.now());
         if (textoDias != null) {
             Label dias = new Label(textoDias);
@@ -196,6 +208,7 @@ public class PaginaDetalle extends VBox{
         StringBuilder texto = new StringBuilder();
         texto.append("THE MAW · ").append(item.getTipo()).append('\n');
         texto.append("TITULO: ").append(item.getTitulo()).append('\n');
+        if (item.tieneGenerosMigrados()) texto.append("GENEROS: ").append(item.generosTexto()).append('\n');
         texto.append("ESTADO: ").append(item.getEstado().getEtiqueta()).append('\n');
         texto.append("NOTA: ").append(Formato.decimal(item.getNota())).append('\n');
         if (item.getTier() != null) {

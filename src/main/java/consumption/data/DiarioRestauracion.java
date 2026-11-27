@@ -20,7 +20,9 @@ public final class DiarioRestauracion {
         Path temp = Files.createTempFile(dest.getParent(), "journal-", ".tmp");
         try {
             try(FileChannel ch = FileChannel.open(temp, StandardOpenOption.WRITE)) {
-                ch.write(java.nio.ByteBuffer.wrap(bytes)); ch.force(true);
+                var buffer = java.nio.ByteBuffer.wrap(bytes);
+                while (buffer.hasRemaining()) ch.write(buffer);
+                ch.force(true);
             }
             Files.move(temp, dest, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
         } finally { Files.deleteIfExists(temp); }

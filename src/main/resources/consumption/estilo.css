@@ -847,6 +847,31 @@
     -fx-border-style: dashed;
     -fx-opacity: 0.55;
 }
+/* 32B: barras estadisticas continuas; no afecta a los LED del pie ni del arranque. */
+.grafico-pista {
+    -fx-background-color: -c-ln;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+}
+.grafico-relleno {
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-border-width: 0;
+}
+.grafico-relleno-normal { -fx-background-color: -c-acento; }
+.grafico-relleno-actual { -fx-background-color: -c-y; }
+.grafico-guia-continua {
+    -fx-background-color: -c-mt;
+    -fx-background-insets: 0;
+    -fx-opacity: 0.35;
+}
+/* Los tiers conservan el color fijo de base.css con un brillo mas contenido. */
+.grafico-relleno.tier-s { -fx-effect: dropshadow(gaussian, rgba(255,47,160,0.35), 4, 0.2, 0, 0); }
+.grafico-relleno.tier-a { -fx-effect: dropshadow(gaussian, rgba(255,138,31,0.35), 4, 0.2, 0, 0); }
+.grafico-relleno.tier-b { -fx-effect: dropshadow(gaussian, rgba(252,238,10,0.35), 4, 0.2, 0, 0); }
+.grafico-relleno.tier-c { -fx-effect: dropshadow(gaussian, rgba(57,255,136,0.35), 4, 0.2, 0, 0); }
+.grafico-relleno.tier-d { -fx-effect: dropshadow(gaussian, rgba(47,216,255,0.35), 4, 0.2, 0, 0); }
+.grafico-relleno.tier-f { -fx-effect: dropshadow(gaussian, rgba(155,107,255,0.35), 4, 0.2, 0, 0); }
 .grafico-valor { -fx-text-fill: -c-tx; -fx-font-size: 0.95em; }
 .grafico-eje { -fx-text-fill: -c-mt; -fx-font-size: 0.65em; }
 .grafico-mini-valor { -fx-text-fill: -c-tx; -fx-font-size: 0.6em; }
@@ -858,3 +883,21 @@
 .pestana.boton-accion:hover { -fx-background-color: -c-y; -fx-text-fill: -c-yt; }
 
 .pestana.boton-peligro:hover { -fx-background-color: -c-r; -fx-text-fill: -c-bg; }
+/* 32C: controles de genero; aislados del formulario legado. */
+.campo-generos .generos-chips { -fx-border-color: -c-ln; -fx-border-width: 1; -fx-padding: 5; }
+.campo-generos .genero-boton { -fx-padding: 3 5; }
+.campo-generos .genero-seleccionado, .campo-generos .genero-coincidente { -fx-text-fill: -c-y; -fx-border-color: -c-y; }
+.campo-generos .genero-alerta { -fx-text-fill: -c-r; }
+.campo-generos .genero-chip { -fx-border-color: -c-y; -fx-border-width: 1; -fx-padding: 2 4; }
+.campo-generos .genero-chip .label { -fx-text-fill: -c-y; }
+
+/* 32C.4: lectura de tags sin alterar la altura de filas ni otros chips. */
+.genero-chip-lectura { -fx-border-color: -c-y; -fx-border-width: 1; -fx-border-radius: 0; -fx-padding: 1 4; -fx-text-fill: -c-y; }
+.table-cell .genero-chip-lectura { -fx-font-size: 0.85em; }
+.consulta-generos-invalida { -fx-text-fill: -c-r; -fx-padding: 0 4; }
+
+/* 32C.5: selector exclusivo y ambito de cada barra. */
+.ranking-generos .ranking-genero-selector { -fx-padding: 4 6; }
+.ranking-generos .ranking-genero-activo, .ranking-generos .ranking-genero-activo:hover,
+.ranking-generos .ranking-genero-activo:pressed { -fx-background-color: -c-y; -fx-border-color: -c-y; -fx-text-fill: -c-yt; }
+.ranking-generos .ranking-genero-ambito { -fx-text-fill: -c-mt; -fx-font-size: 0.8em; }

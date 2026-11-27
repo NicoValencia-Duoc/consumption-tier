@@ -98,6 +98,20 @@ public final class DialogoRechazados {
             }
             boolean repetido = items.stream().anyMatch(i -> i.getNumero() == item.getNumero());
             if (item.getNumero() <= 0 || repetido) item.setNumero(Numeracion.siguiente(items));
+            if (repositorio.usaGeneros()) {
+                try {
+                    var plan = repositorio.prepararRecuperacion(item);
+                    var autorizados = DialogoRecuperacionGeneros.elegir(dialogo.getDialogPane().getScene().getWindow(), hojas, item.getTitulo(), plan);
+                    if (autorizados.isEmpty()) return;
+                    repositorio.recuperarRechazado(r, item, items, plan, autorizados.get());
+                } catch (RuntimeException ex) {
+                    estado.setText("!! NO SE GUARDO: " + ex.getMessage());
+                    return;
+                }
+                alCambiar.run(); refrescar.run();
+                estado.setText("[ OK ] RECUPERADO: " + item.getTitulo());
+                return;
+            }
             repositorio.quitarRechazado(r);
             items.add(item);
             try {

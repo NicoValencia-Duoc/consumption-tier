@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -28,16 +29,21 @@ public final class RecuperacionDatos {
     private RecuperacionDatos() {}
 
     public static Optional<Path> ultimoRespaldoLegible() throws IOException {
+        return ultimoRespaldoLegible(false);
+    }
+    public static Optional<Path> ultimoRespaldoLegible(boolean generos) throws IOException {
         List<Path> copias = RespaldoAutomatico.listar();
         return copias.stream()
                 .sorted(Comparator.reverseOrder())
-                .filter(RecuperacionDatos::esLegible)
+                .filter(zip -> esLegible(zip, generos))
                 .findFirst();
     }
 
-    private static boolean esLegible(Path zip) {
+    private static boolean esLegible(Path zip, boolean generos) {
         try {
-            comprobarContenido(leerDatosZip(zip));
+            byte[] bytes = leerDatosZip(zip);
+            if (generos) RepositorioJson.prepararRespaldoGeneros(bytes);
+            else comprobarContenido(bytes);
             return true;
         } catch (IOException | RuntimeException e) {
             return false;
@@ -83,12 +89,18 @@ public final class RecuperacionDatos {
     }
 
     public static Path restaurarSoloDatos(Path zip) throws IOException {
-        return ejecutarProtegido(() -> restaurarSoloDatosInterno(zip));
+        return restaurarSoloDatos(zip, false);
     }
 
-    private static Path restaurarSoloDatosInterno(Path zip) throws IOException {
+    public static Path restaurarSoloDatos(Path zip, boolean generos) throws IOException {
+        if (generos) Rutas.exigirOrigenEnsayo(zip);
+        return ejecutarProtegido(() -> restaurarSoloDatosInterno(zip, generos));
+    }
+
+    private static Path restaurarSoloDatosInterno(Path zip, boolean generos) throws IOException {
         byte[] bytes = leerDatosZip(zip);
-        comprobarContenido(bytes);
+        if (generos) bytes = RepositorioJson.prepararRespaldoGeneros(bytes);
+        else comprobarContenido(bytes);
         Files.createDirectories(Rutas.BASE);
 
         Path copiaEmergencia = null;
@@ -139,11 +151,16 @@ public final class RecuperacionDatos {
         catch (Exception e) { throw new IOException("Error al adquirir barrera de escritura", e); }
     }
 
-    static void mover(Path origen, Path destino) throws IOException {        try {
-        Files.move(origen, destino,
-                    StandardCopyOption.REPLACE_EXISTING,
-                    StandardCopyOption.ATOMIC_MOVE);
+    static void mover(Path origen, Path destino) throws IOException {
+        if (Rutas.generosHabilitados()) {
+            try (var canal = java.nio.channels.FileChannel.open(origen, StandardOpenOption.WRITE)) {
+                canal.force(true);
+            }
+        }
+        try {
+            Files.move(origen, destino, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
         } catch (AtomicMoveNotSupportedException e) {
+            if (Rutas.generosHabilitados()) throw e;
             Files.move(origen, destino, StandardCopyOption.REPLACE_EXISTING);
         }
     }

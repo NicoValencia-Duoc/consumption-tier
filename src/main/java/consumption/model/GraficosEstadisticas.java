@@ -20,6 +20,39 @@ public final class GraficosEstadisticas {
 
     public record Barra(String etiqueta, int valor) { }
 
+    public enum FiltroGenero {
+        TODOS, JUEGOS, LIBROS, PELICULAS, SERIES;
+        public boolean admite(ItemConsumption item) { return this == TODOS || name().equals(item.getTipo()); }
+    }
+    public record BarraGenero(AmbitoGenero ambito, String nombre, int cantidad) {}
+    public record RankingGeneros(List<BarraGenero> barras, int totalElegibles) {
+        public RankingGeneros { barras = List.copyOf(barras); }
+    }
+    private record ClaveGenero(AmbitoGenero ambito, String nombre) {}
+
+    public static RankingGeneros rankingGeneros(List<? extends ItemConsumption> items, FiltroGenero filtro) {
+        Map<ClaveGenero, Integer> cuentas = new LinkedHashMap<>();
+        java.util.Set<ItemConsumption> vistos = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        int total = 0;
+        for (ItemConsumption item : items) {
+            if (!vistos.add(item) || item.getEstado() == Estado.PENDIENTE || !filtro.admite(item)
+                    || item.getGeneros().isEmpty()) continue;
+            total++;
+            AmbitoGenero ambito = AmbitoGenero.deTipo(item.getTipo());
+            java.util.Set<String> nombres = new java.util.HashSet<>();
+            for (ReferenciaGenero ref : item.getGeneros()) {
+                String clave = NombreGenero.clave(ref.nombre());
+                if (nombres.add(clave)) cuentas.merge(new ClaveGenero(ambito, clave), 1, Integer::sum);
+            }
+        }
+        var barras = cuentas.entrySet().stream()
+                .map(e -> new BarraGenero(e.getKey().ambito(), e.getKey().nombre(), e.getValue()))
+                .sorted(Comparator.comparingInt(BarraGenero::cantidad).reversed()
+                        .thenComparing(BarraGenero::nombre).thenComparing(BarraGenero::ambito))
+                .toList();
+        return new RankingGeneros(barras, total);
+    }
+
     private GraficosEstadisticas() { }
 
     public static Distribucion distribucionTiers(List<? extends ItemConsumption> items) {

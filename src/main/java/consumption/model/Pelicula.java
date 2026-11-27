@@ -14,10 +14,19 @@ public class Pelicula extends ItemConsumption{
     private int duracionMin;
     private int anio;
 
-    public Pelicula(String titulo, double nota, Estado estado, String director, String genero, int duracionMin, int anio){
+    public Pelicula(String titulo, double nota, Estado estado, String director, String genero, int duracionMin, int anio) {
+        this(titulo, nota, estado, director, genero, duracionMin, anio, null, false);
+    }
+
+    public static Pelicula conGeneros(String titulo, double nota, Estado estado, String director, List<ReferenciaGenero> referencias, int duracionMin, int anio) {
+        return new Pelicula(titulo, nota, estado, director, null, duracionMin, anio, referencias, true);
+    }
+
+    private Pelicula(String titulo, double nota, Estado estado, String director, String genero, int duracionMin, int anio, List<ReferenciaGenero> referencias, boolean migrado) {
         super(titulo, nota, estado);
         setDirector(director);
-        setGenero(genero);
+        if (migrado) setGeneros(referencias);
+        else setGenero(genero);
         setDuracionMin(duracionMin);
         setAnio(anio);
     }

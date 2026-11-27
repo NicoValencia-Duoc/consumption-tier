@@ -23,7 +23,7 @@ public class FormularioJuego extends FormularioItem<Juego> {
 
     @Override protected void agregarCamposPropios() {
         agregarFila("PLATAFORMA", plataforma);
-        agregarFila("GENERO", genero);
+        agregarCampoGenero(genero);
         agregarFila("DESARROLLADOR", desarrollador);
         agregarFila("AÑO", anio);
         agregarFila("HORAS JUGADAS", horas);
@@ -32,20 +32,23 @@ public class FormularioJuego extends FormularioItem<Juego> {
 
     @Override protected void cargarPropios(Juego j) {
         plataforma.setText(j.getPlataforma());
-        genero.setText(j.getGenero());
+        if (!usaGeneros()) genero.setText(j.getGenero());
         desarrollador.setText(j.getDesarrollador());
         anio.setText(String.valueOf(j.getAnio()));
         horas.setText(Formato.decimal(j.getHorasJugadas()));
     }
 
     @Override protected Juego crear(String titulo, double nota, Estado estado) {
+        if (usaGeneros()) return Juego.conGeneros(titulo, nota, estado, texto(plataforma), referenciasGenero(), texto(desarrollador),
+                entero(anio, "El año"), decimal(horas, "Las horas"));
         return new Juego(titulo, nota, estado, texto(plataforma), texto(genero), texto(desarrollador),
                 entero(anio, "El año"), decimal(horas, "Las horas"));
     }
 
     @Override protected void aplicarPropios(Juego j) {
         j.setPlataforma(texto(plataforma));
-        j.setGenero(texto(genero));
+        if (usaGeneros()) j.setGeneros(referenciasGenero());
+        else j.setGenero(texto(genero));
         j.setDesarrollador(texto(desarrollador));
         j.setAnio(entero(anio, "El año"));
         j.setHorasJugadas(decimal(horas, "Las horas"));

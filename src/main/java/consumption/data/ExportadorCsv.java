@@ -62,7 +62,7 @@ public class ExportadorCsv {
         if (pareceFormula) {
             t = "'" + t;
         }
-        if (t.contains(SEPARADOR) || t.contains("\"") || t.contains("\n")) {
+        if (t.contains(SEPARADOR) || t.contains("\"") || t.contains("\n") || t.contains("\r")) {
             t = "\"" + t.replace("\"", "\"\"") + "\"";
         }
         return t;

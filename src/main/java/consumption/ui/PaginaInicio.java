@@ -28,6 +28,7 @@ public class PaginaInicio extends VBox {
     private final List<ItemConsumption> items;
     private final Consumer<ItemConsumption> alAbrir;
     private final TilePane galeria = new TilePane(14, 14);
+    private final boolean modoGeneros;
     private final CampoBusqueda buscador = new CampoBusqueda();
     private final ComboBox<String> orden = new ComboBox<>();
     private final Label subtitulo = new Label();
@@ -48,6 +49,12 @@ public class PaginaInicio extends VBox {
 
     public PaginaInicio(List<ItemConsumption> items, Consumer<ItemConsumption> alAbrir,
                         Consumer<String> alAgregarTipo, boolean tarjetasCompactas) {
+        this(items, alAbrir, alAgregarTipo, tarjetasCompactas, false);
+    }
+
+    public PaginaInicio(List<ItemConsumption> items, Consumer<ItemConsumption> alAbrir,
+                        Consumer<String> alAgregarTipo, boolean tarjetasCompactas, boolean modoGeneros) {
+        this.modoGeneros = modoGeneros;
         this.items = items;
         this.tarjetasCompactas = tarjetasCompactas;
         this.alAbrir = alAbrir;
@@ -180,11 +187,13 @@ public class PaginaInicio extends VBox {
             if (e.getKey() == tierActual) e.getValue().getStyleClass().add("chip-activo");
         }
         String consulta = buscador.getText();
+        var consultaGeneros = consumption.model.ConsultaGeneros.analizar(modoGeneros ? consulta : "");
+        buscador.consultaInvalida(modoGeneros && !consultaGeneros.valida());
 
         List<ItemConsumption> visibles = items.stream()
                 .filter(this::coincideConFiltro)
                 .filter(i -> ReglasInicio.pasaTier(i, tierActual))
-                .filter(i -> ReglasInicio.coincideBusqueda(i, consulta))
+                .filter(i -> modoGeneros ? consultaGeneros.coincideInicio(i) : ReglasInicio.coincideBusqueda(i, consulta))
                 .sorted(ReglasInicio.pendientesAlFinal(comparador()))
                 .toList();
 

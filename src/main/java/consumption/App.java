@@ -60,14 +60,17 @@ public class App extends Application {
         }
         tema = Tema.de(preferencias.getTema());
 
-        RepositorioJson repositorio = new RepositorioJson();
+        boolean ensayoGeneros = consumption.data.Rutas.generosAislados();
+        if (ensayoGeneros) System.err.println("THE MAW // ENSAYO SINTETICO V2: " + consumption.data.Rutas.BASE);
+        RepositorioJson repositorio = consumption.data.Rutas.generosHabilitados()
+                ? RepositorioJson.paraGeneros() : new RepositorioJson();
         List<ItemConsumption> items;
         try {
-            items = repositorio.cargar();
+            items = cargarConReconstruccion(repositorio);
         } catch (IllegalStateException errorOriginal) {
             Optional<Path> candidato;
             try {
-                candidato = RecuperacionDatos.ultimoRespaldoLegible();
+                candidato = RecuperacionDatos.ultimoRespaldoLegible(repositorio.usaGeneros());
             } catch (IOException ex) {
                 candidato = Optional.empty();
             }
@@ -106,8 +109,9 @@ public class App extends Application {
 
             Path copia = null;
             try {
-                copia = RecuperacionDatos.restaurarSoloDatos(respaldo);
-                repositorio = new RepositorioJson();
+                boolean generos = repositorio.usaGeneros();
+                copia = RecuperacionDatos.restaurarSoloDatos(respaldo, generos);
+                repositorio = generos ? RepositorioJson.paraGeneros() : new RepositorioJson();
                 items = repositorio.cargar();
             } catch (IOException | RuntimeException ex) {
 
@@ -165,6 +169,38 @@ public class App extends Application {
         stage.show();
         ArranqueTerminal.iniciar(raizArranque);
         GeometriaVentana.registrar(stage, preferencias);
+    }
+
+    private List<ItemConsumption> cargarConReconstruccion(RepositorioJson repositorio) {
+        try { return repositorio.cargar(); }
+        catch (IllegalStateException original) {
+            if (!repositorio.usaGeneros()) throw original;
+            final consumption.data.MigracionGeneros.Plan plan;
+            try {
+                plan = RepositorioJson.prepararReconstruccionGeneros(
+                        java.nio.file.Files.readAllBytes(consumption.data.Rutas.DATOS));
+            } catch (IOException | RuntimeException fallo) {
+                original.addSuppressed(fallo); throw original;
+            }
+            ButtonType reconstruir = new ButtonType("RECONSTRUIR");
+            Alert pregunta = new Alert(Alert.AlertType.CONFIRMATION,
+                    "LA BIBLIOTECA DE GENEROS ESTA DAÑADA.\n\n"
+                            + "SE PUEDEN RECONSTRUIR LOS TAGS PRESENTES EN REGISTROS VALIDOS. "
+                            + "PUEDEN PERDERSE TAGS SIN USO E IDENTIDADES HISTORICAS. "
+                            + "SE CONSERVARA UNA COPIA DEL ARCHIVO ORIGINAL. "
+                            + "CANCELAR PERMITE EVALUAR UN RESPALDO SIN RECONSTRUIR.",
+                    reconstruir, ButtonType.CANCEL);
+            pregunta.setTitle("THE MAW // INTEGRIDAD DE GENEROS");
+            pregunta.setHeaderText("RECONSTRUCCION AUTORIZADA");
+            prepararRecuperacion(pregunta);
+            if (pregunta.showAndWait().filter(reconstruir::equals).isEmpty()) throw original;
+            try {
+                consumption.data.MigracionGeneros.aplicar(plan);
+                return repositorio.cargar();
+            } catch (RuntimeException fallo) {
+                original.addSuppressed(fallo); throw original;
+            }
+        }
     }
 
     private void prepararRecuperacion(Alert alerta) {

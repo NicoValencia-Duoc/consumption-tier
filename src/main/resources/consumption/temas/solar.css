@@ -44,3 +44,10 @@
 .dias-en-curso, .estrella, .letra, .boton-musica,
 .pestana-barra:hover, .boton-opciones:hover, .dialog-pane .button:hover { -fx-text-fill: -c-yl; }
 .root, .cal-panel, .context-menu { -c-a2-hover: #f3ec99; -c-a2-danger-hover: #d8aeac; }
+/* 32C-R06: contraste de tags sobre crema, sin alterar la paleta de otros temas. */
+.campo-generos .genero-seleccionado,
+.campo-generos .genero-coincidente,
+.genero-chip-lectura { -fx-text-fill: -c-yl; -fx-border-color: -c-yl; }
+.campo-generos .genero-chip { -fx-border-color: -c-yl; }
+.campo-generos .genero-chip .label,
+.campo-generos .genero-chip .button { -fx-text-fill: -c-yl; }

@@ -15,10 +15,19 @@ public class Juego extends ItemConsumption{
     private int anio;
     private double horasJugadas;
 
-    public Juego(String titulo, double nota, Estado estado, String plataforma, String genero, String desarrollador, int anio, double horasJugadas){
+    public Juego(String titulo, double nota, Estado estado, String plataforma, String genero, String desarrollador, int anio, double horasJugadas) {
+        this(titulo, nota, estado, plataforma, genero, desarrollador, anio, horasJugadas, null, false);
+    }
+
+    public static Juego conGeneros(String titulo, double nota, Estado estado, String plataforma, List<ReferenciaGenero> referencias, String desarrollador, int anio, double horasJugadas) {
+        return new Juego(titulo, nota, estado, plataforma, null, desarrollador, anio, horasJugadas, referencias, true);
+    }
+
+    private Juego(String titulo, double nota, Estado estado, String plataforma, String genero, String desarrollador, int anio, double horasJugadas, List<ReferenciaGenero> referencias, boolean migrado) {
         super(titulo, nota, estado);
         setPlataforma(plataforma);
-        setGenero(genero);
+        if (migrado) setGeneros(referencias);
+        else setGenero(genero);
         setDesarrollador(desarrollador);
         setAnio(anio);
         setHorasJugadas(horasJugadas);
