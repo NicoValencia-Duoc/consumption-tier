@@ -59,8 +59,10 @@ public final class DialogoRechazados {
         estado.setWrapText(true);
 
         Button recuperar = Terminal.corchetes(new Button("RECUPERAR"));
+        recuperar.getStyleClass().add("a2-button");
         recuperar.getStyleClass().addAll("pestana", "boton-accion");
         Button descartar = Terminal.corchetes(new Button("DESCARTAR"));
+        descartar.getStyleClass().add("a2-button");
         descartar.getStyleClass().addAll("pestana", "boton-accion", "boton-peligro");
         HBox acciones = new HBox(8, recuperar, descartar);
         acciones.setAlignment(Pos.CENTER_LEFT);

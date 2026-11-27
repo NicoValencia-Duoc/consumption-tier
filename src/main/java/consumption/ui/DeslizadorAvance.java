@@ -22,7 +22,8 @@ public class DeslizadorAvance extends VBox {
 
     private final Slider deslizador = new Slider(0, TOPE_BASE, 0);
     private final BarraAvance barra = new BarraAvance();
-    private final Button boton = new Button("SUPERAR 100%");
+    private final Button boton = new Button("[ SUPERAR 100% ]");
+    { boton.getStyleClass().add("a2-button"); }
     private final DoubleProperty valor = new SimpleDoubleProperty(0);
     private final boolean permiteExceso;
 
@@ -112,7 +113,7 @@ public class DeslizadorAvance extends VBox {
         interno = true;
         deslizador.setMax(activo ? TOPE_EXTENDIDO : TOPE_BASE);
         interno = false;
-        boton.setText(activo ? "VOLVER A 100%" : "SUPERAR 100%");
+        boton.setText(activo ? "[ VOLVER A 100% ]" : "[ SUPERAR 100% ]");
         barra.setExtendida(activo);
         marcar(deslizador, "extendido", activo);
         refrescar();
@@ -142,7 +143,9 @@ public class DeslizadorAvance extends VBox {
             alerta.getDialogPane().getStylesheets().setAll(getScene().getStylesheets());
         }
         Button b1 = (Button) alerta.getDialogPane().lookupButton(recortar);
+        b1.getStyleClass().add("a2-button");
         Button b2 = (Button) alerta.getDialogPane().lookupButton(mantener);
+        b2.getStyleClass().add("a2-button");
         b1.getStyleClass().add("boton-dialogo");
         b2.getStyleClass().addAll("boton-dialogo", "boton-accion");
         b1.setDefaultButton(false);

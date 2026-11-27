@@ -64,6 +64,7 @@ public class Cabecera extends HBox {
             if (g > 0) contenedorPestanas.getChildren().add(crearSeparador());
             for (String nombrePestana : GRUPOS[g]) {
                 Button b = new Button(nombrePestana);
+                b.getStyleClass().add("a2-exento");
                 b.getStyleClass().add("pestana-barra");
                 fijarAnchoNavegacion(b);
                 b.setOnAction(e -> {
@@ -79,6 +80,7 @@ public class Cabecera extends HBox {
         contenedorPestanas.getChildren().add(pestanaDetalle);
 
         Button botonTema = Terminal.corchetes(new Button("TEMA ▾"));
+        botonTema.getStyleClass().add("a2-button");
         botonTema.getStyleClass().add("pestana-barra");
         fijarAnchoNavegacion(botonTema);
         ContextMenu menuTema = new ContextMenu();
@@ -92,6 +94,7 @@ public class Cabecera extends HBox {
         });
 
         Button engranaje = new Button("⚙");
+        engranaje.getStyleClass().add("a2-exento");
         engranaje.getStyleClass().addAll("pestana-barra", "boton-opciones");
         engranaje.setTooltip(new javafx.scene.control.Tooltip("OPCIONES"));
         engranaje.setMinSize(36, 32);
@@ -196,6 +199,7 @@ public class Cabecera extends HBox {
     public void setContadores(Map<String, Integer> cantidades) {
         cantidades.forEach((nombrePestana, cantidad) -> {
             Button b = pestanas.get(nombrePestana);
+            b.getStyleClass().add("a2-exento");
             if (b == null) return;
             Label numero = new Label(String.format("%02d", cantidad));
             numero.getStyleClass().add("contador-pestana");

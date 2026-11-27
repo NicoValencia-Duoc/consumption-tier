@@ -87,6 +87,7 @@ public class PaginaInicio extends VBox {
         botones.setAlignment(Pos.CENTER);
         for (String tipo : new String[] {"JUEGO", "LIBRO", "PELICULA", "SERIE"}) {
             Button b = Terminal.corchetes(new Button("+ " + tipo));
+            b.getStyleClass().add("a2-button");
             b.getStyleClass().addAll("pestana", "boton-accion");
             b.setOnAction(e -> alAgregarTipo.accept(tipo));
             botones.getChildren().add(b);
@@ -107,6 +108,7 @@ public class PaginaInicio extends VBox {
         HBox filtros = new HBox(6);
         for (String nombre : FILTROS) {
             Button b = new Button(nombre);
+            b.getStyleClass().add("a2-exento");
             b.setUserData(nombre);
             Terminal.corchetes(b);
             b.getStyleClass().add("filtro");
@@ -148,6 +150,7 @@ public class PaginaInicio extends VBox {
         fila.setAlignment(Pos.CENTER_LEFT);
         for (Tier t : Tier.values()) {
             Button chip = new Button(t.getLetra());
+            chip.getStyleClass().add("a2-exento");
             chip.getStyleClass().addAll("chip-tier", "chip-" + t.getLetra().toLowerCase());
             chip.setOnAction(e -> {
                 tierActual = (tierActual == t) ? null : t;

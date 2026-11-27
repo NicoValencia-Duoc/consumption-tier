@@ -854,3 +854,7 @@
 
 /* Lectura de escala (OPCIONES) con destello del acento del tema */
 .opciones-valor-glitch { -fx-text-fill: -c-acento; -fx-font-weight: bold; }
+/* R05 experimental */
+.pestana.boton-accion:hover { -fx-background-color: -c-y; -fx-text-fill: -c-yt; }
+
+.pestana.boton-peligro:hover { -fx-background-color: -c-r; -fx-text-fill: -c-bg; }

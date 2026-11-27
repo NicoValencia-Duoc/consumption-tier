@@ -72,11 +72,13 @@ public class PieMaw extends VBox {
         tiempo.textProperty().bind(reproductor.tiempoProperty());
 
         Button lista = new Button("☰");
+        lista.getStyleClass().add("a2-exento");
         lista.getStyleClass().add("boton-musica");
         lista.setOnAction(e -> PistasDialog.mostrar(reproductor, getScene().getStylesheets()));
         fijarTamano(lista);
 
         Button pausa = new Button();
+        pausa.getStyleClass().add("a2-exento");
         pausa.getStyleClass().add("boton-musica");
         Node iconoPlay = crearIconoPlay();
         Node iconoPausa = crearIconoPausa();
@@ -86,6 +88,7 @@ public class PieMaw extends VBox {
         fijarTamano(pausa);
 
         Button siguiente = new Button("▶▶");
+        siguiente.getStyleClass().add("a2-exento");
         siguiente.getStyleClass().add("boton-musica");
         siguiente.setOnAction(e -> reproductor.siguiente());
         fijarTamano(siguiente);

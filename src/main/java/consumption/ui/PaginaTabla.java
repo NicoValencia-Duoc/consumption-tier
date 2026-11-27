@@ -78,13 +78,21 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
     private final HBox barraSeleccion;
     private final Label contador = new Label();
     private final Button botonTodo = new Button();
+    { botonTodo.getStyleClass().add("a2-button"); }
     private final Button editar = new Button("EDITAR");
+    { editar.getStyleClass().add("a2-button"); }
     private final Button favorito = new Button("★ FAVORITO");
+    { favorito.getStyleClass().add("a2-button"); }
     private final Button detalle = new Button("DETALLE");
+    { detalle.getStyleClass().add("a2-button"); }
     private final Button eliminar = new Button();
+    { eliminar.getStyleClass().add("a2-button"); }
     private final Button empezar = new Button(Transicion.EMPEZAR.getEtiqueta());
+    { empezar.getStyleClass().add("a2-button"); }
     private final Button terminar = new Button(Transicion.TERMINAR.getEtiqueta());
+    { terminar.getStyleClass().add("a2-button"); }
     private final Button abandonar = new Button(Transicion.ABANDONAR.getEtiqueta());
+    { abandonar.getStyleClass().add("a2-button"); }
 
     private ContextMenu menuAbierto;
 
@@ -127,6 +135,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         HBox titulo = Terminal.titulo(nombreTipo, cantidad);
 
         Button agregar = new Button("+ AGREGAR");
+        agregar.getStyleClass().add("a2-button");
         agregar.getStyleClass().addAll("pestana", "boton-accion");
         agregar.setOnAction(e -> alAgregar.run());
         mas.getStyleClass().addAll("pestana", "menu-mas");
@@ -138,6 +147,7 @@ public class PaginaTabla<T extends ItemConsumption> extends VBox {
         acciones.setMaxWidth(Double.MAX_VALUE);
 
         Button cerrar = new Button("✕");
+        cerrar.getStyleClass().add("a2-exento");
         cerrar.getStyleClass().addAll("pestana", "cerrar-plano");
         cerrar.setOnAction(e -> marcados.clear());
         contador.getStyleClass().add("contador-seleccion");

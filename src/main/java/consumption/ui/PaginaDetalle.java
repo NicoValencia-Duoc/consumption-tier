@@ -76,10 +76,12 @@ public class PaginaDetalle extends VBox{
         comentario.textProperty().addListener((obs, antes, ahora) -> aviso.setText(""));
 
         Button volver = Terminal.corchetes(new Button("← VOLVER"));
+        volver.getStyleClass().add("a2-button");
         volver.getStyleClass().add("pestana");
         volver.setOnAction(e -> alVolver.run());
 
         Button guardar = Terminal.corchetes(new Button("GUARDAR COMENTARIO"));
+        guardar.getStyleClass().add("a2-button");
         guardar.getStyleClass().addAll("pestana", "boton-accion");
         guardar.setOnAction(e -> {
             String comentarioAnterior = item.getComentario();
@@ -94,9 +96,11 @@ public class PaginaDetalle extends VBox{
         });
 
         Button editar = Terminal.corchetes(new Button("EDITAR"));
+        editar.getStyleClass().add("a2-button");
         editar.getStyleClass().add("pestana");
         editar.setOnAction(e -> alEditar.run());
         Button copiar = Terminal.corchetes(new Button("COPIAR FICHA"));
+        copiar.getStyleClass().add("a2-button");
         copiar.getStyleClass().add("pestana");
         copiar.setOnAction(e -> {
             ClipboardContent portapapeles = new ClipboardContent();
@@ -135,6 +139,7 @@ public class PaginaDetalle extends VBox{
         for (Transicion transicion : Transicion.values()) {
             if (!transicion.permitidaDesde(item.getEstado())) continue;
             Button boton = Terminal.corchetes(new Button(transicion.getEtiqueta()));
+            boton.getStyleClass().add("a2-button");
             boton.getStyleClass().add("pestana");
             if (transicion == Transicion.TERMINAR) boton.getStyleClass().add("boton-accion");
             if (transicion == Transicion.ABANDONAR) boton.getStyleClass().add("boton-peligro");

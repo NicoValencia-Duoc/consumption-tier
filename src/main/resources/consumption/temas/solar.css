@@ -43,3 +43,4 @@
 .estado-progreso, .chip-progreso:selected { -fx-text-fill: -c-yl; -fx-border-color: -c-yl; }
 .dias-en-curso, .estrella, .letra, .boton-musica,
 .pestana-barra:hover, .boton-opciones:hover, .dialog-pane .button:hover { -fx-text-fill: -c-yl; }
+.root, .cal-panel, .context-menu { -c-a2-hover: #f3ec99; -c-a2-danger-hover: #d8aeac; }

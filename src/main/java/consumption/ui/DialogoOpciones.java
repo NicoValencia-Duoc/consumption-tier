@@ -72,7 +72,8 @@ public final class DialogoOpciones {
             porcentaje.setEffect(null);
             porcentaje.getStyleClass().remove("opciones-valor-glitch");
         });
-        final Timeline[] glitchActual = {null};
+        final AnimationTimer[] glitchActual = {null};
+        final int[] generacion = {0};
         Slider escala = new Slider(90, 115, preferencias.getEscalaTexto());
         escala.setMajorTickUnit(5);
         escala.setMinorTickCount(0);
@@ -99,30 +100,54 @@ public final class DialogoOpciones {
                 return;
             }
             limpiarGlitch.stop();
-            if (glitchActual[0] != null) glitchActual[0].stop();
+            if (glitchActual[0] != null) { glitchActual[0].stop(); System.err.println("STOP gen="+generacion[0]); }
+            final int gen = ++generacion[0];
             porcentaje.getStyleClass().remove("opciones-valor-glitch");
             porcentaje.getStyleClass().add("opciones-valor-glitch");
             porcentaje.setText(previo + " %");
             porcentaje.setOpacity(0.22);
-            glitchActual[0] = new Timeline(
-                    new KeyFrame(Duration.millis(35), e -> {
+            porcentaje.setTranslateX(0);
+            glitchActual[0] = new AnimationTimer() {
+                final int[] posiciones = {-3, 3, -2, 2, 0};
+                final long[] esperas = {35, 40, 40, 50, 50, 35};
+                int paso = 0;
+                long ultimo = -1;
+                @Override public void handle(long now) {
+                    long efectivo = System.nanoTime();
+                    if (gen != generacion[0]) { stop(); return; }
+                    if (ultimo < 0) { ultimo = efectivo; return; }
+                    if (efectivo - ultimo < esperas[paso] * 1_000_000L) return;
+                    System.err.println("F07 gen="+gen+" paso="+paso+" pulso="+now+" efectivo="+efectivo+" intervalo="+(efectivo-ultimo));
+                    if (paso == 0) {
                         porcentaje.setText(valor + " %");
-                        porcentaje.setTranslateX(-3);
                         porcentaje.setOpacity(1);
-                    }),
-                    new KeyFrame(Duration.millis(75), e -> porcentaje.setTranslateX(3)),
-                    new KeyFrame(Duration.millis(115), e -> porcentaje.setTranslateX(-2)),
-                    new KeyFrame(Duration.millis(165), e -> porcentaje.setTranslateX(2)),
-                    new KeyFrame(Duration.millis(215), e -> porcentaje.setTranslateX(0))
-            );
-            glitchActual[0].playFromStart();
-            limpiarGlitch.playFromStart();
+                    }
+                    if (paso < posiciones.length) {
+                        porcentaje.setTranslateX(posiciones[paso++]);
+                        ultimo = System.nanoTime();
+                    } else {
+                        porcentaje.setOpacity(1);
+                        porcentaje.setEffect(null);
+                        porcentaje.getStyleClass().remove("opciones-valor-glitch");
+                        stop();
+                        System.err.println("END gen="+gen+" x="+porcentaje.getTranslateX()+" opacity="+porcentaje.getOpacity()+" effect="+porcentaje.getEffect()+" fill="+porcentaje.getTextFill()+" classes="+porcentaje.getStyleClass());
+                    }
+                }
+            };
+            long inicioRefresco = System.nanoTime();
             refrescarEscala.run();
             refrescarPagina.run();
             if (dialogo.getDialogPane().getScene() != null) {
                 dialogo.getDialogPane().getStylesheets().setAll(
                         ((Scene) propietario.getScene()).getStylesheets());
             }
+            System.err.println("F07 refresh ms=" + (System.nanoTime()-inicioRefresco)/1e6);
+            AnimationTimer secuencia = glitchActual[0];
+            javafx.application.Platform.runLater(() -> {
+                if (glitchActual[0] == secuencia) {
+                    secuencia.start();
+                }
+            });
         });
         Label explicacion = new Label("100 % = TAMAÑO ORIGINAL · CAMBIOS EN TIEMPO REAL");
         explicacion.getStyleClass().add("subtitulo");
@@ -183,6 +208,7 @@ public final class DialogoOpciones {
         Button detalles = accion("REVISAR Y RECUPERAR", dialogo, abrirRechazados);
         detalles.setDisable(rechazados == 0);
         Button exportar = Terminal.corchetes(new Button("EXPORTAR JSON"));
+        exportar.getStyleClass().add("a2-button");
         exportar.getStyleClass().addAll("pestana", "boton-accion");
         exportar.setDisable(rechazados == 0);
         exportar.setOnAction(e -> {
@@ -249,6 +275,7 @@ public final class DialogoOpciones {
         Terminal.dialogo(dialogo, "OPCIONES // THE MAW", null, null);
         Terminal.prepararCentrado(dialogo);
         Button cerrar = (Button) dialogo.getDialogPane().lookupButton(ButtonType.CLOSE);
+        cerrar.getStyleClass().add("a2-button");
         if (cerrar != null) {
             cerrar.getStyleClass().add("opciones-cerrar-fijo");
             cerrar.setMinWidth(140);
@@ -292,6 +319,7 @@ public final class DialogoOpciones {
 
     private static Button accion(String nombre, Dialog<?> dialogo, Runnable accion) {
         Button boton = Terminal.corchetes(new Button(nombre));
+        boton.getStyleClass().add("a2-button");
         boton.getStyleClass().addAll("pestana", "boton-accion");
         boton.setOnAction(e -> {
             dialogo.close();

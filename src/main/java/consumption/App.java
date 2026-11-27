@@ -32,6 +32,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
+        Tipografia.cargar();
         try {
             consumption.data.DiarioZipImagenes.recuperarPendiente();
             DiarioRestauracion.recuperarAntesDeCargar();
@@ -39,11 +40,11 @@ public class App extends Application {
             Alert error = new Alert(Alert.AlertType.ERROR,
                     "Recuperacion A08/A10 incompleta. No se abriran los datos. " + ex.getMessage(), ButtonType.CLOSE);
             error.setTitle("THE MAW — RECUPERACION PENDIENTE");
+            prepararRecuperacion(error);
             error.showAndWait();
             Platform.exit();
             return;
         }
-        Tipografia.cargar();
         try {
             preferencias = Preferencias.cargar();
         } catch (IllegalStateException ex) {
@@ -52,6 +53,7 @@ public class App extends Application {
                             + "sobrescrito. Revise preferencias.json y sus respaldos. "
                             + ex.getMessage(), ButtonType.CLOSE);
             error.setTitle("THE MAW — PREFERENCIAS NO LEGIBLES");
+            prepararRecuperacion(error);
             error.showAndWait();
             Platform.exit();
             return;
@@ -78,6 +80,7 @@ public class App extends Application {
                         ButtonType.CLOSE);
                 alerta.setTitle("THE MAW — RECUPERACION");
                 alerta.setHeaderText("NO SE PUDO CARGAR LA BIBLIOTECA");
+                prepararRecuperacion(alerta);
                 alerta.showAndWait();
                 Platform.exit();
                 return;
@@ -95,6 +98,7 @@ public class App extends Application {
             pregunta.setTitle("THE MAW — RECUPERACION");
             pregunta.setHeaderText("RECUPERAR BIBLIOTECA DESDE RESPALDO");
 
+            prepararRecuperacion(pregunta);
             if (pregunta.showAndWait().filter(restaurar::equals).isEmpty()) {
                 Platform.exit();
                 return;
@@ -120,6 +124,7 @@ public class App extends Application {
                         ButtonType.CLOSE);
                 alerta.setTitle("THE MAW — RECUPERACION FALLIDA");
                 alerta.setHeaderText("NO SE ABRIRA LA BIBLIOTECA");
+                prepararRecuperacion(alerta);
                 alerta.showAndWait();
                 Platform.exit();
                 return;
@@ -162,6 +167,15 @@ public class App extends Application {
         GeometriaVentana.registrar(stage, preferencias);
     }
 
+    private void prepararRecuperacion(Alert alerta) {
+        alerta.getDialogPane().getStylesheets().setAll(
+                getClass().getResource("/consumption/base.css").toExternalForm(),
+                getClass().getResource("/consumption/estilo.css").toExternalForm(),
+                getClass().getResource(tema.getRecurso()).toExternalForm(),
+                getClass().getResource("/consumption/a2.css").toExternalForm());
+        Terminal.dialogo(alerta, "RECUPERACION", "boton-accion", null);
+    }
+
     @Override
     public void stop() {
         if (ventana != null) ventana.alCerrar();
@@ -184,7 +198,7 @@ public class App extends Application {
         String base = getClass().getResource("/consumption/base.css").toExternalForm();
         String actual = getClass().getResource(tema.getRecurso()).toExternalForm();
         String estilo = getClass().getResource("/consumption/estilo.css").toExternalForm();
-        scena.getStylesheets().setAll(base, estilo, actual);
+        scena.getStylesheets().setAll(base, estilo, actual, App.class.getResource("/consumption/a2.css").toExternalForm());
         int escala = preferencias.getEscalaTexto();
         if (escala != 100) {
             String recursoEscala = "/consumption/texto-" + escala + ".css";

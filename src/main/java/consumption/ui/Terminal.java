@@ -133,9 +133,11 @@ public final class Terminal {
         if (actual == null || actual.isBlank()) dialogo.setHeaderText(titulo);
 
         DialogPane panel = dialogo.getDialogPane();
+        dialogo.setGraphic(null);
         for (ButtonType tipo : panel.getButtonTypes()) {
             Node nodo = panel.lookupButton(tipo);
             if (!(nodo instanceof Button boton)) continue;
+            if (!boton.getStyleClass().contains("a2-button")) boton.getStyleClass().add("a2-button");
 
             if (!boton.getStyleClass().contains("boton-dialogo")) boton.getStyleClass().add("boton-dialogo");
             if (tipo == ButtonType.OK) boton.setText("ACEPTAR");
@@ -154,8 +156,10 @@ public final class Terminal {
         panel.setPrefWidth(Math.max(panel.getPrefWidth(), 540));
         if (dialogo instanceof Alert alerta && alerta.getContentText() != null
                 && !alerta.getContentText().isBlank()) {
-            Label contenido = (Label) panel.lookup(".content.label");
-            if (contenido != null) contenido.setWrapText(true);
+            javafx.scene.text.Text contenido = new javafx.scene.text.Text(alerta.getContentText());
+            contenido.setWrappingWidth(490);
+            contenido.setStyle("-fx-fill: -c-tx;");
+            panel.setContent(new javafx.scene.layout.VBox(contenido));
         }
         panel.setMinHeight(Region.USE_COMPUTED_SIZE);
         panel.setPrefHeight(Region.USE_COMPUTED_SIZE);

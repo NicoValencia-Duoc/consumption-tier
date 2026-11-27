@@ -25,7 +25,8 @@ public class FilaCriterio extends HBox {
         texto.setMinWidth(42);
         texto.getStyleClass().add("valor-criterio");
 
-        Button limpiar = new Button("N/A");
+        Button limpiar = new Button("[ N/A ]");
+        limpiar.getStyleClass().add("a2-button");
         limpiar.getStyleClass().add("pestana");
         limpiar.setOnAction(e -> setValor(null));
 

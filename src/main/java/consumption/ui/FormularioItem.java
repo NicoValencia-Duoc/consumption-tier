@@ -268,7 +268,9 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         dialogo.getDialogPane().getButtonTypes().addAll(guardar, cancelar);
 
         Button botonGuardar = (Button) dialogo.getDialogPane().lookupButton(guardar);
+        botonGuardar.getStyleClass().add("a2-button");
         Button botonCancelar = (Button) dialogo.getDialogPane().lookupButton(cancelar);
+        botonCancelar.getStyleClass().add("a2-button");
         botonGuardar.getStyleClass().addAll("boton-dialogo", "boton-accion");
         botonCancelar.getStyleClass().add("boton-dialogo");
         Terminal.corchetes(botonGuardar);
@@ -794,6 +796,7 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         actualizar.run();
 
         Button restablecer = Terminal.corchetes(new Button("RESTABLECER"));
+        restablecer.getStyleClass().add("a2-button");
         restablecer.getStyleClass().add("pestana");
         restablecer.setOnAction(e -> {
             posicion[0] = 0.5;
@@ -845,9 +848,11 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         vistaPrevia.setFitHeight(134);
         vistaPrevia.setPreserveRatio(true);
 
-        Button elegir = new Button("ELEGIR...");
+        Button elegir = Terminal.corchetes(new Button("ELEGIR..."));
+        elegir.getStyleClass().add("a2-button");
         elegir.getStyleClass().add("pestana");
-        Button pegar = new Button("PEGAR");
+        Button pegar = Terminal.corchetes(new Button("PEGAR"));
+        pegar.getStyleClass().add("a2-button");
         pegar.getStyleClass().add("pestana");
         pegar.setOnAction(e -> {
             Clipboard portapapeles = Clipboard.getSystemClipboard();
@@ -865,11 +870,13 @@ public abstract class FormularioItem<T extends ItemConsumption> {
                 mostrarError(filaPortada, ex.getMessage());
             }
         });
-        Button encuadrar = new Button("ENCUADRAR");
+        Button encuadrar = Terminal.corchetes(new Button("ENCUADRAR"));
+        encuadrar.getStyleClass().add("a2-button");
         encuadrar.getStyleClass().add("pestana");
         encuadrar.setOnAction(e -> abrirEditorEncuadre());
-        Button quitar = new Button("QUITAR");
-        quitar.getStyleClass().add("pestana");
+        Button quitar = Terminal.corchetes(new Button("QUITAR"));
+        quitar.getStyleClass().add("a2-button");
+        quitar.getStyleClass().addAll("pestana", "boton-peligro");
         nombreImagen.getStyleClass().add("subtitulo");
         if (original != null && original.getRutaImagen() != null) nombreImagen.setText("IMAGEN ACTUAL");
 
@@ -1064,7 +1071,9 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         alerta.getDialogPane().getStylesheets().setAll(hojas);
 
         Button b1 = (Button) alerta.getDialogPane().lookupButton(botonSi);
+        b1.getStyleClass().add("a2-button");
         Button b2 = (Button) alerta.getDialogPane().lookupButton(botonNo);
+        b2.getStyleClass().add("a2-button");
         b1.getStyleClass().add("boton-dialogo");
         b2.getStyleClass().addAll("boton-dialogo", "boton-accion");
         Terminal.corchetes(b1);
@@ -1135,7 +1144,10 @@ public abstract class FormularioItem<T extends ItemConsumption> {
         Map<String, Double> notas = new LinkedHashMap<>();
         criterios.forEach((nombre, fila) -> notas.put(nombre, fila.getValor()));
 
-        T prueba = crear(t, 0, e);
+        double notaInicial = existente != null && existente.getCriterios().isEmpty()
+                && notas.values().stream().allMatch(java.util.Objects::isNull)
+                ? existente.getNota() : 0;
+        T prueba = crear(t, notaInicial, e);
         aplicarComunes(prueba, t, e, p, ini, fin, sinIni, sinFin, notas, veces, textoComentario);
         if (existente == null && e == Estado.TERMINADO) {
             if (veces == 1) prueba.setFechaPrimeraFinalizacion(fin);

@@ -47,6 +47,7 @@ public class CampoFecha extends HBox {
         campo.textProperty().addListener((obs, antes, ahora) -> valor.set(leerONull(ahora)));
 
         Button abrir = new Button("CAL ▾");
+        abrir.getStyleClass().add("a2-exento");
         abrir.getStyleClass().add("pestana");
         abrir.setOnAction(e -> {
             if (popup.isShowing()) popup.hide();
@@ -54,6 +55,7 @@ public class CampoFecha extends HBox {
         });
 
         panel.getStyleClass().add("cal-panel");
+        panel.setAlignment(Pos.CENTER);
         popup.getContent().add(panel);
         popup.setAutoHide(true);
         popup.setHideOnEscape(true);
@@ -114,6 +116,7 @@ public class CampoFecha extends HBox {
         cabecera.setAlignment(Pos.CENTER);
 
         GridPane rejilla = new GridPane();
+        rejilla.setAlignment(Pos.CENTER);
         rejilla.setHgap(2);
         rejilla.setVgap(2);
         for (int c = 0; c < 7; c++) {
@@ -132,6 +135,7 @@ public class CampoFecha extends HBox {
             LocalDate fecha = mes.atDay(d);
             int posicion = vacias + d - 1;
             Button boton = new Button(String.valueOf(d));
+            boton.getStyleClass().add("a2-exento");
             boton.getStyleClass().add("cal-dia");
             if (fecha.equals(hoy)) boton.getStyleClass().add("cal-hoy");
             if (fecha.equals(elegida)) boton.getStyleClass().add("cal-sel");
@@ -140,15 +144,17 @@ public class CampoFecha extends HBox {
             rejilla.add(boton, posicion % 7, 1 + posicion / 7);
         }
 
-        Button botonHoy = new Button("HOY");
+        Button botonHoy = new Button("[ HOY ]");
+        botonHoy.getStyleClass().add("a2-button");
         botonHoy.getStyleClass().addAll("pestana", "boton-accion");
         botonHoy.setDisable(desde != null && hoy.isBefore(desde));
         botonHoy.setOnAction(e -> elegir(hoy));
-        Button limpiar = new Button("LIMPIAR");
+        Button limpiar = new Button("[ LIMPIAR ]");
+        limpiar.getStyleClass().add("a2-button");
         limpiar.getStyleClass().add("pestana");
         limpiar.setOnAction(e -> elegir(null));
         HBox pie = new HBox(8, botonHoy, limpiar);
-        pie.setAlignment(Pos.CENTER_LEFT);
+        pie.setAlignment(Pos.CENTER);
 
         panel.getChildren().addAll(cabecera, rejilla, pie);
         panel.setPadding(new Insets(10));
@@ -156,6 +162,7 @@ public class CampoFecha extends HBox {
 
     private Button navegar(String texto, int meses) {
         Button b = new Button(texto);
+        b.getStyleClass().add("a2-exento");
         b.getStyleClass().add("cal-nav");
         b.setOnAction(e -> {
             mes = mes.plusMonths(meses);

@@ -11,3 +11,4 @@
     -fx-background-color: linear-gradient(from 0px 0px to 0px 4px, repeat,
     rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.05) 50%, transparent 50%, transparent 100%);
 }
+.root, .cal-panel, .context-menu { -c-a2-hover: #2b6850; -c-a2-danger-hover: #644240; }

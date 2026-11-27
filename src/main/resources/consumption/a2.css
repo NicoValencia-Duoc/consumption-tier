@@ -1,0 +1,31 @@
+/* Experimental: opt-in for eligible Button instances, not navigation or selection. */
+.button.a2-button:hover, .button.a2-button.boton-accion:hover, .dialog-pane .button.a2-button:hover, .button.a2-button.boton-accion:hover,
+.cal-panel .button.a2-button:hover, .button.a2-button.boton-accion:hover, .button.pestana.a2-button:hover {
+    -fx-background-color: -c-a2-hover;
+    -fx-text-fill: -c-tx;
+    -fx-border-color: -c-y;
+}
+.button.a2-button:pressed, .button.a2-button.boton-accion:pressed, .dialog-pane .button.a2-button:pressed, .button.a2-button.boton-accion:pressed,
+.cal-panel .button.a2-button:pressed, .button.a2-button.boton-accion:pressed, .button.pestana.a2-button:pressed {
+    -fx-background-color: -c-y;
+    -fx-text-fill: -c-yt;
+    -fx-border-color: -c-y;
+}
+.button.a2-button.boton-peligro:hover, .button.a2-button.boton-accion.boton-peligro:hover, .dialog-pane .button.a2-button.boton-peligro:hover {
+    -fx-background-color: -c-a2-danger-hover;
+    -fx-text-fill: -c-tx;
+    -fx-border-color: -c-r;
+}
+.button.a2-button.boton-peligro:pressed, .button.a2-button.boton-accion.boton-peligro:pressed, .dialog-pane .button.a2-button.boton-peligro:pressed {
+    -fx-background-color: -c-r;
+    -fx-text-fill: -c-bg;
+    -fx-border-color: -c-r;
+}
+
+.cal-panel { -fx-effect: null; -fx-border-color: -c-y; -fx-border-width: 2; }
+.button.a2-button.boton-peligro { -fx-text-fill: -c-r; -fx-border-color: -c-r; }
+
+.dialog-pane .button.a2-button.boton-dialogo.boton-accion:hover { -fx-background-color: -c-a2-hover; -fx-text-fill: -c-tx; -fx-border-color: -c-y; }
+.dialog-pane .button.a2-button.boton-dialogo.boton-accion:pressed { -fx-background-color: -c-y; -fx-text-fill: -c-yt; -fx-border-color: -c-y; }
+.dialog-pane .button.a2-button.boton-dialogo.boton-peligro:hover { -fx-background-color: -c-a2-danger-hover; -fx-text-fill: -c-tx; -fx-border-color: -c-r; }
+.dialog-pane .button.a2-button.boton-dialogo.boton-peligro:pressed { -fx-background-color: -c-r; -fx-text-fill: -c-bg; -fx-border-color: -c-r; }

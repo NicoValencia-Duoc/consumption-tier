@@ -19,6 +19,7 @@ public class Aviso extends StackPane {
 
     private final Label texto = new Label();
     private final Button deshacer = new Button("DESHACER");
+    { deshacer.getStyleClass().add("a2-button"); }
     private final HBox caja = new HBox(texto, deshacer);
     private SequentialTransition animacion;
     private Runnable alDeshacer;
